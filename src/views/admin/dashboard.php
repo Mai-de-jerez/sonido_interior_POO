@@ -8,7 +8,7 @@ $totalActivos = $data['totalActivos'] ?? 0;
 
 $titulo = "Panel | Administración";
 $bodyClass = "admin-body";
-$paginaAdmin = "productos";
+$paginaAdmin = "dashboard";
 
 include __DIR__ . '/../includes/header.php';
 include __DIR__ . '/../includes/menu-admin.php';

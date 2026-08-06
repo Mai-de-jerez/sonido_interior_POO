@@ -6,5 +6,5 @@
             <p>Administración</p>
         </div>
     </div>
-    <a href="/sonido-interior/views/public/index.php" class="volver-web">← Volver a la web</a>
+    <a href="." class="volver-web">← Volver a la web</a>
 </header>

@@ -38,8 +38,8 @@ if (isset($totalPaginas) && $totalPaginas > 1):
             <span class="paginador-puntos">…</span>
         <?php endif; ?>
 
-        <!-- Última página, solo si es distinta de la primera -->
-        <?php if ($totalPaginas > 1): 
+        <!-- Última página -->
+        <?php if ($totalPaginas > 1):  
             $params['pag'] = $totalPaginas;
             $activa = ($actual === $totalPaginas) ? 'class="pagina-activa"' : '';
         ?>
@@ -55,3 +55,4 @@ if (isset($totalPaginas) && $totalPaginas > 1):
 
     </nav>
 <?php endif; ?>
+

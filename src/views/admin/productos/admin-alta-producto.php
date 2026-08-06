@@ -33,7 +33,7 @@ include __DIR__ . '/../../includes/menu-admin.php';
 
     <section class="admin-contenido dos-columnas-admin">
         <form class="formulario-admin"
-              action="/productos/guardar" 
+              action="productos/guardar" 
               method="post" enctype="multipart/form-data"
               data-es-edicion="<?php echo $esEdicion ? '1' : '0'; ?>">
 
@@ -160,7 +160,7 @@ include __DIR__ . '/../../includes/menu-admin.php';
                     <h3><?php echo htmlspecialchars($producto->getNombre()); ?></h3>
                     <p class="precio"><?php echo number_format($producto->getPrecio(), 2, ',', '.'); ?> €</p>
                 <?php else: ?>
-                    <img src="img/cuenco-18.svg" alt="Vista previa cuenco">
+                    <img src="public/img/cuenco-18.svg" alt="Vista previa cuenco">
                     <h3>Cuenco tibetano artesanal 18 cm</h3>
                     <p class="precio">79,90 €</p>
                     <p>Diámetro: 18 cm</p>

@@ -97,12 +97,12 @@ class ProductoController {
         $pagina = isset($_GET['pag']) && ctype_digit($_GET['pag']) 
             ? (int) $_GET['pag'] 
             : 1;
-        $porPagina = 12;
+        $porPagina = 8;
         
         // Obtener productos y categorías
         $productos = $this->productoService->obtenerProductosCatalogo($idCategoria, $orden, $pagina, $porPagina);
-        $totalProductos = $this->productoService->contarProductosCatalogo($idCategoria);
-        $totalPaginas = ceil($totalProductos / $porPagina);
+        $totalProductos = $this->productoService->contarProductosCatalogo($idCategoria);        
+        $totalPaginas = (int) ceil($totalProductos / $porPagina);
         $categorias = $this->categoriaService->obtenerActivas();
         
         $data = [
@@ -143,7 +143,7 @@ class ProductoController {
         AuthMiddleware::verificarAdmin();
 
         if (empty($_POST['nombre'])) {
-            header("Location: /admin/productos");
+            header("Location: /sonido-interior-POO/admin/productos");
             exit();
         }
 
@@ -151,7 +151,7 @@ class ProductoController {
 
         if (!empty($errores)) {
             $_SESSION['errores'] = $errores;
-            header("Location: /admin/productos/crear");
+            header("Location: /sonido-interior-POO/admin/productos/crear");
             exit();
         }
 
@@ -159,16 +159,16 @@ class ProductoController {
             $creado = $this->productoService->crear($_POST, $_FILES);
         } catch (\RuntimeException $e) {
             $_SESSION['mensaje_error'] = $e->getMessage();
-            header("Location: /admin/productos/crear");
+            header("Location: /sonido-interior-POO/admin/productos/crear");
             exit();
         }
 
         if ($creado) {
             $_SESSION['mensaje_exito'] = "Producto guardado con éxito.";
-            header("Location: /admin/productos");
+            header("Location: /sonido-interior-POO/admin/productos");
         } else {
             $_SESSION['mensaje_error'] = "Error al guardar el producto.";
-            header("Location: /admin/productos/crear");
+            header("Location: /sonido-interior-POO/admin/productos/crear");
         }
         exit();
     }

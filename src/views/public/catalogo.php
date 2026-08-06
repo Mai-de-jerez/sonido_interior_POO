@@ -3,7 +3,7 @@
 // VISTA: catalogo.php (POO)
 // ============================================
 
-// Datos que llegan del controlador (via extract($data))
+// Datos que llegan del controlador 
 $productos = $data['productos'] ?? [];
 $categorias = $data['categorias'] ?? [];
 $idCategoria = $data['idCategoria'] ?? null;
@@ -11,7 +11,7 @@ $orden = $data['orden'] ?? 'recientes';
 $paginaActual = $data['pagina'] ?? 1;
 $totalPaginas = $data['totalPaginas'] ?? 1;
 $totalProductos = $data['totalProductos'] ?? 0;
-$porPagina = 12;
+$porPagina = 8;
 
 $titulo = "Catálogo | Sonido Interior";
 $pagina = "catalogo";

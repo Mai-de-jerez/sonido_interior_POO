@@ -4,6 +4,7 @@ namespace SonidoInteriorPoo\models;
 class Producto {
     private int $idProducto;
     private int $idCategoria;
+    private ?string $nombreCategoria = null;
     private string $nombre;
     private ?string $descripcion;
     private float $precio;
@@ -16,6 +17,7 @@ class Producto {
     private ?string $procedencia;
     private int $activo;
     private ?string $fechaAlta;
+
 
     public function __construct(
         int $idProducto, int $idCategoria, string $nombre, ?string $descripcion,
@@ -73,4 +75,12 @@ class Producto {
     public function getProcedencia(): ?string { return $this->procedencia; }
     public function isActivo(): bool { return $this->activo === 1; }
     public function getFechaAlta(): ?string { return $this->fechaAlta; }
+
+     public function getNombreCategoria(): ?string {
+        return $this->nombreCategoria;
+    }
+
+    public function setNombreCategoria(?string $nombreCategoria): void {
+        $this->nombreCategoria = $nombreCategoria;
+    }
 }

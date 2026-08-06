@@ -13,13 +13,13 @@ if (!isset($paginaAdmin)) {
     </div>
 
     <nav class="menu-admin">
-        <a href="views/admin/dashboard.php">⌂ Panel</a>
-        <a href="views/admin/productos/admin-listado-productos.php" class="<?php echo ($paginaAdmin == 'productos') ? 'activo' : ''; ?>">▣ Productos</a>
-        <a href="views/admin/productos/admin-alta-producto.php" class="sub <?php echo ($paginaAdmin == 'alta-producto') ? 'activo-sub' : ''; ?>">Añadir producto</a>
-        <a href="views/admin/categorias/admin-listado-categorias.php" class="<?php echo ($paginaAdmin == 'categorias') ? 'activo' : ''; ?>">◇ Categorías</a>
-        <a href="views/admin/categorias/admin-alta-categoria.php" class="sub <?php echo ($paginaAdmin == 'alta-categoria') ? 'activo-sub' : ''; ?>">Añadir categoría</a>
-        <a href="views/admin/#">✉ Mensajes</a>
-        <a href="views/admin/#">⚙ Configuración</a>
-        <a href="controllers/auth/logout.php">↩ Cerrar sesión</a>
+        <a href="admin/dashboard" class="<?php echo ($paginaAdmin == 'dashboard') ? 'activo' : ''; ?>">⌂ Panel</a>
+        <a href="admin/productos" class="<?php echo ($paginaAdmin == 'productos') ? 'activo' : ''; ?>">▣ Productos</a>
+        <a href="admin/productos/crear" class="sub <?php echo ($paginaAdmin == 'alta-producto') ? 'activo-sub' : ''; ?>">Añadir producto</a>
+        <a href="admin/categorias" class="<?php echo ($paginaAdmin == 'categorias') ? 'activo' : ''; ?>">◇ Categorías</a>
+        <a href="admin/categorias/crear" class="sub <?php echo ($paginaAdmin == 'alta-categoria') ? 'activo-sub' : ''; ?>">Añadir categoría</a>
+        <a href="admin/mensajes" class="<?php echo ($paginaAdmin == 'mensajes') ? 'activo' : ''; ?>">✉ Mensajes</a>
+        <a href="admin/configuracion" class="<?php echo ($paginaAdmin == 'configuracion') ? 'activo' : ''; ?>">⚙ Configuración</a>
+        <a href="logout">↩ Cerrar sesión</a>
     </nav>
 </aside> 
