@@ -1,0 +1,52 @@
+version: '3.8'
+
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: sonido-interior-web
+    ports:
+      - "8083:80"
+    volumes:
+      - ./:/var/www/html/sonido-interior
+    environment:
+      - PASSWORD_DB=${DB_PASSWORD}
+      - DB_HOST=db
+      - MAIL_HOST=mailpit
+    depends_on:
+      - db
+    networks:
+      - sonido-interior-net
+
+  db:
+    image: mariadb:10.11
+    container_name: sonido-interior-db
+    restart: always
+    environment:
+      - MYSQL_ROOT_PASSWORD=${DB_PASSWORD}
+      - MYSQL_DATABASE=sonido_interior
+    volumes:
+      - db_data:/var/lib/mysql
+      - ./sql:/docker-entrypoint-initdb.d
+    ports:
+      - "3306:3306"
+    networks:
+      - sonido-interior-net
+
+  mailpit:
+    image: axllent/mailpit
+    container_name: sonido-interior-mailpit
+    restart: always
+    ports:
+      - "8025:8025"
+      - "1025:1025"
+    networks:
+      - sonido-interior-net
+
+volumes:
+  db_data:
+
+networks:
+  sonido-interior-net:
+    driver: bridge

@@ -1,0 +1,10 @@
+{
+    "autoload": {
+        "psr-4": {
+            "SonidoInteriorPoo\\": "src/"
+        }
+    },
+    "require": {
+        "phpmailer/phpmailer": "^7.1"
+    }
+}
