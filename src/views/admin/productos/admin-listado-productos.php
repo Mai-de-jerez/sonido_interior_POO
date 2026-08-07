@@ -45,7 +45,8 @@ include __DIR__ . '/../../includes/menu-admin.php';
                             <td colspan="9" style="text-align: center; padding: 20px;">No hay productos guardados en la base de datos.</td>
                         </tr>
                     <?php else: ?>
-                        <?php foreach ($productos as $prod): ?>
+                        <?php foreach ($productos as $dto): ?>
+                            <?php $prod = $dto->getProducto(); ?>
                             <tr>
                                 <td><?php echo $prod->getIdProducto(); ?></td>
                                 <td>
@@ -56,7 +57,7 @@ include __DIR__ . '/../../includes/menu-admin.php';
                                     <?php endif; ?>
                                 </td>
                                 <td><?php echo htmlspecialchars($prod->getNombre()); ?></td>
-                                <td><?php echo htmlspecialchars($prod->getNombreCategoria()); ?></td>
+                                <td><?php echo htmlspecialchars($dto->getNombreCategoria()); ?></td>
                                 <td><?php echo number_format($prod->getPrecio(), 2, ',', '.'); ?> €</td>
                                 <td><?php echo $prod->getStock(); ?></td>
                                 <td>
@@ -78,16 +79,11 @@ include __DIR__ . '/../../includes/menu-admin.php';
                                 </td>
                                 
                                 <td class="acciones-tabla">
-                                    <!-- Editar -->
-                                    <a href="/admin/productos/editar?id=<?php echo $prod->getIdProducto(); ?>">✎</a>
-                                    
-                                    <!-- Eliminar / Reactivar -->
+                                    <a href="admin/productos/editar?id=<?php echo $prod->getIdProducto(); ?>">✎</a>                                
                                     <?php if ($prod->isActivo()): ?>
-                                        <a href="/productos/eliminar?id=<?php echo $prod->getIdProducto(); ?>" 
-                                        onclick="return confirm('¿Estás seguro de eliminar este producto?')">🗑</a>
+                                        <a href="admin/productos/eliminar?id=<?php echo $prod->getIdProducto(); ?>">🗑</a>
                                     <?php else: ?>
-                                        <a href="/productos/reactivar?id=<?php echo $prod->getIdProducto(); ?>" 
-                                        onclick="return confirm('¿Estás seguro de reactivar este producto?')">↺</a>
+                                        <a href="admin/productos/reactivar?id=<?php echo $prod->getIdProducto(); ?>">↺</a>
                                     <?php endif; ?>
                                 </td>
                             </tr>

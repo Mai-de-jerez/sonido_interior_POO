@@ -1,52 +1,18 @@
 <?php
 namespace SonidoInteriorPoo\controllers;
 
-use SonidoInteriorPoo\middleware\AuthMiddleware;
-use SonidoInteriorPoo\interfaces\ProductoServiceInterface;
-use SonidoInteriorPoo\interfaces\CategoriaServiceInterface;
 use SonidoInteriorPoo\interfaces\UsuarioServiceInterface;
 
 class UsuarioController {
 
-    private ProductoServiceInterface $productoService;
-    private CategoriaServiceInterface $categoriaService;
     private UsuarioServiceInterface $usuarioService;
 
     public function __construct(
-        UsuarioServiceInterface $usuarioService,     
-        ProductoServiceInterface $productoService,   
-        CategoriaServiceInterface $categoriaService  
+        UsuarioServiceInterface $usuarioService  
     ) {
         $this->usuarioService = $usuarioService;
-        $this->productoService = $productoService;
-        $this->categoriaService = $categoriaService;
     }
 
-    //=====================================
-    // DASHBOARD
-    //=====================================
-    public function dashboard(): void {
-        AuthMiddleware::verificarAdmin();
-        
-        $productos = $this->productoService->obtenerProductosAdmin();
-        $totalProductos = count($productos);
-        $totalActivos = count(array_filter($productos, fn($p) => $p->isActivo()));
-        
-        $categorias = $this->categoriaService->obtenerTodasAdmin();
-        $totalCategorias = count($categorias);
-        $categoriasActivas = count(array_filter($categorias, fn($c) => $c->isActivo()));
-        
-        $data = [
-            'totalProductos' => $totalProductos,
-            'totalActivos' => $totalActivos,
-            'totalCategorias' => $totalCategorias,
-            'categoriasActivas' => $categoriasActivas,
-            'ultimosProductos' => array_slice($productos, 0, 5) 
-        ];
-        
-        extract($data);
-        require_once __DIR__ . '/../views/admin/dashboard.php';
-    }
 
     // ============================================================
     // PROCESAR LOGIN

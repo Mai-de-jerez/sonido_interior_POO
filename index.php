@@ -54,27 +54,21 @@ $homeAction = function() use ($productoService) {
 };
 
 $routes = [
-    // ============================================================
-    // RUTAS POST
-    // ============================================================
-    'POST /categorias/guardar'    => [$categoriaController, 'crear'],
-    'POST /categorias/actualizar' => [$categoriaController, 'actualizar'],
-    'POST /categorias/eliminar'   => [$categoriaController, 'eliminar'],
-    'GET  /categorias/reactivar'  => [$categoriaController, 'reactivar'],
-
-    'POST /productos/guardar'     => [$productoController, 'crear'],
-    'POST /productos/actualizar'  => [$productoController, 'actualizar'],
-    'POST /productos/eliminar'    => [$productoController, 'eliminar'],
-    'GET  /productos/reactivar'   => [$productoController, 'reactivar'],
-    'GET /detalle-producto' => [$productoController, 'detalle'],
 
     // ============================================================
     // RUTAS GET - PÚBLICAS
     // ============================================================
+
     'GET /'                       => $homeAction,
     'GET /index.php'              => $homeAction,
     'GET /catalogo' => [$productoController, 'catalogo'],
-
+    'GET /detalle-producto' => [$productoController, 'detalle'],
+    'GET /sonoterapia' => function() {
+        require __DIR__ . '/src/views/public/sonoterapia.php';
+    },
+    'GET /sobre-nosotros' => function() {
+        require __DIR__ . '/src/views/public/sobre-nosotros.php';
+    },
     // LOGIN
     'POST /login' => [$usuarioController, 'procesarLogin'],
     'GET /login' => function() {
@@ -91,13 +85,32 @@ $routes = [
     // ============================================================
     // RUTAS GET - ADMIN
     // ============================================================
-    'GET /admin/dashboard'        => [$usuarioController, 'dashboard'],
+    // panel
+    'GET /admin/dashboard'        => [$productoController, 'dashboard'],
+    // productos
     'GET /admin/productos'        => [$productoController, 'listar'],
     'GET /admin/productos/crear'  => [$productoController, 'nuevo'],
     'GET /admin/productos/editar' => [$productoController, 'editar'],
+    'GET /admin/productos/eliminar' => [$productoController, 'confirmarEliminar'],
+    'GET /admin/productos/reactivar' => [$productoController, 'confirmarReactivar'],
+    // categorías
     'GET /admin/categorias'       => [$categoriaController, 'listar'],
     'GET /admin/categorias/crear' => [$categoriaController, 'nuevo'],
     'GET /admin/categorias/editar'=> [$categoriaController, 'editar'],
+
+    // ============================================================
+    // RUTAS POST - ADMIN
+    // ============================================================
+    // rutas para categorías
+    'POST /categorias/guardar'    => [$categoriaController, 'crear'],
+    'POST /categorias/actualizar' => [$categoriaController, 'actualizar'],
+    'POST /categorias/eliminar'   => [$categoriaController, 'eliminar'],
+    'POST /categorias/reactivar'  => [$categoriaController, 'reactivar'],
+    // rutas para productos
+    'POST /productos/guardar'     => [$productoController, 'crear'],
+    'POST /productos/actualizar'  => [$productoController, 'actualizar'],
+    'POST /productos/eliminar'    => [$productoController, 'eliminar'],
+    'POST /productos/reactivar'   => [$productoController, 'reactivar'],
 ];
 
 $clave = "$metodo $uri";

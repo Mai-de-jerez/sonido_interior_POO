@@ -2,8 +2,8 @@
 $titulo = "Sonido Interior | Sonoterapia";
 $pagina = "sonoterapia";
 
-include __DIR__ . '/../../includes/header.php';
-include __DIR__ . '/../../includes/menu.php';
+include __DIR__ . '/../includes/header.php';
+include __DIR__ . '/../includes/menu.php';
 ?>
 
 <main class="contenedor">
@@ -11,7 +11,7 @@ include __DIR__ . '/../../includes/menu.php';
     <!-- HERO: imagen + texto + puntos destacados -->
     <div class="nosotros-hero">
         <div class="nosotros-imagen">
-            <img src="img/cuencos.jpg" alt="Cuenco tibetano usado en sonoterapia">
+            <img src="public/img/cuencos.jpg" alt="Cuenco tibetano usado en sonoterapia">
         </div>
 
         <div class="nosotros-texto">
@@ -118,9 +118,9 @@ include __DIR__ . '/../../includes/menu.php';
             <h2>¿Tienes dudas o quieres más información?</h2>
             <p>Escríbenos y te contamos más sobre nuestros cuencos y cómo elegir el que mejor se adapte a lo que buscas.</p>
         </div>
-        <a href="views/public/contacto.php" class="boton principal cta-btn">Contactar</a>
+        <a href="contacto" class="boton principal cta-btn">Contactar</a>
     </div>
 
 </main>
 
-<?php include __DIR__ . '/../../includes/footer.php'; ?>
+<?php include __DIR__ . '/../includes/footer.php'; ?>

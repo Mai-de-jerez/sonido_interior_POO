@@ -3,8 +3,8 @@
 $titulo = "Sonido Interior | Sobre nosotros";
 $pagina = "nosotros";
 
-include __DIR__ . '/../../includes/header.php';
-include __DIR__ . '/../../includes/menu.php';
+include __DIR__ . '/../includes/header.php';
+include __DIR__ . '/../includes/menu.php';
 ?>
 
 <main class="contenedor-nosotros">
@@ -12,7 +12,7 @@ include __DIR__ . '/../../includes/menu.php';
     <!-- SECCIÓN 1: SOBRE NOSOTROS -->
     <section class="nosotros-hero">
         <div class="nosotros-imagen">
-            <img src="img/tibet.jpg" alt="Estupa en Nepal">
+            <img src="public/img/tibet.jpg" alt="Estupa en Nepal">
         </div>
         <div class="nosotros-texto">
             <h2>Sobre nosotros</h2>
@@ -74,9 +74,9 @@ include __DIR__ . '/../../includes/menu.php';
             <h2>Descubre el cuenco ideal para tu práctica</h2>
             <p>Explora nuestro catálogo y encuentra el sonido que resuena contigo.</p>
         </div>
-        <a href="views/public/productos/catalogo.php" class="boton principal cta-btn">Ver catálogo completo &rarr;</a>
+        <a href="catalogo" class="boton principal cta-btn">Ver catálogo completo &rarr;</a>
     </section>
 
 </main>
 
-<?php include __DIR__ . '/../../includes/footer.php'; ?>
+<?php include __DIR__ . '/../includes/footer.php'; ?>

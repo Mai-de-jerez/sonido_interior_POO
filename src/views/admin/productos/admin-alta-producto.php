@@ -33,9 +33,9 @@ include __DIR__ . '/../../includes/menu-admin.php';
 
     <section class="admin-contenido dos-columnas-admin">
         <form class="formulario-admin"
-              action="productos/guardar" 
-              method="post" enctype="multipart/form-data"
-              data-es-edicion="<?php echo $esEdicion ? '1' : '0'; ?>">
+            action="<?php echo $esEdicion ? 'productos/actualizar' : 'productos/guardar'; ?>"
+            method="post" enctype="multipart/form-data"
+            data-es-edicion="<?php echo $esEdicion ? '1' : '0'; ?>">
 
             <?php if ($esEdicion): ?>
                 <input type="hidden" name="id_producto" value="<?php echo $producto->getIdProducto(); ?>">
@@ -142,7 +142,7 @@ include __DIR__ . '/../../includes/menu-admin.php';
 
             <!-- ===== BOTONES ===== -->
             <div class="acciones-formulario">
-                <a href="/admin/productos" class="boton cancelar">Cancelar</a>
+                <a href="admin/productos" class="boton cancelar">Cancelar</a>
                 <button type="submit" class="boton principal"><?php echo $esEdicion ? "Guardar cambios" : "Guardar producto"; ?></button>
             </div>
         </form>
@@ -257,7 +257,7 @@ if (formProducto) {
     enganchar('peso', 'blur', () => validarNumero('peso', 'error-peso', 'El peso', 0, 10000, true));
     enganchar('diametro', 'blur', () => validarNumero('diametro', 'error-diametro', 'El diámetro', 0, 100, false));
     enganchar('material', 'blur', () => validarTexto('material', 'error-material', 'El material', 3, 50));
-    enganchar('procedencia', 'blur', () => validarTexto('procedencia', 'error-procedencia', 'La procedencia', 3, 50));
+    enganchar('procedencia', 'blur', () => validarTexto('procedencia', 'error-procedencia', 'La procedencia', 3, 100));
     enganchar('descripcion', 'blur', () => validarTexto('descripcion', 'error-descripcion', 'La descripción', 15, 300));
 
     formProducto.addEventListener('submit', (e) => {
@@ -268,7 +268,7 @@ if (formProducto) {
         const ok5 = validarNumero('peso', 'error-peso', 'El peso', 0, 10000, true);
         const ok6 = validarNumero('diametro', 'error-diametro', 'El diámetro', 0, 100, false);
         const ok7 = validarTexto('material', 'error-material', 'El material', 3, 50);
-        const ok8 = validarTexto('procedencia', 'error-procedencia', 'La procedencia', 3, 50);
+        const ok8 = validarTexto('procedencia', 'error-procedencia', 'La procedencia', 3, 100);
         const ok9 = validarTexto('descripcion', 'error-descripcion', 'La descripción', 15, 300);
         const ok10 = validarImagen();
 

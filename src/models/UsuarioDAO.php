@@ -1,7 +1,6 @@
 <?php
 namespace SonidoInteriorPoo\models;
 
-use PDO;
 use PDOException;
 
 class UsuarioDAO {
@@ -16,7 +15,7 @@ class UsuarioDAO {
     // ============================================================
     public function obtenerPorUsername(string $usuario): ?Usuario {
         $pdo = $this->conexion->getPdo();
-        $sql = "SELECT id_usuario, usuario, password, rol FROM usuarios WHERE usuario = ?";
+        $sql = "SELECT id_usuario, nombre, email, usuario, password, rol, fecha_registro FROM usuarios WHERE usuario = ?";
         
         $stmt = $pdo->prepare($sql);
         $stmt->execute([$usuario]);
@@ -28,12 +27,12 @@ class UsuarioDAO {
 
         return new Usuario(
             (int) $fila['id_usuario'],
-            null, // nombre
-            '',   // email (no lo traemos en esta consulta)
+            $fila['nombre'],
+            $fila['email'],
             $fila['usuario'],
             $fila['password'],
             $fila['rol'],
-            ''    // fecha_registro (no lo traemos)
+            $fila['fecha_registro']
         );
     }
 

@@ -17,6 +17,32 @@ class ProductoController {
         $this->categoriaService = $categoriaService;
     }
 
+    //=====================================
+    // DASHBOARD ZONA ADMIN
+    //=====================================
+    public function dashboard(): void {
+        AuthMiddleware::verificarAdmin();
+        
+        $productos = $this->productoService->obtenerProductosAdmin();
+        $totalProductos = count($productos);
+        $totalActivos = count(array_filter($productos, fn($dto) => $dto->getProducto()->isActivo()));
+        
+        $categorias = $this->categoriaService->obtenerTodasAdmin();
+        $totalCategorias = count($categorias);
+        $categoriasActivas = count(array_filter($categorias, fn($c) => $c->isActivo()));
+        
+        $data = [
+            'totalProductos' => $totalProductos,
+            'totalActivos' => $totalActivos,
+            'totalCategorias' => $totalCategorias,
+            'categoriasActivas' => $categoriasActivas,
+            'ultimosProductos' => array_slice($productos, 0, 5) 
+        ];
+        
+        extract($data);
+        require_once __DIR__ . '/../views/admin/dashboard.php';
+    }
+
     // ============================================================
     // MÉTODOS QUE MUESTRAN FORMULARIOS (GET) - CON SEGURIDAD
     // ============================================================
@@ -42,7 +68,7 @@ class ProductoController {
             : 0;
 
         if ($idProducto === 0) {
-            header("Location: /admin/productos?status=notfound");
+            header("Location: /sonido-interior-POO/admin/productos?status=notfound");
             exit();
         }
 
@@ -50,7 +76,7 @@ class ProductoController {
         $categorias = $this->categoriaService->obtenerActivas();
 
         if ($producto === null) {
-            header("Location: /admin/productos?status=notfound");
+            header("Location: /sonido-interior-POO/admin/productos?status=notfound");
             exit();
         }
 
@@ -61,6 +87,54 @@ class ProductoController {
 
         extract($data);
         require_once __DIR__ . '/../views/admin/productos/admin-alta-producto.php';
+    }
+
+    public function confirmarEliminar(): void {
+        AuthMiddleware::verificarAdmin();
+
+        $idProducto = isset($_GET['id']) && ctype_digit($_GET['id'])
+            ? (int) $_GET['id']
+            : 0;
+
+        if ($idProducto === 0) {
+            header("Location: /sonido-interior-POO/admin/productos?status=notfound");
+            exit();
+        }
+
+        $producto = $this->productoService->obtenerPorIdAdmin($idProducto);
+
+        if ($producto === null) {
+            header("Location: /sonido-interior-POO/admin/productos?status=notfound");
+            exit();
+        }
+
+        $data = ['producto' => $producto];
+        extract($data);
+        require_once __DIR__ . '/../views/admin/productos/admin-confirmar-eliminar.php';
+    }
+
+    public function confirmarReactivar(): void {
+        AuthMiddleware::verificarAdmin();
+
+        $idProducto = isset($_GET['id']) && ctype_digit($_GET['id'])
+            ? (int) $_GET['id']
+            : 0;
+
+        if ($idProducto === 0) {
+            header("Location: /sonido-interior-POO/admin/productos?status=notfound");
+            exit();
+        }
+
+        $producto = $this->productoService->obtenerPorIdAdmin($idProducto);
+
+        if ($producto === null) {
+            header("Location: /sonido-interior-POO/admin/productos?status=notfound");
+            exit();
+        }
+
+        $data = ['producto' => $producto];
+        extract($data);
+        require_once __DIR__ . '/../views/admin/productos/admin-confirmar-reactivar.php';
     }
 
     public function detalle(): void {
@@ -82,6 +156,7 @@ class ProductoController {
         extract($data);
         require_once __DIR__ . '/../views/public/detalle-producto.php';
     }
+
 
     // ============================================================
     // MÉTODOS PÚBLICOS (CATÁLOGO) - SIN SEGURIDAD
@@ -181,11 +256,11 @@ class ProductoController {
             : null;
 
         if ($idProducto === null || empty($_POST['nombre'])) {
-            header("Location: /admin/productos");
+            header("Location: /sonido-interior-POO/admin/productos");
             exit();
         }
 
-        $urlVuelta = "/admin/productos/editar?id=" . $idProducto;
+        $urlVuelta = "/sonido-interior-POO/admin/productos/editar?id=" . $idProducto;
 
         $errores = $this->productoService->validar($_POST, esEdicion: true);
 
@@ -205,7 +280,7 @@ class ProductoController {
 
         if ($actualizado) {
             $_SESSION['mensaje_exito'] = "Producto actualizado con éxito.";
-            header("Location: /admin/productos");
+            header("Location: /sonido-interior-POO/admin/productos");
         } else {
             $_SESSION['mensaje_error'] = "Error al actualizar el producto.";
             header("Location: " . $urlVuelta);
@@ -221,7 +296,7 @@ class ProductoController {
             : null;
 
         if ($idProducto === null) {
-            header("Location: /admin/productos");
+            header("Location: /sonido-interior-POO/admin/productos");
             exit();
         }
 
@@ -229,16 +304,16 @@ class ProductoController {
             $eliminado = $this->productoService->eliminarLogico($idProducto);
         } catch (\RuntimeException $e) {
             $_SESSION['mensaje_error'] = $e->getMessage();
-            header("Location: /admin/productos?status=error");
+            header("Location: /sonido-interior-POO/admin/productos?status=error");
             exit();
         }
 
         if ($eliminado) {
             $_SESSION['mensaje_exito'] = "Producto eliminado correctamente.";
-            header("Location: /admin/productos?status=deleted");
+            header("Location: /sonido-interior-POO/admin/productos?status=deleted");
         } else {
             $_SESSION['mensaje_error'] = "No se pudo eliminar el producto.";
-            header("Location: /admin/productos?status=error");
+            header("Location: /sonido-interior-POO/admin/productos?status=error");
         }
         exit();
     }
@@ -246,12 +321,12 @@ class ProductoController {
     public function reactivar(): void {
         AuthMiddleware::verificarAdmin();
 
-        $idProducto = (isset($_GET['id']) && ctype_digit($_GET['id']))
-            ? (int) $_GET['id']
+        $idProducto = (isset($_POST['id_producto']) && ctype_digit($_POST['id_producto']))
+            ? (int) $_POST['id_producto']
             : null;
 
         if ($idProducto === null) {
-            header("Location: /admin/productos");
+            header("Location: /sonido-interior-POO/admin/productos");
             exit();
         }
 
@@ -259,16 +334,16 @@ class ProductoController {
             $reactivado = $this->productoService->reactivar($idProducto);
         } catch (\RuntimeException $e) {
             $_SESSION['mensaje_error'] = $e->getMessage();
-            header("Location: /admin/productos?status=error");
+            header("Location: /sonido-interior-POO/admin/productos?status=error");
             exit();
         }
 
         if ($reactivado) {
             $_SESSION['mensaje_exito'] = "Producto reactivado correctamente.";
-            header("Location: /admin/productos?status=reactivated");
+            header("Location: /sonido-interior-POO/admin/productos?status=reactivated");
         } else {
             $_SESSION['mensaje_error'] = "No se pudo reactivar el producto. Por favor, inténtalo de nuevo.";
-            header("Location: /admin/productos?status=error");
+            header("Location: /sonido-interior-POO/admin/productos?status=error");
         }
         exit();
     }

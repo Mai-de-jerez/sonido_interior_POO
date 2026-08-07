@@ -1,9 +1,9 @@
 <?php
 namespace SonidoInteriorPoo\models;
 
-use SonidoInteriorPoo\Interfaces\ProductoDAOInterface;
-use PDO;
-use SonidoInteriorPoo\Models\Conexion;
+use SonidoInteriorPoo\interfaces\ProductoDAOInterface;
+use SonidoInteriorPoo\dto\ProductoAdminDTO;
+use SonidoInteriorPoo\models\Conexion;
 
 class ProductoDAO implements ProductoDAOInterface {
     private Conexion $conexion;
@@ -23,14 +23,14 @@ class ProductoDAO implements ProductoDAOInterface {
                 ORDER BY p.id_producto DESC";
 
         $filas = $pdo->query($sql)->fetchAll();
-        
-        $productos = [];
-        foreach ($filas as $fila) {
-            $producto = Producto::fromArray($fila);
-            $producto->setNombreCategoria($fila['nombre_categoria'] ?? ''); 
-            $productos[] = $producto;
-        }
-        return $productos;
+
+        return array_map(
+            fn($fila) => new ProductoAdminDTO(
+                Producto::fromArray($fila),
+                $fila['nombre_categoria'] ?? ''
+            ),
+            $filas
+        );
     }
 
     // Obtener los últimos 4 productos para el inicio

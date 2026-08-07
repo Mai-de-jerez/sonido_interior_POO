@@ -75,10 +75,8 @@ class ProductoService implements ProductoServiceInterface {
 
         if ($procedencia === '') {
             $errores['procedencia'] = "La procedencia es obligatoria.";
-        } elseif (mb_strlen($procedencia) < 3 || mb_strlen($procedencia) > 50) {
-            $errores['procedencia'] = "La procedencia debe tener entre 3 y 50 caracteres.";
-        } elseif (!preg_match('/^[A-Za-zÀ-ÿñÑ0-9\s\-]+$/u', $procedencia)) {
-            $errores['procedencia'] = "La procedencia contiene caracteres no válidos.";
+        } elseif (mb_strlen($procedencia) < 3 || mb_strlen($procedencia) > 100) {
+            $errores['procedencia'] = "La procedencia debe tener entre 3 y 100 caracteres.";
         }
 
         if ($descripcion === '') {
