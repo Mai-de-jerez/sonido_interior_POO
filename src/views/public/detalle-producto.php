@@ -75,7 +75,7 @@ include __DIR__ . '/../includes/menu.php';
 
                 <?php if ($producto->getStock() > 0): ?>
                     <p class="detalle-producto-stock disponible">✓ Disponible (<?php echo $producto->getStock(); ?> unidades)</p>
-                    <form action="/carrito/agregar" method="post">
+                    <form action="<?php echo BASE_URL; ?>/carrito/agregar" method="post"> 
                         <input type="hidden" name="id_producto" value="<?php echo $producto->getIdProducto(); ?>">
                         <input type="hidden" name="cantidad" value="1">
                         <button type="submit" class="boton principal bloque">Añadir al carrito</button>
