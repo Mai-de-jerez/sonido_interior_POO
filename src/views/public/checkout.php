@@ -1,38 +1,11 @@
 <?php
-require_once __DIR__ . '/../../includes/seguridad.php';
-require_once __DIR__ . '/../../models/carrito.php';
-require_once __DIR__ . '/../../includes/conexion.php';
-
-// obtener datos del carrito del usuario activo
-$idCarrito = obtenerOCrearCarrito($conexion, $_SESSION['id_usuario']);
-$lineasCarrito = obtenerProductosCarrito($conexion, $idCarrito);
-
-// si el carrito está vacío, rebotar al carrito
-if (empty($lineasCarrito)) {
-    $_SESSION['mensaje_error'] = "Tu carrito está vacío. Añade algún producto antes de finalizar la compra.";
-    mysqli_close($conexion);
-    header("Location: carrito.php");
-    exit();
-}
-
-// comprobar que ningún producto supere el stock actual en BD
-$totalCarrito = 0;
-foreach ($lineasCarrito as $linea) {
-    if ($linea['cantidad'] > $linea['stock']) {
-        $_SESSION['mensaje_error'] = "El producto '" . htmlspecialchars($linea['nombre']) . "' solo tiene " . $linea['stock'] . " unidades disponibles. Ajusta la cantidad.";
-        mysqli_close($conexion);
-        header("Location: carrito.php");
-        exit();
-    }
-    $totalCarrito += $linea['cantidad'] * $linea['precio_unitario'];
-}
-
-mysqli_close($conexion);
+$lineas = $data['lineas'] ?? [];
+$totalCarrito = $data['totalCarrito'] ?? 0;
 
 $titulo = "Finalizar compra | Sonido Interior";
 $pagina = "checkout";
-include __DIR__ . '/../../includes/header.php';
-include __DIR__ . '/../../includes/menu.php';
+include __DIR__ . '/../includes/header.php';
+include __DIR__ . '/../includes/menu.php';
 
 $errores = $_SESSION['errores'] ?? [];
 $old = $_SESSION['form_old'] ?? [];
@@ -46,11 +19,10 @@ unset($_SESSION['errores'], $_SESSION['form_old']);
     </div>
 
     <div class="grid-checkout">
-        
-        <!-- Formulario con la dirección de envío -->
+
         <section class="checkout-formulario tabla-card">
             <h3>Datos de entrega</h3>
-            <form class="formulario-checkout" action="controllers/carrito/procesar-checkout.php" method="post">
+            <form class="formulario-checkout" action="<?php echo BASE_URL; ?>/checkout" method="post">
                 <div class="campo-form">
                     <label for="direccion_envio">Dirección de envío completa *</label>
                     <input type="text" 
@@ -68,14 +40,13 @@ unset($_SESSION['errores'], $_SESSION['form_old']);
             </form>
         </section>
 
-        <!-- Resumen del pedido -->
         <aside class="carrito-resumen tabla-card">
             <h3>Resumen del pedido</h3>
             <ul class="checkout-lista-productos">
-                <?php foreach ($lineasCarrito as $linea): ?>
+                <?php foreach ($lineas as $linea): ?>
                     <li class="checkout-item-producto">
-                        <span><?php echo htmlspecialchars($linea['nombre']); ?> (x<?php echo $linea['cantidad']; ?>)</span>
-                        <span><?php echo number_format($linea['cantidad'] * $linea['precio_unitario'], 2, ',', '.'); ?> €</span>
+                        <span><?php echo htmlspecialchars($linea->getProducto()->getNombre()); ?> (x<?php echo $linea->getCantidad(); ?>)</span>
+                        <span><?php echo number_format($linea->getSubtotal(), 2, ',', '.'); ?> €</span>
                     </li>
                 <?php endforeach; ?>
             </ul>
@@ -120,4 +91,4 @@ if (formCheckout) {
 }
 </script>
 
-<?php include __DIR__ . '/../../includes/footer.php'; ?>
+<?php include __DIR__ . '/../includes/footer.php'; ?>

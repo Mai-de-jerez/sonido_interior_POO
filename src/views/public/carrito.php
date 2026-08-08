@@ -1,21 +1,15 @@
 <?php
-require_once __DIR__ . '/../../includes/seguridad.php';
-require_once __DIR__ . '/../../models/carrito.php';
-require_once __DIR__ . '/../../includes/conexion.php';
-
-$idCarrito = obtenerOCrearCarrito($conexion, $_SESSION['id_usuario']);
-$lineasCarrito = obtenerProductosCarrito($conexion, $idCarrito);
-mysqli_close($conexion);
+$lineas = $data['lineas'] ?? [];
 
 $totalCarrito = 0;
-foreach ($lineasCarrito as $linea) {
-    $totalCarrito += $linea['cantidad'] * $linea['precio_unitario'];
+foreach ($lineas as $linea) {
+    $totalCarrito += $linea->getSubtotal();
 }
 
 $titulo = "Mi carrito | Sonido Interior";
 $pagina = "carrito";
-include __DIR__ . '/../../includes/header.php';
-include __DIR__ . '/../../includes/menu.php';
+include __DIR__ . '/../includes/header.php';
+include __DIR__ . '/../includes/menu.php';
 ?>
 
 <main class="contenedor">
@@ -24,11 +18,11 @@ include __DIR__ . '/../../includes/menu.php';
         <div class="linea-adorno-centro"></div>
     </div>
 
-        <?php if (empty($lineasCarrito)): ?>
+        <?php if (empty($lineas)): ?>
 
         <div class="carrito-vacio">
             <p>Tu carrito está vacío por ahora.</p>
-            <a href="views/public/productos/catalogo.php" class="boton principal">Explorar catálogo</a>
+            <a href="<?php echo BASE_URL; ?>/catalogo" class="boton principal">Explorar catálogo</a>
         </div>
 
         <?php else: ?>
@@ -46,40 +40,40 @@ include __DIR__ . '/../../includes/menu.php';
                     </tr>
                 </thead>
                 <tbody>
-                    <?php foreach ($lineasCarrito as $linea): ?>
-                        <?php $subtotal = $linea['cantidad'] * $linea['precio_unitario']; ?>
+                    <?php foreach ($lineas as $linea): ?>
+                        <?php $producto = $linea->getProducto(); ?>
                         <tr>
                             <td class="carrito-producto-celda">
-                                <?php if (!empty($linea['imagen'])): ?>
-                                    <img src="img/productos/<?php echo htmlspecialchars($linea['imagen']); ?>" alt="<?php echo htmlspecialchars($linea['nombre']); ?>">
+                                <?php if (!empty($producto->getImagen())): ?>
+                                    <img src="public/img/productos/<?php echo htmlspecialchars($producto->getImagen()); ?>" alt="<?php echo htmlspecialchars($producto->getNombre()); ?>">
                                 <?php else: ?>
-                                    <img src="img/cuenco-12.svg" alt="Por defecto">
+                                    <img src="public/img/cuenco-12.svg" alt="Por defecto">
                                 <?php endif; ?>
-                                <span><?php echo htmlspecialchars($linea['nombre']); ?></span>
+                                <span><?php echo htmlspecialchars($producto->getNombre()); ?></span>
                             </td>
-                            <td><?php echo number_format($linea['precio_unitario'], 2, ',', '.'); ?> €</td>
+                            <td><?php echo number_format($linea->getPrecioUnitario(), 2, ',', '.'); ?> €</td>
                             <td>
                                 <div class="carrito-stepper">
-                                    <form action="controllers/carrito/actualizar-cantidad.php" method="post">
-                                        <input type="hidden" name="id_carrito_producto" value="<?php echo $linea['id_carrito_producto']; ?>">
+                                    <form action="<?php echo BASE_URL; ?>/carrito/actualizar-cantidad" method="post">
+                                        <input type="hidden" name="id_carrito_producto" value="<?php echo $linea->getIdCarritoProducto(); ?>">
                                         <input type="hidden" name="accion" value="restar">
-                                        <button type="submit" class="stepper-btn" <?php echo ($linea['cantidad'] <= 1) ? 'disabled' : ''; ?>>−</button>
+                                        <button type="submit" class="stepper-btn" <?php echo ($linea->getCantidad() <= 1) ? 'disabled' : ''; ?>>−</button>
                                     </form>
-                                    <span class="stepper-cantidad"><?php echo $linea['cantidad']; ?></span>
-                                    <form action="controllers/carrito/actualizar-cantidad.php" method="post">
-                                        <input type="hidden" name="id_carrito_producto" value="<?php echo $linea['id_carrito_producto']; ?>">
+                                    <span class="stepper-cantidad"><?php echo $linea->getCantidad(); ?></span>
+                                    <form action="<?php echo BASE_URL; ?>/carrito/actualizar-cantidad" method="post">
+                                        <input type="hidden" name="id_carrito_producto" value="<?php echo $linea->getIdCarritoProducto(); ?>">
                                         <input type="hidden" name="accion" value="sumar">
-                                        <button type="submit" class="stepper-btn" <?php echo ($linea['cantidad'] >= $linea['stock']) ? 'disabled' : ''; ?>>+</button>
+                                        <button type="submit" class="stepper-btn" <?php echo ($linea->getCantidad() >= $producto->getStock()) ? 'disabled' : ''; ?>>+</button>
                                     </form>
                                 </div>
                             </td>
                             <td class="carrito-desglose">
-                                x<?php echo $linea['cantidad']; ?>
+                                x<?php echo $linea->getCantidad(); ?>
                             </td>
-                            <td><?php echo number_format($subtotal, 2, ',', '.'); ?> €</td>
+                            <td><?php echo number_format($linea->getSubtotal(), 2, ',', '.'); ?> €</td>
                             <td>
-                                <form action="controllers/carrito/eliminar-producto.php" method="post">
-                                    <input type="hidden" name="id_carrito_producto" value="<?php echo $linea['id_carrito_producto']; ?>">
+                                <form action="<?php echo BASE_URL; ?>/carrito/eliminar" method="post">
+                                    <input type="hidden" name="id_carrito_producto" value="<?php echo $linea->getIdCarritoProducto(); ?>">
                                     <button type="submit" class="btn-quitar-linea" title="Quitar del carrito">✕</button>
                                 </form>
                             </td>
@@ -95,10 +89,10 @@ include __DIR__ . '/../../includes/menu.php';
                 <span>Total:</span>
                 <span><?php echo number_format($totalCarrito, 2, ',', '.'); ?> €</span>
             </div>
-            <a href="views/public/checkout.php" class="boton principal cta-btn">Finalizar compra</a>
+            <a href="<?php echo BASE_URL; ?>/checkout" class="boton principal cta-btn">Finalizar compra</a>
         </aside>
 
     <?php endif; ?>
 </main>
 
-<?php include __DIR__ . '/../../includes/footer.php'; ?>
+<?php include __DIR__ . '/../includes/footer.php'; ?>

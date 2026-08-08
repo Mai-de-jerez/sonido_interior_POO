@@ -135,6 +135,27 @@ class ProductoDAO implements ProductoDAOInterface {
         return $fila ? Producto::fromArray($fila) : null;
     }
 
+    // Consulta y bloquea la fila del producto (FOR UPDATE), solo válido dentro de una transacción
+    public function obtenerStockParaUpdate(int $idProducto): ?array {
+        $pdo = $this->conexion->getPdo();
+        $sql = "SELECT stock, nombre FROM productos WHERE id_producto = ? FOR UPDATE";
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute([$idProducto]);
+        $fila = $stmt->fetch();
+        return $fila ?: null;
+    }
+
+    // Descuenta stock tras una compra; si llega a 0, desactiva el producto automáticamente
+    public function descontarStock(int $idProducto, int $cantidad): bool {
+        $pdo = $this->conexion->getPdo();
+        $sql = "UPDATE productos
+                SET stock = stock - ?,
+                    activo = CASE WHEN stock - ? <= 0 THEN 0 ELSE activo END
+                WHERE id_producto = ?";
+        $stmt = $pdo->prepare($sql);
+        return $stmt->execute([$cantidad, $cantidad, $idProducto]);
+    }
+
     // Insertar nuevo producto
     public function insertar(Producto $producto): bool {
         $pdo = $this->conexion->getPdo();

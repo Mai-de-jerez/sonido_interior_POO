@@ -25,6 +25,10 @@ use SonidoInteriorPoo\controllers\ProductoController;
 use SonidoInteriorPoo\controllers\UsuarioController;
 use SonidoInteriorPoo\controllers\StaticPagesController;
 use SonidoInteriorPoo\controllers\MensajeController;
+use SonidoInteriorPoo\models\CarritoDAO;
+use SonidoInteriorPoo\models\PedidoDAO;
+use SonidoInteriorPoo\services\CarritoService;
+use SonidoInteriorPoo\controllers\CarritoController;
 
 // --- Contenedor de dependencias ---
 $conexion = new Conexion();
@@ -45,6 +49,11 @@ $usuarioController = new UsuarioController($usuarioService);
 $staticPagesController = new StaticPagesController();
 $mensajeController = new MensajeController($mensajeService);
 
+$carritoDAO = new CarritoDAO($conexion);
+$pedidoDAO = new PedidoDAO($conexion);
+$carritoService = new CarritoService($conexion, $carritoDAO, $productoDAO, $pedidoDAO);
+$carritoController = new CarritoController($carritoService);
+
 // --- Instancia del Router ---
 $router = new Router();
 
@@ -60,11 +69,23 @@ $router->get('/contacto', [$staticPagesController, 'contacto']);
 // ============================================================
 // PÁGINAS PÚBLICAS NO ESTÁTICAS
 // ============================================================
+// home
 $router->get('/', [$productoController, 'home']);
+// productos
 $router->get('/catalogo', [$productoController, 'catalogo']);
 $router->get('/detalle-producto', [$productoController, 'detalle']);
+// carrito
+$router->get('/carrito', [$carritoController, 'ver']);
+$router->post('/carrito/agregar', [$carritoController, 'agregar']);
+$router->post('/carrito/actualizar-cantidad', [$carritoController, 'actualizarCantidad']);
+$router->post('/carrito/eliminar', [$carritoController, 'eliminar']);
+// checkout
+$router->get('/checkout', [$carritoController, 'mostrarCheckout']);
+$router->post('/checkout', [$carritoController, 'procesarCheckout']);
+// redirección checkout exitoso
+$router->get('/pedido-exito', [$carritoController, 'pedidoExito']);
+// contacto
 $router->post('/contacto', [$mensajeController, 'procesarContacto']);
-
 // Autenticación
 $router->post('/login', [$usuarioController, 'procesarLogin']);
 $router->get('/logout', [$usuarioController, 'logout']);    
