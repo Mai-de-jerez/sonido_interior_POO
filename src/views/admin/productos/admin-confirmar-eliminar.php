@@ -2,7 +2,7 @@
 $producto = $data['producto'] ?? null;
 
 if (!$producto) {
-    header("Location: admin/productos?status=notfound");
+    header("Location: " . BASE_URL . "/admin/productos?status=notfound");
     exit();
 }
 
@@ -32,11 +32,11 @@ include __DIR__ . '/../../includes/menu-admin.php';
                     Dejará de verse en la tienda, pero sus datos no se borrarán.
                 </p>
 
-                <form action="productos/eliminar" method="post">
+                <form action="<?php echo BASE_URL; ?>/admin/productos/eliminar" method="post">
                     <input type="hidden" name="id_producto" value="<?php echo $producto->getIdProducto(); ?>">
 
                     <div class="acciones-formulario">
-                        <a href="admin/productos" class="boton cancelar">Cancelar</a>
+                        <a href="<?php echo BASE_URL; ?>/admin/productos" class="boton cancelar">Cancelar</a>
                         <button type="submit" class="boton principal">Sí, desactivar</button>
                     </div>
                 </form>

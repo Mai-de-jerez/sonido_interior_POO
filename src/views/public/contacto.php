@@ -2,8 +2,8 @@
 $titulo = "Sonido Interior | Contacto";
 $pagina = "contacto";
 
-include __DIR__ . '/../../includes/header.php';
-include __DIR__ . '/../../includes/menu.php';
+include __DIR__ . '/../includes/header.php';
+include __DIR__ . '/../includes/menu.php';
 
 $errores = $_SESSION['errores'] ?? [];
 $old = $_SESSION['form_old'] ?? [];
@@ -67,7 +67,7 @@ unset($_SESSION['errores'], $_SESSION['form_old']);
         </aside>
 
         <section class="tarjeta-beneficio contacto-form">
-            <form class="formulario-contacto" action="controllers/mensajes/procesar-contacto.php" method="POST">
+            <form class="formulario-contacto" action="contacto" method="POST">
                 <div class="campo-form">
                     <label for="nombre">Nombre completo *</label>
                     <input type="text" id="nombre" name="nombre" placeholder="Tu nombre"
@@ -90,10 +90,10 @@ unset($_SESSION['errores'], $_SESSION['form_old']);
                 </div>
 
                 <div class="campo-form">
-                    <label for="asunto">Asunto *</label>
-                    <input type="text" id="asunto" name="asunto" placeholder="¿En qué te podemos ayudar?"
-                           value="<?= htmlspecialchars($old['asunto'] ?? '') ?>">
-                    <span class="mensaje-error" id="error-asunto"><?= isset($errores['asunto']) ? htmlspecialchars($errores['asunto']) : '' ?></span>
+                    <label for="motivo">Asunto *</label>
+                    <input type="text" id="motivo" name="motivo" placeholder="¿En qué te podemos ayudar?"
+                           value="<?= htmlspecialchars($old['motivo'] ?? '') ?>">
+                    <span class="mensaje-error" id="error-motivo"><?= isset($errores['motivo']) ? htmlspecialchars($errores['motivo']) : '' ?></span>
                 </div>
 
                 <div class="campo-form">
@@ -172,17 +172,17 @@ if (formContacto) {
     }
 
     function validarAsunto() {
-        const input = document.getElementById('asunto');
+       const input = document.getElementById('motivo');
         const valor = input.value.trim();
         if (valor === '') {
-            marcarError(input, 'error-asunto', 'El asunto es obligatorio.');
+            marcarError(input, 'error-motivo', 'El asunto es obligatorio.');
             return false;
         }
         if (valor.length < 3 || valor.length > 50) {
-            marcarError(input, 'error-asunto', 'El asunto debe tener entre 3 y 50 caracteres.');
+            marcarError(input, 'error-motivo', 'El asunto debe tener entre 3 y 50 caracteres.');
             return false;
         }
-        limpiarError(input, 'error-asunto');
+        limpiarError(input, 'error-motivo');
         return true;
     }
 
@@ -228,4 +228,4 @@ if (formContacto) {
 }
 </script>
 
-<?php include __DIR__ . '/../../includes/footer.php'; ?>
+<?php include __DIR__ . '/../includes/footer.php'; ?>

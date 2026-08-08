@@ -30,4 +30,18 @@ class Mensaje {
     public function getMensaje(): string { return $this->mensaje; }
     public function getFechaEnvio(): string { return $this->fechaEnvio; }
     public function isLeido(): bool { return $this->leido === 1; }
+
+
+    public static function fromArray(array $fila): self {
+        return new self(
+            (int) $fila['id_mensaje'],
+             $fila['nombre'],
+             $fila['email'],
+             $fila['telefono'] ?? null,
+             $fila['motivo'] ?? null,
+             $fila['mensaje'],
+             $fila['fecha_envio'],
+            (int) $fila['leido']
+        );
+    }
 }

@@ -19,7 +19,7 @@ include __DIR__ . '/../includes/menu.php';
         <div class="hero-texto">
             <h2>Armonía que<br>se siente</h2>
             <p>Cuencos tibetanos artesanales para meditación, relajación y bienestar interior.</p>
-            <a href="/catalogo" class="boton principal">Ver catálogo</a>
+            <a href="catalogo" class="boton principal">Ver catálogo</a>
         </div>
     </section>
 

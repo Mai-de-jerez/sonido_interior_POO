@@ -26,7 +26,7 @@ $cantidadesCarrito = $_SESSION['cantidades_carrito'] ?? 0;
     <div class="acciones-header">
         <a href="#">🔍</a>
         <?php if (isset($_SESSION['id_usuario'])): ?>
-            <a href="controllers/auth/logout.php" title="Cerrar sesión">⏻</a>
+            <a href="logout" title="Cerrar sesión">⏻</a>
 
             <a href="views/public/carrito.php" title="Mi carrito" class="btn-carrito-header">
                 🛒

@@ -1,11 +1,11 @@
 <?php
+$token = $data['token'] ?? ($_GET['token'] ?? '');
+
 $titulo = "Sonido Interior | Nueva Contraseña";
 $pagina = "restablecer";
 
-include __DIR__ . '/../../includes/header.php';
-include __DIR__ . "/../../includes/menu-login.php";
-
-$token = $_GET['token'] ?? '';
+include __DIR__ . '/../includes/header.php';
+include __DIR__ . "/../includes/menu-login.php";
 
 $errores = $_SESSION['errores'] ?? [];
 unset($_SESSION['errores']);
@@ -18,18 +18,11 @@ unset($_SESSION['errores']);
     </div>
 
     <div style="max-width: 450px; margin: 0 auto;">
-        <?php if (isset($_SESSION['error_reset'])): ?>
-            <p style="text-align: center; color: #b03030; font-weight: bold; margin-bottom: 20px;">
-                <?= htmlspecialchars($_SESSION['error_reset']); ?>
-            </p>
-            <?php unset($_SESSION['error_reset']); ?>
-        <?php endif; ?>
-
         <?php if (empty($token)): ?>
             <p style="text-align: center; color: #b03030;">El enlace de recuperación no es válido.</p>
         <?php else: ?>
             <section class="tarjeta-beneficio">
-                <form class="formulario-restablecer" action="controllers/auth/procesar-nueva-password.php" method="POST" autocomplete="off">
+                <form class="formulario-restablecer" action="<?php echo BASE_URL; ?>/restablecer-password" method="POST" autocomplete="off">
                     <input type="hidden" name="token" value="<?= htmlspecialchars($token); ?>">
 
                     <div class="campo">
@@ -111,4 +104,4 @@ if (formRestablecer) {
 }
 </script>
 
-<?php include __DIR__ . '/../../includes/footer.php'; ?>
+<?php include __DIR__ . '/../includes/footer.php'; ?>

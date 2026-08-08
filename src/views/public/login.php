@@ -41,8 +41,8 @@ unset($_SESSION['errores'], $_SESSION['form_old'], $_SESSION['mensaje_error']);
             <button type="submit" class="boton principal bloque">Entrar</button>
 
             <div class="opciones-login">
-                <a href="/registro">¿No tienes una cuenta? Crea aquí una</a>
-                <a href="/recuperar-password">¿Has olvidado tu contraseña?</a>
+                <a href="registro">¿No tienes una cuenta? Crea aquí una</a>
+                <a href="recuperar-password">¿Has olvidado tu contraseña?</a>
             </div>
         </form>
     </section>

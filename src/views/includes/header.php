@@ -13,8 +13,7 @@ if (!isset($bodyClass)) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?php echo $titulo; ?></title>
-    <base href="/sonido-interior-POO/">
-    <link rel="stylesheet" href="public/css/estilos.css">
+    <link rel="stylesheet" href="<?php echo BASE_URL; ?>/public/css/estilos.css">
 </head>
 <body class="<?php echo $bodyClass; ?>">
 

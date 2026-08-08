@@ -33,7 +33,7 @@ class UsuarioController {
         if (!empty($errores)) {
             $_SESSION['errores'] = $errores;
             $_SESSION['form_old'] = ['usuario' => $usuario];
-            header("Location: /login");
+            header("Location: " . BASE_URL . "/login");
             exit();
         }
 
@@ -42,7 +42,7 @@ class UsuarioController {
 
         if (!$usuarioData) {
             $_SESSION['mensaje_error'] = "Usuario o contraseña incorrectos.";
-            header("Location: /login");
+            header("Location: " . BASE_URL . "/login");
             exit();
         }
 
@@ -56,12 +56,12 @@ class UsuarioController {
 
         // Redirigir según rol
         if ($usuarioData['rol'] === 'ADMIN') {
-            header("Location: admin/dashboard");
+            header("Location: " . BASE_URL . "/admin/dashboard");
         } else {
-            header("Location: /");
+            header("Location: " . BASE_URL . "/");
         }
         exit();
-    }
+    }       
 
     // ============================================================
     // PROCESAR REGISTRO
@@ -99,7 +99,7 @@ class UsuarioController {
         if (!empty($errores)) {
             $_SESSION['errores'] = $errores;
             $_SESSION['form_old'] = ['usuario' => $usuario, 'email' => $email];
-            header("Location: /registro");
+            header("Location: " . BASE_URL . "/registro");
             exit();
         }
 
@@ -108,12 +108,101 @@ class UsuarioController {
         if (!$registrado) {
             $_SESSION['mensaje_error'] = "El usuario o email ya existe.";
             $_SESSION['form_old'] = ['usuario' => $usuario, 'email' => $email];
-            header("Location: /registro");
+            header("Location: " . BASE_URL . "/registro");
             exit();
         }
 
         $_SESSION['mensaje_exito'] = "Usuario registrado con éxito. Ahora puedes iniciar sesión.";
-        header("Location: /login");
+        header("Location: " . BASE_URL . "/login");
+        exit();
+    }
+
+    // ============================================================
+    // MOSTRAR FORMULARIO DE SOLICITUD DE RECUPERACIÓN
+    // ============================================================
+    public function mostrarRecuperar(): void {
+        require __DIR__ . '/../views/public/recuperar-password.php';
+    }
+
+    // ============================================================
+    // PROCESAR SOLICITUD DE RECUPERACIÓN
+    // ============================================================
+    public function procesarRecuperar(): void {
+        $email = trim($_POST['email'] ?? '');
+        $errores = [];
+
+        if ($email === '') {
+            $errores['email'] = "El correo es obligatorio.";
+        } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            $errores['email'] = "Introduce un email válido.";
+        }
+
+        if (!empty($errores)) {
+            $_SESSION['errores'] = $errores;
+            $_SESSION['form_old'] = ['email' => $email];
+            header("Location: " . BASE_URL . "/recuperar-password");
+            exit();
+        }
+
+        $this->usuarioService->solicitarRecuperacion($email);
+
+        $_SESSION['mensaje_exito'] = "Si el correo introducido está registrado, recibirás las instrucciones en tu bandeja de entrada.";
+        header("Location: " . BASE_URL . "/recuperar-password");
+        exit();
+    }
+
+    // ============================================================
+    // MOSTRAR FORMULARIO DE RESTABLECER CONTRASEÑA
+    // ============================================================
+    public function mostrarRestablecer(): void {
+        $token = $_GET['token'] ?? '';
+
+        if ($token === '') {
+            header("Location: " . BASE_URL . "/recuperar-password");
+            exit();
+        }
+
+        $data = ['token' => $token];
+        extract($data);
+        require __DIR__ . '/../views/public/restablecer-password.php';
+    }
+
+    // ============================================================
+    // PROCESAR RESTABLECIMIENTO DE CONTRASEÑA
+    // ============================================================
+    public function procesarRestablecer(): void {
+        $token = $_POST['token'] ?? '';
+
+        if ($token === '') {
+            header("Location: " . BASE_URL . "/recuperar-password");
+            exit();
+        }
+
+        $errores = $this->usuarioService->validarNuevaPassword($_POST);
+
+        if (!empty($errores)) {
+            $_SESSION['errores'] = $errores;
+            header("Location: " . BASE_URL . "/restablecer-password?token=" . urlencode($token));
+            exit();
+        }
+
+        $email = $this->usuarioService->obtenerEmailPorToken($token);
+
+        if (!$email) {
+            $_SESSION['mensaje_error'] = "El enlace ha caducado o es inválido. Solicita uno nuevo.";
+            header("Location: " . BASE_URL . "/recuperar-password");
+            exit();
+        }
+
+        $actualizado = $this->usuarioService->actualizarPasswordConToken($email, $_POST['password']);
+
+        if ($actualizado) {
+            $_SESSION['mensaje_exito'] = "¡Contraseña cambiada con éxito! Ya puedes acceder.";
+            header("Location: " . BASE_URL . "/login");
+        } else {
+            $_SESSION['mensaje_error'] = "Error al actualizar la contraseña. Inténtalo de nuevo.";
+            header("Location: " . BASE_URL . "/restablecer-password?token=" . urlencode($token));
+        }
         exit();
     }
 
@@ -123,7 +212,7 @@ class UsuarioController {
     public function logout(): void {
         session_unset();
         session_destroy();
-        header("Location: /");
+        header("Location: " . BASE_URL . "/");
         exit();
     }
 }

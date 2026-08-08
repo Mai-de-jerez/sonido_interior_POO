@@ -20,7 +20,7 @@ include __DIR__ . '/../../includes/menu-admin.php';
             <h2>Listado de productos</h2>
             <p>Inicio › Productos › Listado</p>
         </div>
-        <a href="admin/productos/crear" class="boton principal">+ Añadir producto</a>
+        <a href="<?php echo BASE_URL; ?>/admin/productos/crear" class="boton principal">+ Añadir producto</a>
     </header>
 
     <section class="admin-contenido">
@@ -51,9 +51,9 @@ include __DIR__ . '/../../includes/menu-admin.php';
                                 <td><?php echo $prod->getIdProducto(); ?></td>
                                 <td>
                                     <?php if (!empty($prod->getImagen())): ?>
-                                        <img src="public/img/productos/<?php echo htmlspecialchars($prod->getImagen()); ?>" alt="<?php echo htmlspecialchars($prod->getNombre()); ?>">
+                                        <img src="<?php echo BASE_URL; ?>/public/img/productos/<?php echo htmlspecialchars($prod->getImagen()); ?>" alt="<?php echo htmlspecialchars($prod->getNombre()); ?>">
                                     <?php else: ?>
-                                        <img src="public/img/cuenco-12.svg" alt="Por defecto">
+                                        <img src="<?php echo BASE_URL; ?>/public/img/cuenco-12.svg" alt="Por defecto">
                                     <?php endif; ?>
                                 </td>
                                 <td><?php echo htmlspecialchars($prod->getNombre()); ?></td>
@@ -63,7 +63,7 @@ include __DIR__ . '/../../includes/menu-admin.php';
                                 <td>
                                     <?php if (!empty($prod->getNotaMusical())): ?>
                                         <audio controls style="width: 120px; height: 30px;">
-                                            <source src="public/sonidos/<?php echo htmlspecialchars($prod->getNotaMusical()); ?>" type="audio/mpeg">
+                                            <source src="<?php echo BASE_URL; ?>/public/sonidos/<?php echo htmlspecialchars($prod->getNotaMusical()); ?>" type="audio/mpeg">
                                             Tu navegador no soporta audio.
                                         </audio>
                                     <?php else: ?>
@@ -77,13 +77,12 @@ include __DIR__ . '/../../includes/menu-admin.php';
                                         <span class="estado inactivo">Inactivo</span>
                                     <?php endif; ?>
                                 </td>
-                                
                                 <td class="acciones-tabla">
-                                    <a href="admin/productos/editar?id=<?php echo $prod->getIdProducto(); ?>">✎</a>                                
+                                    <a href="<?php echo BASE_URL; ?>/admin/productos/editar?id=<?php echo $prod->getIdProducto(); ?>">✎</a>                                
                                     <?php if ($prod->isActivo()): ?>
-                                        <a href="admin/productos/eliminar?id=<?php echo $prod->getIdProducto(); ?>">🗑</a>
+                                        <a href="<?php echo BASE_URL; ?>/admin/productos/eliminar?id=<?php echo $prod->getIdProducto(); ?>">🗑</a>
                                     <?php else: ?>
-                                        <a href="admin/productos/reactivar?id=<?php echo $prod->getIdProducto(); ?>">↺</a>
+                                        <a href="<?php echo BASE_URL; ?>/admin/productos/reactivar?id=<?php echo $prod->getIdProducto(); ?>">↺</a>
                                     <?php endif; ?>
                                 </td>
                             </tr>

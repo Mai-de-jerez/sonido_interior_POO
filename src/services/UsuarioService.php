@@ -4,6 +4,7 @@ namespace SonidoInteriorPoo\services;
 use SonidoInteriorPoo\models\Usuario;
 use SonidoInteriorPoo\models\UsuarioDAO;
 use SonidoInteriorPoo\interfaces\UsuarioServiceInterface;
+use SonidoInteriorPoo\utils\EmailHelper;
 
 class UsuarioService implements UsuarioServiceInterface {
     private UsuarioDAO $usuarioDAO;
@@ -60,16 +61,48 @@ class UsuarioService implements UsuarioServiceInterface {
     }
 
     // ============================================================
-    // RECUPERACIÓN DE CONTRASEÑA - GUARDAR TOKEN
+    // RECUPERACIÓN DE CONTRASEÑA - SOLICITAR (genera token + envía email)
     // ============================================================
-    public function guardarTokenRecuperacion(string $email, string $token): bool {
-        // Verificar que el email existe
+    public function solicitarRecuperacion(string $email): void {
         $usuario = $this->usuarioDAO->obtenerPorEmail($email);
+
         if (!$usuario) {
-            return false;
+            // No revelamos si el email existe o no (mismo comportamiento que el código viejo)
+            return;
         }
 
-        return $this->usuarioDAO->guardarTokenRecuperacion($email, $token);
+        $token = bin2hex(random_bytes(32));
+
+        if ($this->usuarioDAO->guardarTokenRecuperacion($email, $token)) {
+            EmailHelper::enviarEnlaceRecuperacion($email, $usuario->getUsuario(), $token);
+        }
+    }
+
+    // ============================================================
+    // VALIDAR NUEVA CONTRASEÑA (para el formulario de restablecer)
+    // ============================================================
+    public function validarNuevaPassword(array $datos): array {
+        $errores = [];
+
+        $password = $datos['password'] ?? '';
+        $confirmPassword = $datos['confirm_password'] ?? '';
+
+        if ($password === '' || $confirmPassword === '') {
+            $errores['general'] = "Todos los campos son obligatorios.";
+            return $errores;
+        }
+
+        if (strlen($password) < 6 || strlen($password) > 72) {
+            $errores['password'] = "La contraseña debe tener entre 6 y 72 caracteres.";
+        } elseif (!preg_match('/[A-Z]/', $password) || !preg_match('/[a-z]/', $password) || !preg_match('/[0-9]/', $password)) {
+            $errores['password'] = "Debe incluir mayúscula, minúscula y número.";
+        }
+
+        if ($password !== $confirmPassword) {
+            $errores['confirm_password'] = "Las contraseñas no coinciden.";
+        }
+
+        return $errores;
     }
 
     // ============================================================

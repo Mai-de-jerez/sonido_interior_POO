@@ -2,8 +2,8 @@
 $titulo = "Sonido Interior | Recuperar Contraseña";
 $pagina = "recuperar";
 
-include __DIR__ . '/../../includes/header.php';
-include __DIR__ . "/../../includes/menu-login.php";
+include __DIR__ . '/../includes/header.php';
+include __DIR__ . "/../includes/menu-login.php";
 
 $errores = $_SESSION['errores'] ?? [];
 $old = $_SESSION['form_old'] ?? [];
@@ -18,15 +18,8 @@ unset($_SESSION['errores'], $_SESSION['form_old']);
     </div>
 
     <div style="max-width: 450px; margin: 0 auto;">
-        <?php if (isset($_SESSION['recuperacion_mensaje'])): ?>
-            <p style="text-align: center; color: #356b2f; font-weight: bold; margin-bottom: 20px;">
-                <?= htmlspecialchars($_SESSION['recuperacion_mensaje']); ?>
-            </p>
-            <?php unset($_SESSION['recuperacion_mensaje']); ?>
-        <?php endif; ?>
-
         <section class="tarjeta-beneficio">
-            <form class="formulario-recuperar" action="controllers/auth/solicitar-recuperacion.php" method="POST" autocomplete="off">
+            <form class="formulario-recuperar" action="<?php echo BASE_URL; ?>/recuperar-password" method="POST" autocomplete="off">
                 <div class="campo">
                     <label for="email">Correo electrónico *</label>
                     <input type="email" id="email" name="email" placeholder="tu@email.com"
@@ -84,4 +77,4 @@ if (formRecuperar) {
 }
 </script>
 
-<?php include __DIR__ . '/../../includes/footer.php'; ?>
+<?php include __DIR__ . '/../includes/footer.php'; ?>

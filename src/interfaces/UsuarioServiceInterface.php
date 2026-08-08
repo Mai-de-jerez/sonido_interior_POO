@@ -12,7 +12,8 @@ interface UsuarioServiceInterface {
     public function obtenerPorId(int $idUsuario): ?Usuario;
 
     // ---------- RECUPERACIÓN DE CONTRASEÑA ----------
-    public function guardarTokenRecuperacion(string $email, string $token): bool;
+    public function solicitarRecuperacion(string $email): void;
+    public function validarNuevaPassword(array $datos): array;
     public function obtenerEmailPorToken(string $token): ?string;
     public function actualizarPasswordConToken(string $email, string $nuevaPassword): bool;
 

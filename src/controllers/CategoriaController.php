@@ -15,7 +15,7 @@ class CategoriaController {
         AuthMiddleware::verificarAdmin();
 
         if (empty($_POST['nombre'])) {
-            header("Location: /admin/categorias");
+            header("Location: " . BASE_URL . "/admin/categorias");
             exit();
         }
 
@@ -23,7 +23,7 @@ class CategoriaController {
 
         if (!empty($errores)) {
             $_SESSION['errores'] = $errores;
-            header("Location: /admin/categorias/nueva");
+            header("Location: " . BASE_URL . "/admin/categorias/nueva");
             exit();
         }
 
@@ -31,10 +31,10 @@ class CategoriaController {
 
         if ($creado) {
             $_SESSION['mensaje_exito'] = "Categoría guardada con éxito.";
-            header("Location: /admin/categorias");
+            header("Location: " . BASE_URL . "/admin/categorias");
         } else {
             $_SESSION['mensaje_error'] = "Error al guardar la categoría.";
-            header("Location: /admin/categorias/nueva");
+            header("Location: " . BASE_URL . "/admin/categorias/nueva");
         }
         exit();
     }
@@ -47,11 +47,11 @@ class CategoriaController {
             : null;
 
         if ($idCategoria === null || empty($_POST['nombre'])) {
-            header("Location: /admin/categorias");
+            header("Location: " . BASE_URL . "/admin/categorias");
             exit();
         }
 
-        $urlVuelta = "/admin/categorias/editar?id=" . $idCategoria;
+        $urlVuelta = BASE_URL . "/admin/categorias/editar?id=" . $idCategoria;
 
         $errores = $this->categoriaService->validar($_POST);
 
@@ -71,7 +71,7 @@ class CategoriaController {
 
         if ($actualizado) {
             $_SESSION['mensaje_exito'] = "Categoría actualizada con éxito.";
-            header("Location: /admin/categorias");
+            header("Location: " . BASE_URL . "/admin/categorias");
         } else {
             $_SESSION['mensaje_error'] = "Error al actualizar la categoría.";
             header("Location: " . $urlVuelta);
@@ -87,7 +87,7 @@ class CategoriaController {
             : null;
 
         if ($idCategoria === null) {
-            header("Location: /admin/categorias");
+            header("Location: " . BASE_URL . "/admin/categorias");
             exit();
         }
 
@@ -95,16 +95,16 @@ class CategoriaController {
             $eliminado = $this->categoriaService->eliminarLogica($idCategoria);
         } catch (\RuntimeException $e) {
             $_SESSION['mensaje_error'] = $e->getMessage();
-            header("Location: /admin/categorias?status=error");
+            header("Location: " . BASE_URL . "/admin/categorias?status=error");
             exit();
         }
 
         if ($eliminado) {
             $_SESSION['mensaje_exito'] = "Categoría eliminada correctamente.";
-            header("Location: /admin/categorias?status=deleted");
+            header("Location: " . BASE_URL . "/admin/categorias?status=deleted");
         } else {
             $_SESSION['mensaje_error'] = "No se pudo eliminar la categoría.";
-            header("Location: /admin/categorias?status=error");
+            header("Location: " . BASE_URL . "/admin/categorias?status=error");
         }
         exit();
     }
@@ -117,7 +117,7 @@ class CategoriaController {
             : null;
 
         if ($idCategoria === null) {
-            header("Location: /admin/categorias");
+            header("Location: " . BASE_URL . "/admin/categorias");
             exit();
         }
 
@@ -125,16 +125,16 @@ class CategoriaController {
             $reactivado = $this->categoriaService->reactivar($idCategoria);
         } catch (\RuntimeException $e) {
             $_SESSION['mensaje_error'] = $e->getMessage();
-            header("Location: /admin/categorias?status=error");
+            header("Location: " . BASE_URL . "/admin/categorias?status=error");
             exit();
         }
 
         if ($reactivado) {
             $_SESSION['mensaje_exito'] = "Categoría reactivada correctamente.";
-            header("Location: /admin/categorias?status=reactivated");
+            header("Location: " . BASE_URL . "/admin/categorias?status=reactivated");
         } else {
             $_SESSION['mensaje_error'] = "No se pudo reactivar la categoría. Por favor, inténtalo de nuevo.";
-            header("Location: /admin/categorias?status=error");
+            header("Location: " . BASE_URL . "/admin/categorias?status=error");
         }
         exit();
     }

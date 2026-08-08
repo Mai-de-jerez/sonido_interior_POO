@@ -10,7 +10,8 @@ $esEdicion = $producto !== null;
 
 // Mensajes de sesión para los errores
 $errores = $_SESSION['errores'] ?? [];
-unset($_SESSION['errores']);
+$old = $_SESSION['form_old'] ?? [];
+unset($_SESSION['errores'], $_SESSION['form_old']);
 
 
 $titulo = $esEdicion ? "Editar producto | Administración" : "Añadir producto | Administración";
@@ -33,7 +34,7 @@ include __DIR__ . '/../../includes/menu-admin.php';
 
     <section class="admin-contenido dos-columnas-admin">
         <form class="formulario-admin"
-            action="<?php echo $esEdicion ? 'productos/actualizar' : 'productos/guardar'; ?>"
+            action="<?php echo BASE_URL . ($esEdicion ? '/admin/productos/actualizar' : '/admin/productos/guardar'); ?>"
             method="post" enctype="multipart/form-data"
             data-es-edicion="<?php echo $esEdicion ? '1' : '0'; ?>">
 
@@ -142,7 +143,7 @@ include __DIR__ . '/../../includes/menu-admin.php';
 
             <!-- ===== BOTONES ===== -->
             <div class="acciones-formulario">
-                <a href="admin/productos" class="boton cancelar">Cancelar</a>
+                <a href="<?php echo BASE_URL; ?>/admin/productos" class="boton cancelar">Cancelar</a>
                 <button type="submit" class="boton principal"><?php echo $esEdicion ? "Guardar cambios" : "Guardar producto"; ?></button>
             </div>
         </form>
