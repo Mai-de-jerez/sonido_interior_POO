@@ -1,10 +1,19 @@
 <?php
+use SonidoInteriorPoo\core\Session;
+
 if (!isset($titulo)) {
     $titulo = "Sonido Interior | Cuencos Tibetanos";
 }
 if (!isset($bodyClass)) {
     $bodyClass = "";
 }
+
+// Leemos los mensajes flash (getFlash borra la clave de la sesión automáticamente)
+$mensajeExito = Session::getFlash('mensaje_exito');
+$mensajeError = Session::getFlash('mensaje_error');
+
+$textoMensaje = $mensajeExito ?? $mensajeError;
+$claseToast   = $mensajeExito ? 'toast-exito' : 'toast-error';
 ?>
 
 <!DOCTYPE html>
@@ -17,12 +26,7 @@ if (!isset($bodyClass)) {
 </head>
 <body class="<?php echo $bodyClass; ?>">
 
-<?php if (isset($_SESSION['mensaje_exito']) || isset($_SESSION['mensaje_error'])): 
-    $esExito = isset($_SESSION['mensaje_exito']);
-    $textoMensaje = $esExito ? $_SESSION['mensaje_exito'] : $_SESSION['mensaje_error'];
-    $claseToast = $esExito ? 'toast-exito' : 'toast-error';
-    unset($_SESSION['mensaje_exito'], $_SESSION['mensaje_error']);
-?>
+<?php if ($textoMensaje): ?>
     <div id="toast-msg" class="toast-notificacion <?php echo $claseToast; ?>">
         <span><?php echo htmlspecialchars($textoMensaje); ?></span>
     </div>

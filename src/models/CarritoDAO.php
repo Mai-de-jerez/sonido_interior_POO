@@ -95,10 +95,15 @@ class CarritoDAO implements CarritoDAOInterface {
         return $stmt->fetch() !== false;
     }
 
-    public function contarUnidades(int $idCarrito): int {
+    public function contarUnidades(int $idUsuario): int {
         $pdo = $this->conexion->getPdo();
-        $stmt = $pdo->prepare("SELECT COALESCE(SUM(cantidad), 0) AS total FROM carrito_producto WHERE id_carrito = ?");
-        $stmt->execute([$idCarrito]);
+        $sql = "SELECT COALESCE(SUM(cp.cantidad), 0) AS total 
+                FROM carrito_producto cp
+                INNER JOIN carrito c ON cp.id_carrito = c.id_carrito
+                WHERE c.id_usuario = ?";
+        
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute([$idUsuario]);
         return (int) $stmt->fetchColumn();
     }
 }

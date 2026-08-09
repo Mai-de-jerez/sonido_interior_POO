@@ -3,18 +3,22 @@ namespace SonidoInteriorPoo\controllers;
 
 use SonidoInteriorPoo\interfaces\ProductoServiceInterface;
 use SonidoInteriorPoo\interfaces\CategoriaServiceInterface;
+use SonidoInteriorPoo\validators\ProductoValidator;
 use SonidoInteriorPoo\middleware\AuthMiddleware;
 
 class ProductoController {
     private ProductoServiceInterface $productoService;
     private CategoriaServiceInterface $categoriaService;
+    private ProductoValidator $productoValidator;
 
     public function __construct(
         ProductoServiceInterface $productoService,
-        CategoriaServiceInterface $categoriaService
+        CategoriaServiceInterface $categoriaService,
+        ProductoValidator $productoValidator
     ) {
         $this->productoService = $productoService;
         $this->categoriaService = $categoriaService;
+        $this->productoValidator = $productoValidator;
     }
 
     // listar en la home últimos productos
@@ -31,20 +35,9 @@ class ProductoController {
     public function dashboard(): void {
         AuthMiddleware::verificarAdmin();
         
-        $productos = $this->productoService->obtenerProductosAdmin();
-        $totalProductos = count($productos);
-        $totalActivos = count(array_filter($productos, fn($dto) => $dto->getProducto()->isActivo()));
-        
-        $categorias = $this->categoriaService->obtenerTodasAdmin();
-        $totalCategorias = count($categorias);
-        $categoriasActivas = count(array_filter($categorias, fn($c) => $c->isActivo()));
-        
         $data = [
-            'totalProductos' => $totalProductos,
-            'totalActivos' => $totalActivos,
-            'totalCategorias' => $totalCategorias,
-            'categoriasActivas' => $categoriasActivas,
-            'ultimosProductos' => array_slice($productos, 0, 5) 
+            'totalProductos' => $this->productoService->obtenerTotalProductosAdmin(),
+            'totalActivos'   => $this->productoService->obtenerTotalActivosAdmin()
         ];
         
         extract($data);
@@ -227,7 +220,10 @@ class ProductoController {
             exit();
         }
 
-        $errores = $this->productoService->validar($_POST, esEdicion: false);
+        $errores = array_merge(
+            $this->productoValidator->validar($_POST, esEdicion: false),
+            $this->productoService->validarCategoria($_POST)
+        );
 
         if (!empty($errores)) {
             $_SESSION['errores'] = $errores;
@@ -267,7 +263,10 @@ class ProductoController {
 
         $urlVuelta = BASE_URL . "/admin/productos/editar?id=" . $idProducto;
 
-        $errores = $this->productoService->validar($_POST, esEdicion: true);
+        $errores = array_merge(
+            $this->productoValidator->validar($_POST, esEdicion: true),
+            $this->productoService->validarCategoria($_POST)
+        );
 
         if (!empty($errores)) {
             $_SESSION['errores'] = $errores;

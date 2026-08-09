@@ -1,10 +1,12 @@
 <?php
+use SonidoInteriorPoo\core\Session;
+
 if (!isset($pagina)) {
     $pagina = "";
 }
 
-// Leemos las unidades directamente de la sesión (sin tocar BD)
-$cantidadesCarrito = $_SESSION['cantidades_carrito'] ?? 0;
+// Leemos las unidades del carrito usando el método estático get()
+$cantidadesCarrito = Session::get('cantidades_carrito', 0);
 ?>
 <header class="cabecera">
     <div class="logo">
@@ -25,7 +27,7 @@ $cantidadesCarrito = $_SESSION['cantidades_carrito'] ?? 0;
 
     <div class="acciones-header">
         <a href="#">🔍</a>
-        <?php if (isset($_SESSION['id_usuario'])): ?>
+        <?php if (Session::isLoggedIn()): ?>
             <a href="logout" title="Cerrar sesión">⏻</a>
 
             <a href="carrito" title="Mi carrito" class="btn-carrito-header">
@@ -35,8 +37,12 @@ $cantidadesCarrito = $_SESSION['cantidades_carrito'] ?? 0;
                 <?php endif; ?>
             </a>
         <?php else: ?>
-            <!-- <a href="views/public/login.php" title="Iniciar sesión">👤</a> -->
             <a href="login" title="Iniciar sesión">👤</a>
         <?php endif; ?>
     </div>
 </header>
+
+
+
+
+

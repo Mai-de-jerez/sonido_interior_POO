@@ -31,8 +31,7 @@ class CarritoService implements CarritoServiceInterface {
     }
 
     public function contarUnidades(int $idUsuario): int {
-        $idCarrito = $this->carritoDAO->obtenerOCrearCarrito($idUsuario);
-        return $this->carritoDAO->contarUnidades($idCarrito);
+        return $this->carritoDAO->contarUnidades($idUsuario);
     }
 
     // Devuelve ['ok' => bool, 'mensaje' => string]

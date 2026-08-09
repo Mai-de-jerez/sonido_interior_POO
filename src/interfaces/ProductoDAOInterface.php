@@ -14,4 +14,7 @@ interface ProductoDAOInterface {
     public function actualizar(Producto $producto): bool;
     public function eliminarLogico(int $idProducto): bool;
     public function reactivar(int $idProducto): bool;
+    // Métodos para las estadísticas del dashboard
+    public function contarTodosAdmin(): int;
+    public function contarActivosAdmin(): int;
 }

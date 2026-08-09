@@ -5,7 +5,7 @@ use SonidoInteriorPoo\models\Producto;
 
 interface ProductoServiceInterface {
     // ---------- VALIDACIÓN ----------
-    public function validar(array $datos, bool $esEdicion): array;
+    public function validarCategoria(array $datos): array;
 
     // ---------- OBTENER PRODUCTOS ----------
     public function obtenerPorIdAdmin(int $idProducto): ?Producto;
@@ -14,6 +14,8 @@ interface ProductoServiceInterface {
     public function obtenerUltimosProductosInicio(): array;
     public function obtenerProductosCatalogo(?int $idCategoria = null, string $orden = 'recientes', int $pagina = 1, int $porPagina = 12): array;
     public function contarProductosCatalogo(?int $idCategoria = null): int;
+    public function obtenerTotalProductosAdmin(): int;
+    public function obtenerTotalActivosAdmin(): int;
 
     // ---------- CREAR / ACTUALIZAR ----------
     public function crear(array $datos, array $ficheros): bool;

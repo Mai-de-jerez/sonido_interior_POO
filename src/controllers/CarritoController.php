@@ -2,13 +2,19 @@
 namespace SonidoInteriorPoo\controllers;
 
 use SonidoInteriorPoo\interfaces\CarritoServiceInterface;
+use SonidoInteriorPoo\validators\CheckoutValidator;
 use SonidoInteriorPoo\middleware\AuthMiddleware;
 
 class CarritoController {
     private CarritoServiceInterface $carritoService;
+    private CheckoutValidator $checkoutValidator;
 
-    public function __construct(CarritoServiceInterface $carritoService) {
+    public function __construct(
+        CarritoServiceInterface $carritoService,
+        CheckoutValidator $checkoutValidator
+    ) {
         $this->carritoService = $carritoService;
+        $this->checkoutValidator = $checkoutValidator;
     }
 
     // ============================================================
@@ -106,7 +112,6 @@ class CarritoController {
             exit();
         }
 
-        // Necesitamos la cantidad ANTES de eliminar, para poder restarla de la sesión
         $cantidadAEliminar = $this->carritoService->obtenerCantidadLinea($idUsuario, $idCarritoProducto);
 
         if ($cantidadAEliminar === null) {
@@ -160,14 +165,16 @@ class CarritoController {
         AuthMiddleware::verificarCliente();
         $idUsuario = (int) $_SESSION['id_usuario'];
 
-        $direccionEnvio = trim($_POST['direccion_envio'] ?? '');
+        $errores = $this->checkoutValidator->validar($_POST);
 
-        if ($direccionEnvio === '') {
-            $_SESSION['errores'] = ['direccion_envio' => "Introduce una dirección de envío."];
+        if (!empty($errores)) {
+            $_SESSION['errores'] = $errores;
+            $_SESSION['form_old'] = $_POST;
             header("Location: " . BASE_URL . "/checkout");
             exit();
         }
 
+        $direccionEnvio = trim($_POST['direccion_envio']);
         $resultado = $this->carritoService->procesarCheckout($idUsuario, $direccionEnvio);
 
         if ($resultado['ok']) {

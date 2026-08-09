@@ -103,6 +103,26 @@ class ProductoDAO implements ProductoDAOInterface {
         return (int) ($fila['total'] ?? 0);
     }
 
+    // Contar el total absoluto de productos (activos e inactivos) para el admin
+    public function contarTodosAdmin(): int {
+        $pdo = $this->conexion->getPdo();
+        $sql = "SELECT COUNT(*) AS total FROM productos";
+        $stmt = $pdo->query($sql);
+        $fila = $stmt->fetch();
+
+        return (int) ($fila['total'] ?? 0);
+    }
+
+    // Contar el total de productos activos para el admin
+    public function contarActivosAdmin(): int {
+        $pdo = $this->conexion->getPdo();
+        $sql = "SELECT COUNT(*) AS total FROM productos WHERE activo = 1";
+        $stmt = $pdo->query($sql);
+        $fila = $stmt->fetch();
+
+        return (int) ($fila['total'] ?? 0);
+    }
+
     // Obtener un producto activo por ID (público)
     public function obtenerPorId(int $idProducto): ?Producto {
         $pdo = $this->conexion->getPdo();

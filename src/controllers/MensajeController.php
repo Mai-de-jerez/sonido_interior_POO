@@ -2,20 +2,24 @@
 namespace SonidoInteriorPoo\controllers;
 
 use SonidoInteriorPoo\interfaces\MensajeServiceInterface;
+use SonidoInteriorPoo\validators\MensajeValidator;
 use SonidoInteriorPoo\middleware\AuthMiddleware;
 
 class MensajeController {
     private MensajeServiceInterface $mensajeService;
+    private MensajeValidator $mensajeValidator;
 
-    public function __construct(MensajeServiceInterface $mensajeService) {
+    public function __construct(
+        MensajeServiceInterface $mensajeService,
+        MensajeValidator $mensajeValidator
+    ) {
         $this->mensajeService = $mensajeService;
+        $this->mensajeValidator = $mensajeValidator;
     }
 
-    // ============================================================
-    // PROCESAR FORMULARIO DE CONTACTO (PÚBLICO)
-    // ============================================================
+    // procesar formulario de contacto
     public function procesarContacto(): void {
-        $errores = $this->mensajeService->validar($_POST);
+        $errores = $this->mensajeValidator->validar($_POST);
 
         if (!empty($errores)) {
             $_SESSION['errores'] = $errores;
@@ -65,10 +69,9 @@ class MensajeController {
 
         try {
             $this->mensajeService->marcarComoLeido($idMensaje);
+            $_SESSION['mensaje_exito'] = "Mensaje marcado como leído.";
         } catch (\RuntimeException $e) {
             $_SESSION['mensaje_error'] = $e->getMessage();
-            header("Location: " . BASE_URL . "/admin/mensajes?status=error");
-            exit();
         }
 
         header("Location: " . BASE_URL . "/admin/mensajes");
@@ -89,19 +92,16 @@ class MensajeController {
 
         try {
             $eliminado = $this->mensajeService->eliminar($idMensaje);
+            if ($eliminado) {
+                $_SESSION['mensaje_exito'] = "Mensaje eliminado correctamente.";
+            } else {
+                $_SESSION['mensaje_error'] = "No se pudo eliminar el mensaje.";
+            }
         } catch (\RuntimeException $e) {
             $_SESSION['mensaje_error'] = $e->getMessage();
-            header("Location: " . BASE_URL . "/admin/mensajes?status=error");
-            exit();
         }
 
-        if ($eliminado) {
-            $_SESSION['mensaje_exito'] = "Mensaje eliminado correctamente.";
-            header("Location: " . BASE_URL . "/admin/mensajes?status=deleted");
-        } else {
-            $_SESSION['mensaje_error'] = "No se pudo eliminar el mensaje.";
-            header("Location: " . BASE_URL . "/admin/mensajes?status=error");
-        }
+        header("Location: " . BASE_URL . "/admin/mensajes");
         exit();
     }
 }

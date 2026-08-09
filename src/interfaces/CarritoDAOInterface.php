@@ -9,5 +9,5 @@ interface CarritoDAOInterface {
     public function eliminarLinea(int $idCarritoProducto): bool;
     public function vaciarCarrito(int $idCarrito): bool;
     public function lineaPerteneceAUsuario(int $idCarritoProducto, int $idUsuario): bool;
-    public function contarUnidades(int $idCarrito): int;
+    public function contarUnidades(int $idUsuario): int;
 }

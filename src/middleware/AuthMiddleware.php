@@ -1,15 +1,17 @@
 <?php
 namespace SonidoInteriorPoo\middleware;
 
+use SonidoInteriorPoo\core\Session;
+
 class AuthMiddleware {
     
     public static function verificarAdmin(): void {
-        if (!isset($_SESSION['id_usuario'])) {
+        if (!Session::isLoggedIn()) {
             header("Location: " . BASE_URL . "/login?status=denegado");
             exit();
         }
         
-        if ($_SESSION['rol'] !== 'ADMIN') {
+        if (Session::getUserRole() !== 'ADMIN') {
             http_response_code(403);
             echo "Acceso denegado. Se requiere rol de administrador.";
             exit();
@@ -17,12 +19,13 @@ class AuthMiddleware {
     }
 
     public static function verificarCliente(): void {
-        if (!isset($_SESSION['id_usuario'])) {
+        if (!Session::isLoggedIn()) {
             header("Location: " . BASE_URL . "/login?status=denegado");
             exit();
         }
         
-        if ($_SESSION['rol'] !== 'CLIENTE' && $_SESSION['rol'] !== 'ADMIN') {
+        $rol = Session::getUserRole();
+        if ($rol !== 'CLIENTE' && $rol !== 'ADMIN') {
             http_response_code(403);
             echo "Acceso denegado. Se requiere rol de cliente.";
             exit();
@@ -30,7 +33,7 @@ class AuthMiddleware {
     }
 
     public static function verificarLogueado(): void {
-        if (!isset($_SESSION['id_usuario'])) {
+        if (!Session::isLoggedIn()) {
             header("Location: " . BASE_URL . "/login?status=denegado");
             exit();
         }

@@ -10,6 +10,10 @@ class StaticPagesController {
     public function registro(): void {
         require __DIR__ . '/../views/public/registro.php';
     }    
+
+    public function mostrarRecuperar(): void {
+        require __DIR__ . '/../views/public/recuperar-password.php';
+    }
     
     public function sonoterapia(): void {
         require __DIR__ . '/../views/public/sonoterapia.php';
