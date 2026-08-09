@@ -12,6 +12,12 @@ class CategoriaService implements CategoriaServiceInterface {
         $this->categoriaDAO = $categoriaDAO;
     }
 
+    // LECTURA
+    // obtener una categoría por su ID
+    public function obtenerPorId(int $idCategoria): ?Categoria {
+        return $this->categoriaDAO->obtenerPorId($idCategoria);
+    }
+
     // obtener categorias para el administrador
     public function obtenerTodasAdmin(): array {
         return $this->categoriaDAO->obtenerTodasAdmin();
@@ -22,6 +28,7 @@ class CategoriaService implements CategoriaServiceInterface {
         return $this->categoriaDAO->obtenerActivas();
     }
 
+    // ESCRITURA
     // crear categoria
     public function crear(array $datos): bool {
         $categoria = new Categoria(

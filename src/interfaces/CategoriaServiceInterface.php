@@ -4,6 +4,8 @@ namespace SonidoInteriorPoo\interfaces;
 use SonidoInteriorPoo\models\Categoria;
 
 interface CategoriaServiceInterface {
+    
+    public function obtenerPorId(int $idCategoria): ?Categoria;
     public function obtenerTodasAdmin(): array;
     public function obtenerActivas(): array;
     public function crear(array $datos): bool;

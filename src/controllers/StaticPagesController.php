@@ -1,29 +1,27 @@
 <?php
 namespace SonidoInteriorPoo\controllers;
 
-class StaticPagesController {
+use SonidoInteriorPoo\core\Controller;
+
+class StaticPagesController extends Controller {
     
     public function login(): void {
-        require __DIR__ . '/../views/public/login.php';
+        $this->renderizar('public/login');
     }
     
     public function registro(): void {
-        require __DIR__ . '/../views/public/registro.php';
+        $this->renderizar('public/registro');
     }    
-
-    public function mostrarRecuperar(): void {
-        require __DIR__ . '/../views/public/recuperar-password.php';
-    }
     
     public function sonoterapia(): void {
-        require __DIR__ . '/../views/public/sonoterapia.php';
+        $this->renderizar('public/sonoterapia');
     }
     
     public function sobreNosotros(): void {
-        require __DIR__ . '/../views/public/sobre-nosotros.php';
+        $this->renderizar('public/sobre-nosotros');
     }
     
     public function contacto(): void {
-        require __DIR__ . '/../views/public/contacto.php';
+        $this->renderizar('public/contacto');
     }
 }

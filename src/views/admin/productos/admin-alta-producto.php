@@ -133,7 +133,7 @@ include __DIR__ . '/../../includes/menu-admin.php';
             <div class="bloque-imagen-form">
                 <label for="imagen"><?php echo $esEdicion ? "Imagen del producto (opcional, deja vacío para mantener la actual)" : "Imagen del producto *"; ?></label>
                 <div class="zona-subida">
-                    <input type="file" id="imagen" name="imagen" accept="image/*">
+                    <input type="file" id="imagen" name="imagen" accept="image/*" onchange="previsualizarImagen(event)">
                     <p>▧</p>
                     <strong><?php echo $esEdicion ? "Subir nueva imagen" : "Subir imagen"; ?></strong>
                     <span>JPG, PNG o WEBP. Máx. 2MB</span>
@@ -154,19 +154,14 @@ include __DIR__ . '/../../includes/menu-admin.php';
             <article class="tarjeta-producto">
                 <?php if ($esEdicion): ?>
                     <?php if (!empty($producto->getImagen())): ?>
-                        <img src="img/productos/<?php echo htmlspecialchars($producto->getImagen()); ?>" alt="<?php echo htmlspecialchars($producto->getNombre()); ?>">
+                        <img id="previa-imagen" src="<?php echo BASE_URL; ?>/public/img/productos/<?php echo htmlspecialchars($producto->getImagen()); ?>" alt="<?php echo htmlspecialchars($producto->getNombre()); ?>">
                     <?php else: ?>
-                        <img src="img/cuenco-12.svg" alt="Sin imagen">
+                        <img id="previa-imagen" src="<?php echo BASE_URL; ?>/public/img/cuenco-12.svg" alt="Sin imagen">
                     <?php endif; ?>
                     <h3><?php echo htmlspecialchars($producto->getNombre()); ?></h3>
                     <p class="precio"><?php echo number_format($producto->getPrecio(), 2, ',', '.'); ?> €</p>
                 <?php else: ?>
-                    <img src="public/img/cuenco-18.svg" alt="Vista previa cuenco">
-                    <h3>Cuenco tibetano artesanal 18 cm</h3>
-                    <p class="precio">79,90 €</p>
-                    <p>Diámetro: 18 cm</p>
-                    <p>Peso: 850 g</p>
-                    <p>Procedencia: Nepal</p>
+                    <img id="previa-imagen" src="<?php echo BASE_URL; ?>/public/img/cuenco-18.svg" alt="Vista previa cuenco">
                 <?php endif; ?>
             </article>
         </aside>
@@ -241,6 +236,19 @@ if (formProducto) {
         }
         span.textContent = '';
         return true;
+    }
+
+    function previsualizarImagen(event) {
+        const input = event.target;
+        const imagenPrevia = document.getElementById('previa-imagen');
+        
+        if (input.files && input.files[0]) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                imagenPrevia.src = e.target.result;
+            }
+            reader.readAsDataURL(input.files[0]);
+        }
     }
 
     function enganchar(idInput, evento, validador) {

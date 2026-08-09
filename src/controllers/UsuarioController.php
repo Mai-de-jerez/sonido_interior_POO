@@ -1,54 +1,55 @@
 <?php
 namespace SonidoInteriorPoo\controllers;
 
+use SonidoInteriorPoo\core\Controller;
 use SonidoInteriorPoo\interfaces\UsuarioServiceInterface;
 use SonidoInteriorPoo\validators\UsuarioValidator;
 
-class UsuarioController {
-
+class UsuarioController extends Controller {
     private UsuarioServiceInterface $usuarioService;
     private UsuarioValidator $usuarioValidator;
 
-    public function __construct(UsuarioServiceInterface $usuarioService, UsuarioValidator $usuarioValidator) {
+    public function __construct(
+        UsuarioServiceInterface $usuarioService,
+        UsuarioValidator $usuarioValidator
+    ) {
         $this->usuarioService = $usuarioService;
         $this->usuarioValidator = $usuarioValidator;
     }
 
     // ============================================================
     // PROCESAR LOGIN
-    // ============================================================ 
+    // ============================================================
     public function procesarLogin(): void {
-        $errores = $this->usuarioValidator->validarLogin($_POST);  
+        $errores = $this->usuarioValidator->validarLogin($_POST);
 
-        if (!empty($errores)) {   
-            $_SESSION['errores'] = $errores;
-            $_SESSION['form_old'] = ['usuario' => $_POST['usuario'] ?? ''];
-            header("Location: " . BASE_URL . "/login");
-            exit();
+        if (!empty($errores)) {
+            $this->setSession('errores', $errores);
+            $this->setSession('form_old', ['usuario' => $_POST['usuario'] ?? '']);
+            $this->redirigir('login');
         }
 
         $usuarioData = $this->usuarioService->login($_POST['usuario'], $_POST['password']);
 
         if (!$usuarioData) {
-            $_SESSION['mensaje_error'] = "Usuario o contraseña incorrectos.";
-            header("Location: " . BASE_URL . "/login");
-            exit();
+            $this->setFlash('mensaje_error', 'Usuario o contraseña incorrectos.');
+            $this->redirigir('login');
         }
 
+        // Limpiar y regenerar sesión
         session_unset();
         session_regenerate_id(true);
 
-        $_SESSION['id_usuario']         = $usuarioData['id_usuario'];
-        $_SESSION['usuario']            = $usuarioData['usuario'];
-        $_SESSION['rol']                = $usuarioData['rol'];
-        $_SESSION['cantidades_carrito'] = $usuarioData['cantidades_carrito'];
+        $this->setSession('id_usuario', $usuarioData['id_usuario']);
+        $this->setSession('usuario', $usuarioData['usuario']);
+        $this->setSession('rol', $usuarioData['rol']);
+        $this->setSession('cantidades_carrito', $usuarioData['cantidades_carrito']);
 
         if ($usuarioData['rol'] === 'ADMIN') {
-            header("Location: " . BASE_URL . "/admin/dashboard");
+            $this->redirigir('admin/dashboard');
         } else {
-            header("Location: " . BASE_URL . "/");
+            $this->redirigir('');
         }
-        exit();
     }
 
     // ============================================================
@@ -58,13 +59,12 @@ class UsuarioController {
         $errores = $this->usuarioValidator->validarRegistro($_POST);
 
         if (!empty($errores)) {
-            $_SESSION['errores'] = $errores;
-            $_SESSION['form_old'] = [
+            $this->setSession('errores', $errores);
+            $this->setSession('form_old', [
                 'usuario' => $_POST['usuario'] ?? '',
                 'email' => $_POST['email'] ?? ''
-            ];
-            header("Location: " . BASE_URL . "/registro");
-            exit();
+            ]);
+            $this->redirigir('registro');
         }
 
         $registrado = $this->usuarioService->registrar(
@@ -74,25 +74,23 @@ class UsuarioController {
         );
 
         if (!$registrado) {
-            $_SESSION['mensaje_error'] = "El usuario o email ya existe.";
-            $_SESSION['form_old'] = [
+            $this->setFlash('mensaje_error', 'El usuario o email ya existe.');
+            $this->setSession('form_old', [
                 'usuario' => $_POST['usuario'] ?? '',
                 'email' => $_POST['email'] ?? ''
-            ];
-            header("Location: " . BASE_URL . "/registro");
-            exit();
+            ]);
+            $this->redirigir('registro');
         }
 
-        $_SESSION['mensaje_exito'] = "Usuario registrado con éxito. Ahora puedes iniciar sesión.";
-        header("Location: " . BASE_URL . "/login");
-        exit();
+        $this->setFlash('mensaje_exito', 'Usuario registrado con éxito. Ahora puedes iniciar sesión.');
+        $this->redirigir('login');
     }
 
     // ============================================================
     // MOSTRAR FORMULARIO DE SOLICITUD DE RECUPERACIÓN
     // ============================================================
     public function mostrarRecuperar(): void {
-        require __DIR__ . '/../views/public/recuperar-password.php';
+        $this->renderizar('public/recuperar-password');
     }
 
     // ============================================================
@@ -102,17 +100,15 @@ class UsuarioController {
         $errores = $this->usuarioValidator->validarRecuperacion($_POST);
 
         if (!empty($errores)) {
-            $_SESSION['errores'] = $errores;
-            $_SESSION['form_old'] = ['email' => $_POST['email'] ?? ''];
-            header("Location: " . BASE_URL . "/recuperar-password");
-            exit();
+            $this->setSession('errores', $errores);
+            $this->setSession('form_old', ['email' => $_POST['email'] ?? '']);
+            $this->redirigir('recuperar-password');
         }
 
         $this->usuarioService->solicitarRecuperacion(trim($_POST['email']));
 
-        $_SESSION['mensaje_exito'] = "Si el correo introducido está registrado, recibirás las instrucciones en tu bandeja de entrada.";
-        header("Location: " . BASE_URL . "/recuperar-password");
-        exit();
+        $this->setFlash('mensaje_exito', 'Si el correo introducido está registrado, recibirás las instrucciones en tu bandeja de entrada.');
+        $this->redirigir('recuperar-password');
     }
 
     // ============================================================
@@ -122,13 +118,12 @@ class UsuarioController {
         $token = $_GET['token'] ?? '';
 
         if ($token === '') {
-            header("Location: " . BASE_URL . "/recuperar-password");
-            exit();
+            $this->redirigir('recuperar-password');
         }
 
-        $data = ['token' => $token];
-        extract($data);
-        require __DIR__ . '/../views/public/restablecer-password.php';
+        $this->renderizar('public/restablecer-password', [
+            'token' => $token
+        ]);
     }
 
     // ============================================================
@@ -138,28 +133,25 @@ class UsuarioController {
         $token = $_POST['token'] ?? '';
 
         if ($token === '') {
-            header("Location: " . BASE_URL . "/recuperar-password");
-            exit();
+            $this->redirigir('recuperar-password');
         }
 
         $errores = $this->usuarioValidator->validarNuevaPassword($_POST);
 
         if (!empty($errores)) {
-            $_SESSION['errores'] = $errores;
-            header("Location: " . BASE_URL . "/restablecer-password?token=" . urlencode($token));
-            exit();
+            $this->setSession('errores', $errores);
+            $this->redirigir('restablecer-password?token=' . urlencode($token));
         }
 
         $actualizado = $this->usuarioService->actualizarPasswordPorToken($token, $_POST['password']);
 
-        if ($actualizado) { 
-            $_SESSION['mensaje_exito'] = "¡Contraseña cambiada con éxito! Ya puedes acceder.";
-            header("Location: " . BASE_URL . "/login");
+        if ($actualizado) {
+            $this->setFlash('mensaje_exito', '¡Contraseña cambiada con éxito! Ya puedes acceder.');
+            $this->redirigir('login');
         } else {
-            $_SESSION['mensaje_error'] = "El enlace ha caducado o es inválido. Solicita uno nuevo.";
-            header("Location: " . BASE_URL . "/recuperar-password");
+            $this->setFlash('mensaje_error', 'El enlace ha caducado o es inválido. Solicita uno nuevo.');
+            $this->redirigir('recuperar-password');
         }
-        exit();
     }
 
     // ============================================================
@@ -168,7 +160,6 @@ class UsuarioController {
     public function logout(): void {
         session_unset();
         session_destroy();
-        header("Location: " . BASE_URL . "/");
-        exit();
+        $this->redirigir('');
     }
 }

@@ -1,12 +1,13 @@
 <?php
 namespace SonidoInteriorPoo\controllers;
 
+use SonidoInteriorPoo\core\Controller;
 use SonidoInteriorPoo\interfaces\ProductoServiceInterface;
 use SonidoInteriorPoo\interfaces\CategoriaServiceInterface;
 use SonidoInteriorPoo\validators\ProductoValidator;
 use SonidoInteriorPoo\middleware\AuthMiddleware;
 
-class ProductoController {
+class ProductoController extends Controller {
     private ProductoServiceInterface $productoService;
     private CategoriaServiceInterface $categoriaService;
     private ProductoValidator $productoValidator;
@@ -21,46 +22,44 @@ class ProductoController {
         $this->productoValidator = $productoValidator;
     }
 
-    // listar en la home últimos productos
+    // ============================================================
+    // HOME (ÚLTIMOS PRODUCTOS)
+    // ============================================================
     public function home(): void {
         $productos = $this->productoService->obtenerUltimosProductosInicio();
-        $data = ['productos' => $productos];
-        $pagina = "inicio";
-        
-        extract($data);
-        require_once __DIR__ . '/../views/public/index.php';
+        $this->renderizar('public/index', [
+            'productos' => $productos
+        ]);
     }
 
-    // dashboard con estadísticas para la zona admin
+    // ============================================================
+    // DASHBOARD (ADMIN)
+    // ============================================================
     public function dashboard(): void {
         AuthMiddleware::verificarAdmin();
         
-        $data = [
+        $this->renderizar('admin/dashboard', [
             'totalProductos' => $this->productoService->obtenerTotalProductosAdmin(),
             'totalActivos'   => $this->productoService->obtenerTotalActivosAdmin()
-        ];
-        
-        extract($data);
-        require_once __DIR__ . '/../views/admin/dashboard.php';
+        ]);
     }
 
     // ============================================================
-    // MÉTODOS QUE MUESTRAN FORMULARIOS (GET) - CON SEGURIDAD
+    // FORMULARIO NUEVO PRODUCTO
     // ============================================================
-
     public function nuevo(): void {
         AuthMiddleware::verificarAdmin();
 
         $categorias = $this->categoriaService->obtenerActivas();
-        $data = [
+        $this->renderizar('admin/productos/admin-alta-producto', [
             'producto' => null,
             'categorias' => $categorias
-        ];
-
-        extract($data);
-        require_once __DIR__ . '/../views/admin/productos/admin-alta-producto.php';
+        ]);
     }
 
+    // ============================================================
+    // FORMULARIO EDITAR PRODUCTO
+    // ============================================================
     public function editar(): void {
         AuthMiddleware::verificarAdmin();
 
@@ -69,27 +68,25 @@ class ProductoController {
             : 0;
 
         if ($idProducto === 0) {
-            header("Location: " . BASE_URL . "/admin/productos?status=notfound");
-            exit();
+            $this->redirigir('admin/productos?status=notfound');
         }
 
         $producto = $this->productoService->obtenerPorIdAdmin($idProducto);
         $categorias = $this->categoriaService->obtenerActivas();
 
         if ($producto === null) {
-            header("Location: " . BASE_URL . "/admin/productos?status=notfound");
-            exit();
+            $this->redirigir('admin/productos?status=notfound');
         }
 
-        $data = [
+        $this->renderizar('admin/productos/admin-alta-producto', [
             'producto' => $producto,
             'categorias' => $categorias
-        ];
-
-        extract($data);
-        require_once __DIR__ . '/../views/admin/productos/admin-alta-producto.php';
+        ]);
     }
 
+    // ============================================================
+    // CONFIRMAR ELIMINAR
+    // ============================================================
     public function confirmarEliminar(): void {
         AuthMiddleware::verificarAdmin();
 
@@ -98,22 +95,23 @@ class ProductoController {
             : 0;
 
         if ($idProducto === 0) {
-            header("Location: " . BASE_URL . "/admin/productos?status=notfound");
-            exit();
+            $this->redirigir('admin/productos?status=notfound');
         }
 
         $producto = $this->productoService->obtenerPorIdAdmin($idProducto);
 
         if ($producto === null) {
-            header("Location: " . BASE_URL . "/admin/productos?status=notfound");
-            exit();
+            $this->redirigir('admin/productos?status=notfound');
         }
 
-        $data = ['producto' => $producto];
-        extract($data);
-        require_once __DIR__ . '/../views/admin/productos/admin-confirmar-eliminar.php';
+        $this->renderizar('admin/productos/admin-confirmar-eliminar', [
+            'producto' => $producto
+        ]);
     }
 
+    // ============================================================
+    // CONFIRMAR REACTIVAR
+    // ============================================================
     public function confirmarReactivar(): void {
         AuthMiddleware::verificarAdmin();
 
@@ -122,46 +120,44 @@ class ProductoController {
             : 0;
 
         if ($idProducto === 0) {
-            header("Location: " . BASE_URL . "/admin/productos?status=notfound");
-            exit();
+            $this->redirigir('admin/productos?status=notfound');
         }
 
         $producto = $this->productoService->obtenerPorIdAdmin($idProducto);
 
         if ($producto === null) {
-            header("Location: " . BASE_URL . "/admin/productos?status=notfound");
-            exit();
+            $this->redirigir('admin/productos?status=notfound');
         }
 
-        $data = ['producto' => $producto];
-        extract($data);
-        require_once __DIR__ . '/../views/admin/productos/admin-confirmar-reactivar.php';
+        $this->renderizar('admin/productos/admin-confirmar-reactivar', [
+            'producto' => $producto
+        ]);
     }
 
+    // ============================================================
+    // DETALLE PRODUCTO (PÚBLICO)
+    // ============================================================
     public function detalle(): void {
         $id = isset($_GET['id']) ? (int) $_GET['id'] : 0;
 
         if ($id === 0) {
-            header("Location: " . BASE_URL . "/catalogo?error=producto_no_encontrado");
-            exit();
+            $this->redirigir('catalogo?error=producto_no_encontrado');
         }
 
         $producto = $this->productoService->obtenerPorId($id);
 
         if ($producto === null) {
-            header("Location: " . BASE_URL . "/catalogo?error=producto_no_encontrado");
-            exit();
+            $this->redirigir('catalogo?error=producto_no_encontrado');
         }
 
-        $data = ['producto' => $producto];
-        extract($data);
-        require_once __DIR__ . '/../views/public/detalle-producto.php';
+        $this->renderizar('public/detalle-producto', [
+            'producto' => $producto
+        ]);
     }
 
     // ============================================================
-    // MÉTODOS PÚBLICOS (CATÁLOGO) - SIN SEGURIDAD
+    // CATÁLOGO (PÚBLICO)
     // ============================================================
-
     public function catalogo(): void {
         $idCategoria = isset($_GET['categoria']) && ctype_digit($_GET['categoria']) 
             ? (int) $_GET['categoria'] 
@@ -178,7 +174,7 @@ class ProductoController {
         $totalPaginas = (int) ceil($totalProductos / $porPagina);
         $categorias = $this->categoriaService->obtenerActivas();
         
-        $data = [
+        $this->renderizar('public/catalogo', [
             'productos' => $productos,
             'categorias' => $categorias,
             'idCategoria' => $idCategoria,
@@ -186,38 +182,29 @@ class ProductoController {
             'pagina' => $pagina,
             'totalPaginas' => $totalPaginas,
             'totalProductos' => $totalProductos
-        ];
-        
-        $pagina = "catalogo";  
-        extract($data);
-        require_once __DIR__ . '/../views/public/catalogo.php';
+        ]);
     }
 
     // ============================================================
-    // MÉTODOS ADMIN (LISTADO) - CON SEGURIDAD
+    // LISTAR PRODUCTOS (ADMIN)
     // ============================================================
-
     public function listar(): void {
         AuthMiddleware::verificarAdmin();
         
         $productos = $this->productoService->obtenerProductosAdmin();
-        $data = ['productos' => $productos];
-        $paginaAdmin = "productos";
-        
-        extract($data);
-        require_once __DIR__ . '/../views/admin/productos/admin-listado-productos.php';
+        $this->renderizar('admin/productos/admin-listado-productos', [
+            'productos' => $productos
+        ]);
     }
 
     // ============================================================
-    // MÉTODOS QUE PROCESAN FORMULARIOS (POST) - CON SEGURIDAD
+    // CREAR PRODUCTO (POST)
     // ============================================================
-
     public function crear(): void {
         AuthMiddleware::verificarAdmin();
 
         if (empty($_POST['nombre'])) {
-            header("Location: " . BASE_URL . "/admin/productos");
-            exit();
+            $this->redirigir('admin/productos');
         }
 
         $errores = array_merge(
@@ -226,29 +213,30 @@ class ProductoController {
         );
 
         if (!empty($errores)) {
-            $_SESSION['errores'] = $errores;
-            header("Location: " . BASE_URL . "/admin/productos/crear");
-            exit();
+            $this->setSession('errores', $errores);
+            $this->redirigir('admin/productos/crear');
         }
 
         try {
             $creado = $this->productoService->crear($_POST, $_FILES);
         } catch (\RuntimeException $e) {
-            $_SESSION['mensaje_error'] = $e->getMessage();
-            header("Location: " . BASE_URL . "/admin/productos/crear");
-            exit();
+            $this->setFlash('mensaje_error', $e->getMessage());
+            $this->redirigir('admin/productos/crear');
+            return;
         }
 
         if ($creado) {
-            $_SESSION['mensaje_exito'] = "Producto guardado con éxito.";
-            header("Location: " . BASE_URL . "/admin/productos");
+            $this->setFlash('mensaje_exito', 'Producto guardado con éxito.');
+            $this->redirigir('admin/productos');
         } else {
-            $_SESSION['mensaje_error'] = "Error al guardar el producto.";
-            header("Location: " . BASE_URL . "/admin/productos/crear");
+            $this->setFlash('mensaje_error', 'Error al guardar el producto.');
+            $this->redirigir('admin/productos/crear');
         }
-        exit();
     }
 
+    // ============================================================
+    // ACTUALIZAR PRODUCTO (POST)
+    // ============================================================
     public function actualizar(): void {
         AuthMiddleware::verificarAdmin();
 
@@ -257,11 +245,10 @@ class ProductoController {
             : null;
 
         if ($idProducto === null || empty($_POST['nombre'])) {
-            header("Location: " . BASE_URL . "/admin/productos");
-            exit();
+            $this->redirigir('admin/productos');
         }
 
-        $urlVuelta = BASE_URL . "/admin/productos/editar?id=" . $idProducto;
+        $urlVuelta = 'admin/productos/editar?id=' . $idProducto;
 
         $errores = array_merge(
             $this->productoValidator->validar($_POST, esEdicion: true),
@@ -269,29 +256,30 @@ class ProductoController {
         );
 
         if (!empty($errores)) {
-            $_SESSION['errores'] = $errores;
-            header("Location: " . $urlVuelta);
-            exit();
+            $this->setSession('errores', $errores);
+            $this->redirigir($urlVuelta);
         }
 
         try {
             $actualizado = $this->productoService->actualizar($idProducto, $_POST, $_FILES);
         } catch (\RuntimeException $e) {
-            $_SESSION['mensaje_error'] = $e->getMessage();
-            header("Location: " . $urlVuelta);
-            exit();
+            $this->setFlash('mensaje_error', $e->getMessage());
+            $this->redirigir($urlVuelta);
+            return;
         }
 
         if ($actualizado) {
-            $_SESSION['mensaje_exito'] = "Producto actualizado con éxito.";
-            header("Location: " . BASE_URL . "/admin/productos");
+            $this->setFlash('mensaje_exito', 'Producto actualizado con éxito.');
+            $this->redirigir('admin/productos');
         } else {
-            $_SESSION['mensaje_error'] = "Error al actualizar el producto.";
-            header("Location: " . $urlVuelta);
+            $this->setFlash('mensaje_error', 'Error al actualizar el producto.');
+            $this->redirigir($urlVuelta);
         }
-        exit();
     }
 
+    // ============================================================
+    // ELIMINAR PRODUCTO (POST)
+    // ============================================================
     public function eliminar(): void {
         AuthMiddleware::verificarAdmin();
 
@@ -300,28 +288,29 @@ class ProductoController {
             : null;
 
         if ($idProducto === null) {
-            header("Location: " . BASE_URL . "/admin/productos");
-            exit();
+            $this->redirigir('admin/productos');
         }
 
         try {
             $eliminado = $this->productoService->eliminarLogico($idProducto);
         } catch (\RuntimeException $e) {
-            $_SESSION['mensaje_error'] = $e->getMessage();
-            header("Location: " . BASE_URL . "/admin/productos?status=error");
-            exit();
+            $this->setFlash('mensaje_error', $e->getMessage());
+            $this->redirigir('admin/productos?status=error');
+            return;
         }
 
         if ($eliminado) {
-            $_SESSION['mensaje_exito'] = "Producto eliminado correctamente.";
-            header("Location: " . BASE_URL . "/admin/productos?status=deleted");
+            $this->setFlash('mensaje_exito', 'Producto eliminado correctamente.');
+            $this->redirigir('admin/productos?status=deleted');
         } else {
-            $_SESSION['mensaje_error'] = "No se pudo eliminar el producto.";
-            header("Location: " . BASE_URL . "/admin/productos?status=error");
+            $this->setFlash('mensaje_error', 'No se pudo eliminar el producto.');
+            $this->redirigir('admin/productos?status=error');
         }
-        exit();
     }
 
+    // ============================================================
+    // REACTIVAR PRODUCTO (POST)
+    // ============================================================
     public function reactivar(): void {
         AuthMiddleware::verificarAdmin();
 
@@ -330,25 +319,23 @@ class ProductoController {
             : null;
 
         if ($idProducto === null) {
-            header("Location: " . BASE_URL . "/admin/productos");
-            exit();
+            $this->redirigir('admin/productos');
         }
 
         try {
             $reactivado = $this->productoService->reactivar($idProducto);
         } catch (\RuntimeException $e) {
-            $_SESSION['mensaje_error'] = $e->getMessage();
-            header("Location: " . BASE_URL . "/admin/productos?status=error");
-            exit();
+            $this->setFlash('mensaje_error', $e->getMessage());
+            $this->redirigir('admin/productos?status=error');
+            return;
         }
 
         if ($reactivado) {
-            $_SESSION['mensaje_exito'] = "Producto reactivado correctamente.";
-            header("Location: " . BASE_URL . "/admin/productos?status=reactivated");
+            $this->setFlash('mensaje_exito', 'Producto reactivado correctamente.');
+            $this->redirigir('admin/productos?status=reactivated');
         } else {
-            $_SESSION['mensaje_error'] = "No se pudo reactivar el producto. Por favor, inténtalo de nuevo.";
-            header("Location: " . BASE_URL . "/admin/productos?status=error");
+            $this->setFlash('mensaje_error', 'No se pudo reactivar el producto. Por favor, inténtalo de nuevo.');
+            $this->redirigir('admin/productos?status=error');
         }
-        exit();
     }
 }

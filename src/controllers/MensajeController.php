@@ -1,11 +1,12 @@
 <?php
 namespace SonidoInteriorPoo\controllers;
 
+use SonidoInteriorPoo\core\Controller;
 use SonidoInteriorPoo\interfaces\MensajeServiceInterface;
 use SonidoInteriorPoo\validators\MensajeValidator;
 use SonidoInteriorPoo\middleware\AuthMiddleware;
 
-class MensajeController {
+class MensajeController extends Controller {
     private MensajeServiceInterface $mensajeService;
     private MensajeValidator $mensajeValidator;
 
@@ -17,44 +18,46 @@ class MensajeController {
         $this->mensajeValidator = $mensajeValidator;
     }
 
-    // procesar formulario de contacto
+    // ============================================================
+    // PROCESAR FORMULARIO DE CONTACTO
+    // ============================================================
     public function procesarContacto(): void {
         $errores = $this->mensajeValidator->validar($_POST);
 
         if (!empty($errores)) {
-            $_SESSION['errores'] = $errores;
-            $_SESSION['form_old'] = $_POST;
-            header("Location: " . BASE_URL . "/contacto");
-            exit();
+            $this->setSession('errores', $errores);
+            $this->setSession('form_old', $_POST);
+            $this->redirigir('contacto');
         }
 
         $creado = $this->mensajeService->crear($_POST);
 
         if ($creado) {
-            $_SESSION['mensaje_exito'] = "Mensaje enviado correctamente. Te responderemos lo antes posible.";
+            $this->setFlash('mensaje_exito', 'Mensaje enviado correctamente. Te responderemos lo antes posible.');
         } else {
-            $_SESSION['mensaje_error'] = "Ha habido un problema al enviar el mensaje. Inténtalo de nuevo.";
+            $this->setFlash('mensaje_error', 'Ha habido un problema al enviar el mensaje. Inténtalo de nuevo.');
         }
 
-        header("Location: " . BASE_URL . "/contacto");
-        exit();
+        $this->redirigir('contacto');
     }
 
     // ============================================================
-    // MÉTODOS ADMIN - CON SEGURIDAD
+    // LISTAR MENSAJES (ADMIN)
     // ============================================================
-
     public function listar(): void {
         AuthMiddleware::verificarAdmin();
 
         $mensajes = $this->mensajeService->obtenerTodosAdmin();
-        $data = ['mensajes' => $mensajes];
-        $paginaAdmin = "mensajes";
 
-        extract($data);
-        require_once __DIR__ . '/../views/admin/mensajes/admin-listado-mensajes.php';
+        $this->renderizar('admin/mensajes/admin-listado-mensajes', [
+            'mensajes' => $mensajes,
+            'paginaAdmin' => 'mensajes'
+        ]);
     }
 
+    // ============================================================
+    // MARCAR MENSAJE COMO LEÍDO (ADMIN)
+    // ============================================================
     public function marcarLeido(): void {
         AuthMiddleware::verificarAdmin();
 
@@ -63,21 +66,22 @@ class MensajeController {
             : null;
 
         if ($idMensaje === null) {
-            header("Location: " . BASE_URL . "/admin/mensajes");
-            exit();
+            $this->redirigir('admin/mensajes');
         }
 
         try {
             $this->mensajeService->marcarComoLeido($idMensaje);
-            $_SESSION['mensaje_exito'] = "Mensaje marcado como leído.";
+            $this->setFlash('mensaje_exito', 'Mensaje marcado como leído.');
         } catch (\RuntimeException $e) {
-            $_SESSION['mensaje_error'] = $e->getMessage();
+            $this->setFlash('mensaje_error', $e->getMessage());
         }
 
-        header("Location: " . BASE_URL . "/admin/mensajes");
-        exit();
+        $this->redirigir('admin/mensajes');
     }
 
+    // ============================================================
+    // ELIMINAR MENSAJE (ADMIN)
+    // ============================================================
     public function eliminar(): void {
         AuthMiddleware::verificarAdmin();
 
@@ -86,22 +90,20 @@ class MensajeController {
             : null;
 
         if ($idMensaje === null) {
-            header("Location: " . BASE_URL . "/admin/mensajes");
-            exit();
+            $this->redirigir('admin/mensajes');
         }
 
         try {
             $eliminado = $this->mensajeService->eliminar($idMensaje);
             if ($eliminado) {
-                $_SESSION['mensaje_exito'] = "Mensaje eliminado correctamente.";
+                $this->setFlash('mensaje_exito', 'Mensaje eliminado correctamente.');
             } else {
-                $_SESSION['mensaje_error'] = "No se pudo eliminar el mensaje.";
+                $this->setFlash('mensaje_error', 'No se pudo eliminar el mensaje.');
             }
         } catch (\RuntimeException $e) {
-            $_SESSION['mensaje_error'] = $e->getMessage();
+            $this->setFlash('mensaje_error', $e->getMessage());
         }
 
-        header("Location: " . BASE_URL . "/admin/mensajes");
-        exit();
+        $this->redirigir('admin/mensajes');
     }
 }
