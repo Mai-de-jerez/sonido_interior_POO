@@ -32,16 +32,34 @@ use SonidoInteriorPoo\validators\ProductoValidator;
 
 class Container
 {
-    private Conexion $conexion;
+    private ?Conexion $conexion = null;
 
-    public function __construct()
+    // Conexión diferida (Lazy Connection)
+    private function getConexion(): Conexion
     {
-        $this->conexion = new Conexion();
+        if ($this->conexion === null) {
+            $this->conexion = new Conexion();
+        }
+        return $this->conexion;
+    }
+
+    // Método que llama el Router para obtener la instancia bajo demanda
+    public function get(string $class): object
+    {
+        return match ($class) {
+            CategoriaController::class => $this->getCategoriaController(),
+            ProductoController::class => $this->getProductoController(),
+            UsuarioController::class => $this->getUsuarioController(),
+            StaticPagesController::class => $this->getStaticPagesController(),
+            MensajeController::class => $this->getMensajeController(),
+            CarritoController::class => $this->getCarritoController(),
+            default => throw new \InvalidArgumentException("Controlador no registrado en el contenedor: $class"),
+        };
     }
 
     public function getCategoriaController(): CategoriaController
     {
-        $categoriaDAO = new CategoriaDAO($this->conexion);
+        $categoriaDAO = new CategoriaDAO($this->getConexion());
 
         $categoriaService = new CategoriaService($categoriaDAO);
 
@@ -55,8 +73,8 @@ class Container
 
     public function getProductoController(): ProductoController
     {
-        $categoriaDAO = new CategoriaDAO($this->conexion);
-        $productoDAO = new ProductoDAO($this->conexion);
+        $categoriaDAO = new CategoriaDAO($this->getConexion());
+        $productoDAO = new ProductoDAO($this->getConexion());
 
         $categoriaService = new CategoriaService($categoriaDAO);
         $productoService = new ProductoService(
@@ -75,14 +93,14 @@ class Container
 
     public function getUsuarioController(): UsuarioController
     {
-        $usuarioDAO = new UsuarioDAO($this->conexion);
+        $usuarioDAO = new UsuarioDAO($this->getConexion());
 
-        $carritoDAO = new CarritoDAO($this->conexion);
-        $productoDAO = new ProductoDAO($this->conexion);
-        $pedidoDAO = new PedidoDAO($this->conexion);
+        $carritoDAO = new CarritoDAO($this->getConexion());
+        $productoDAO = new ProductoDAO($this->getConexion());
+        $pedidoDAO = new PedidoDAO($this->getConexion());
 
         $carritoService = new CarritoService(
-            $this->conexion,
+            $this->getConexion(),
             $carritoDAO,
             $productoDAO,
             $pedidoDAO
@@ -108,7 +126,7 @@ class Container
 
     public function getMensajeController(): MensajeController
     {
-        $mensajeDAO = new MensajeDAO($this->conexion);
+        $mensajeDAO = new MensajeDAO($this->getConexion());
 
         $mensajeService = new MensajeService($mensajeDAO);
 
@@ -122,12 +140,12 @@ class Container
 
     public function getCarritoController(): CarritoController
     {
-        $carritoDAO = new CarritoDAO($this->conexion);
-        $productoDAO = new ProductoDAO($this->conexion);
-        $pedidoDAO = new PedidoDAO($this->conexion);
+        $carritoDAO = new CarritoDAO($this->getConexion());
+        $productoDAO = new ProductoDAO($this->getConexion());
+        $pedidoDAO = new PedidoDAO($this->getConexion());
 
         $carritoService = new CarritoService(
-            $this->conexion,
+            $this->getConexion(),
             $carritoDAO,
             $productoDAO,
             $pedidoDAO

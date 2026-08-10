@@ -4,7 +4,6 @@ namespace SonidoInteriorPoo\controllers;
 use SonidoInteriorPoo\core\Controller;
 use SonidoInteriorPoo\interfaces\CarritoServiceInterface;
 use SonidoInteriorPoo\validators\CheckoutValidator;
-use SonidoInteriorPoo\middleware\AuthMiddleware;
 
 class CarritoController extends Controller {
     private CarritoServiceInterface $carritoService;
@@ -22,7 +21,7 @@ class CarritoController extends Controller {
     // VER CARRITO
     // ============================================================
     public function ver(): void {
-        AuthMiddleware::verificarCliente();
+   
         $idUsuario = $this->getUserId();
 
         $lineas = $this->carritoService->obtenerLineas($idUsuario);
@@ -34,7 +33,7 @@ class CarritoController extends Controller {
     // AÑADIR PRODUCTO AL CARRITO
     // ============================================================
     public function agregar(): void {
-        AuthMiddleware::verificarCliente();
+
         $idUsuario = $this->getUserId();
 
         $idProducto = (isset($_POST['id_producto']) && ctype_digit($_POST['id_producto']))
@@ -67,7 +66,7 @@ class CarritoController extends Controller {
     // ACTUALIZAR CANTIDAD (sumar / restar)
     // ============================================================
     public function actualizarCantidad(): void {
-        AuthMiddleware::verificarCliente();
+
         $idUsuario = $this->getUserId();
 
         $idCarritoProducto = (isset($_POST['id_carrito_producto']) && ctype_digit($_POST['id_carrito_producto']))
@@ -95,7 +94,7 @@ class CarritoController extends Controller {
     // ELIMINAR LÍNEA DEL CARRITO
     // ============================================================
     public function eliminar(): void {
-        AuthMiddleware::verificarCliente();
+
         $idUsuario = $this->getUserId();
 
         $idCarritoProducto = (isset($_POST['id_carrito_producto']) && ctype_digit($_POST['id_carrito_producto']))
@@ -124,7 +123,7 @@ class CarritoController extends Controller {
     // MOSTRAR CHECKOUT
     // ============================================================
     public function mostrarCheckout(): void {
-        AuthMiddleware::verificarCliente();
+
         $idUsuario = $this->getUserId();
 
         $lineas = $this->carritoService->obtenerLineas($idUsuario);
@@ -153,7 +152,7 @@ class CarritoController extends Controller {
     // PROCESAR CHECKOUT
     // ============================================================
     public function procesarCheckout(): void {
-        AuthMiddleware::verificarCliente();
+
         $idUsuario = $this->getUserId();
 
         $errores = $this->checkoutValidator->validar($_POST);
@@ -182,7 +181,6 @@ class CarritoController extends Controller {
     // PÁGINA DE ÉXITO
     // ============================================================
     public function pedidoExito(): void {
-        AuthMiddleware::verificarCliente();
 
         if (!$this->hasSession('ultimo_pedido_id')) {
             $this->redirigir('catalogo');

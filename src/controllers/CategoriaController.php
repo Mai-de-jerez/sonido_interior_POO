@@ -4,7 +4,6 @@ namespace SonidoInteriorPoo\controllers;
 use SonidoInteriorPoo\core\Controller;
 use SonidoInteriorPoo\interfaces\CategoriaServiceInterface;
 use SonidoInteriorPoo\validators\CategoriaValidator;
-use SonidoInteriorPoo\middleware\AuthMiddleware;
 
 class CategoriaController extends Controller {
     private CategoriaServiceInterface $categoriaService;
@@ -22,7 +21,7 @@ class CategoriaController extends Controller {
     // MOSTRAR FORMULARIO NUEVO
     // ============================================================
     public function nuevo(): void {
-        AuthMiddleware::verificarAdmin();
+
         $this->renderizar('admin/categorias/admin-alta-categoria', [
             'categoria' => null
         ]);
@@ -32,7 +31,6 @@ class CategoriaController extends Controller {
     // MOSTRAR FORMULARIO EDITAR
     // ============================================================
     public function editar(): void {
-        AuthMiddleware::verificarAdmin();
 
         $idCategoria = isset($_GET['id']) && ctype_digit($_GET['id'])
             ? (int) $_GET['id']
@@ -57,7 +55,6 @@ class CategoriaController extends Controller {
     // LISTAR CATEGORÍAS (ADMIN)
     // ============================================================
     public function listar(): void {
-        AuthMiddleware::verificarAdmin();
 
         $categorias = $this->categoriaService->obtenerTodasAdmin();
 
@@ -71,7 +68,6 @@ class CategoriaController extends Controller {
     // CREAR CATEGORÍA
     // ============================================================
     public function crear(): void {
-        AuthMiddleware::verificarAdmin();
 
         $errores = $this->categoriaValidator->validar($_POST);
 
@@ -96,7 +92,6 @@ class CategoriaController extends Controller {
     // ACTUALIZAR CATEGORÍA
     // ============================================================
     public function actualizar(): void {
-        AuthMiddleware::verificarAdmin();
 
         $idCategoria = (isset($_POST['id_categoria']) && ctype_digit($_POST['id_categoria']))
             ? (int) $_POST['id_categoria']
@@ -135,7 +130,6 @@ class CategoriaController extends Controller {
     // ELIMINAR CATEGORÍA (BORRADO LÓGICO)
     // ============================================================
     public function eliminar(): void {
-        AuthMiddleware::verificarAdmin();
 
         $idCategoria = (isset($_POST['id_categoria']) && ctype_digit($_POST['id_categoria']))
             ? (int) $_POST['id_categoria']
@@ -163,7 +157,6 @@ class CategoriaController extends Controller {
     // REACTIVAR CATEGORÍA
     // ============================================================
     public function reactivar(): void {
-        AuthMiddleware::verificarAdmin();
 
         $idCategoria = isset($_GET['id']) && ctype_digit($_GET['id'])
             ? (int) $_GET['id']

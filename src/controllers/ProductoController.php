@@ -5,7 +5,6 @@ use SonidoInteriorPoo\core\Controller;
 use SonidoInteriorPoo\interfaces\ProductoServiceInterface;
 use SonidoInteriorPoo\interfaces\CategoriaServiceInterface;
 use SonidoInteriorPoo\validators\ProductoValidator;
-use SonidoInteriorPoo\middleware\AuthMiddleware;
 
 class ProductoController extends Controller {
     private ProductoServiceInterface $productoService;
@@ -36,7 +35,6 @@ class ProductoController extends Controller {
     // DASHBOARD (ADMIN)
     // ============================================================
     public function dashboard(): void {
-        AuthMiddleware::verificarAdmin();
         
         $this->renderizar('admin/dashboard', [
             'totalProductos' => $this->productoService->obtenerTotalProductosAdmin(),
@@ -48,7 +46,6 @@ class ProductoController extends Controller {
     // FORMULARIO NUEVO PRODUCTO
     // ============================================================
     public function nuevo(): void {
-        AuthMiddleware::verificarAdmin();
 
         $categorias = $this->categoriaService->obtenerActivas();
         $this->renderizar('admin/productos/admin-alta-producto', [
@@ -61,7 +58,6 @@ class ProductoController extends Controller {
     // FORMULARIO EDITAR PRODUCTO
     // ============================================================
     public function editar(): void {
-        AuthMiddleware::verificarAdmin();
 
         $idProducto = isset($_GET['id']) && ctype_digit($_GET['id'])
             ? (int) $_GET['id']
@@ -88,7 +84,6 @@ class ProductoController extends Controller {
     // CONFIRMAR ELIMINAR
     // ============================================================
     public function confirmarEliminar(): void {
-        AuthMiddleware::verificarAdmin();
 
         $idProducto = isset($_GET['id']) && ctype_digit($_GET['id'])
             ? (int) $_GET['id']
@@ -113,7 +108,6 @@ class ProductoController extends Controller {
     // CONFIRMAR REACTIVAR
     // ============================================================
     public function confirmarReactivar(): void {
-        AuthMiddleware::verificarAdmin();
 
         $idProducto = isset($_GET['id']) && ctype_digit($_GET['id'])
             ? (int) $_GET['id']
@@ -189,7 +183,6 @@ class ProductoController extends Controller {
     // LISTAR PRODUCTOS (ADMIN)
     // ============================================================
     public function listar(): void {
-        AuthMiddleware::verificarAdmin();
         
         $productos = $this->productoService->obtenerProductosAdmin();
         $this->renderizar('admin/productos/admin-listado-productos', [
@@ -201,7 +194,6 @@ class ProductoController extends Controller {
     // CREAR PRODUCTO (POST)
     // ============================================================
     public function crear(): void {
-        AuthMiddleware::verificarAdmin();
 
         if (empty($_POST['nombre'])) {
             $this->redirigir('admin/productos');
@@ -238,7 +230,6 @@ class ProductoController extends Controller {
     // ACTUALIZAR PRODUCTO (POST)
     // ============================================================
     public function actualizar(): void {
-        AuthMiddleware::verificarAdmin();
 
         $idProducto = (isset($_POST['id_producto']) && ctype_digit($_POST['id_producto']))
             ? (int) $_POST['id_producto']
@@ -281,7 +272,6 @@ class ProductoController extends Controller {
     // ELIMINAR PRODUCTO (POST)
     // ============================================================
     public function eliminar(): void {
-        AuthMiddleware::verificarAdmin();
 
         $idProducto = (isset($_POST['id_producto']) && ctype_digit($_POST['id_producto']))
             ? (int) $_POST['id_producto']
@@ -312,7 +302,6 @@ class ProductoController extends Controller {
     // REACTIVAR PRODUCTO (POST)
     // ============================================================
     public function reactivar(): void {
-        AuthMiddleware::verificarAdmin();
 
         $idProducto = (isset($_POST['id_producto']) && ctype_digit($_POST['id_producto']))
             ? (int) $_POST['id_producto']

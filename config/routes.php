@@ -1,99 +1,86 @@
 <?php
 
-// Obtener los controladores necesarios
-$categoriaController = $container->getCategoriaController();
-$productoController = $container->getProductoController();
-$usuarioController = $container->getUsuarioController();
-$staticPagesController = $container->getStaticPagesController();
-$mensajeController = $container->getMensajeController();
-$carritoController = $container->getCarritoController();
+use SonidoInteriorPoo\controllers\CategoriaController;
+use SonidoInteriorPoo\controllers\ProductoController;
+use SonidoInteriorPoo\controllers\UsuarioController;
+use SonidoInteriorPoo\controllers\StaticPagesController;
+use SonidoInteriorPoo\controllers\MensajeController;
+use SonidoInteriorPoo\controllers\CarritoController;
+use SonidoInteriorPoo\middleware\AuthMiddleware;
+use SonidoInteriorPoo\middleware\AdminMiddleware; 
 
 // ============================================================
-// PÁGINAS ESTÁTICAS PÚBLICAS
+// PÁGINAS ESTÁTICAS Y PÚBLICAS
 // ============================================================
+$router->get('/', [ProductoController::class, 'home']);
+$router->get('/catalogo', [ProductoController::class, 'catalogo']);
+$router->get('/detalle-producto', [ProductoController::class, 'detalle']);
 
-$router->get('/login', [$staticPagesController, 'login']);
-$router->get('/registro', [$staticPagesController, 'registro']);
-$router->get('/sonoterapia', [$staticPagesController, 'sonoterapia']);
-$router->get('/sobre-nosotros', [$staticPagesController, 'sobreNosotros']);
-$router->get('/contacto', [$staticPagesController, 'contacto']);
+$router->get('/login', [StaticPagesController::class, 'login']);
+$router->get('/registro', [StaticPagesController::class, 'registro']);
+$router->get('/sonoterapia', [StaticPagesController::class, 'sonoterapia']);
+$router->get('/sobre-nosotros', [StaticPagesController::class, 'sobreNosotros']);
+$router->get('/contacto', [StaticPagesController::class, 'contacto']);
+$router->post('/contacto', [MensajeController::class, 'procesarContacto']);
 
-
-// ============================================================
-// PÁGINAS PÚBLICAS
-// ============================================================
-
-// Home
-$router->get('/', [$productoController, 'home']);
-
-// Productos
-$router->get('/catalogo', [$productoController, 'catalogo']);
-$router->get('/detalle-producto', [$productoController, 'detalle']);
-
-// Carrito
-$router->get('/carrito', [$carritoController, 'ver']);
-$router->post('/carrito/agregar', [$carritoController, 'agregar']);
-$router->post('/carrito/actualizar-cantidad', [$carritoController, 'actualizarCantidad']);
-$router->post('/carrito/eliminar', [$carritoController, 'eliminar']);
-
-// Checkout
-$router->get('/checkout', [$carritoController, 'mostrarCheckout']);
-$router->post('/checkout', [$carritoController, 'procesarCheckout']);
-
-// Pedido
-$router->get('/pedido-exito', [$carritoController, 'pedidoExito']);
-
-// Contacto
-$router->post('/contacto', [$mensajeController, 'procesarContacto']);
+// Autenticación
+$router->post('/login', [UsuarioController::class, 'procesarLogin']);
+$router->get('/logout', [UsuarioController::class, 'logout']);
+$router->post('/registro', [UsuarioController::class, 'procesarRegistro']);
+$router->get('/recuperar-password', [UsuarioController::class, 'mostrarRecuperar']);
+$router->post('/recuperar-password', [UsuarioController::class, 'procesarRecuperar']);
+$router->get('/restablecer-password', [UsuarioController::class, 'mostrarRestablecer']);
+$router->post('/restablecer-password', [UsuarioController::class, 'procesarRestablecer']);
 
 
 // ============================================================
-// AUTENTICACIÓN
+// RUTAS PRIVADAS DE CLIENTE (Requieren estar autenticado)
 // ============================================================
-
-$router->post('/login', [$usuarioController, 'procesarLogin']);
-$router->get('/logout', [$usuarioController, 'logout']);
-$router->post('/registro', [$usuarioController, 'procesarRegistro']);
-
-$router->get('/recuperar-password', [$usuarioController, 'mostrarRecuperar']);
-$router->post('/recuperar-password', [$usuarioController, 'procesarRecuperar']);
-
-$router->get('/restablecer-password', [$usuarioController, 'mostrarRestablecer']);
-$router->post('/restablecer-password', [$usuarioController, 'procesarRestablecer']);
-
+$router->group([AuthMiddleware::class], function($router) {
+    // operaciones carrito
+    $router->get('/carrito', [CarritoController::class, 'ver']);
+    $router->post('/carrito/agregar', [CarritoController::class, 'agregar']);
+    $router->post('/carrito/actualizar-cantidad', [CarritoController::class, 'actualizarCantidad']);
+    $router->post('/carrito/eliminar', [CarritoController::class, 'eliminar']);
+    // checkout
+    $router->get('/checkout', [CarritoController::class, 'mostrarCheckout']);
+    $router->post('/checkout', [CarritoController::class, 'procesarCheckout']);
+    // compra exitosa
+    $router->get('/pedido-exito', [CarritoController::class, 'pedidoExito']);
+}); 
+   
 
 // ============================================================
-// RUTAS ADMIN
+// RUTAS PRIVADAS DE ADMIN (Requieren rol Admin)
 // ============================================================
+$router->group([AdminMiddleware::class], function($router) {
+    // Dashboard 
+    $router->get('/admin/dashboard', [ProductoController::class, 'dashboard']);
 
-$router->get('/admin/dashboard', [$productoController, 'dashboard']);
+    // Productos
+    $router->get('/admin/productos', [ProductoController::class, 'listar']);
+    $router->get('/admin/productos/crear', [ProductoController::class, 'nuevo']);
+    $router->get('/admin/productos/editar', [ProductoController::class, 'editar']);
+    $router->get('/admin/productos/eliminar', [ProductoController::class, 'confirmarEliminar']);
+    $router->get('/admin/productos/reactivar', [ProductoController::class, 'confirmarReactivar']);
 
+    $router->post('/admin/productos/guardar', [ProductoController::class, 'crear']);
+    $router->post('/admin/productos/actualizar', [ProductoController::class, 'actualizar']);
+    $router->post('/admin/productos/eliminar', [ProductoController::class, 'eliminar']);
+    $router->post('/admin/productos/reactivar', [ProductoController::class, 'reactivar']);
 
-// Productos Admin
-$router->get('/admin/productos', [$productoController, 'listar']);
-$router->get('/admin/productos/crear', [$productoController, 'nuevo']);
-$router->get('/admin/productos/editar', [$productoController, 'editar']);
-$router->get('/admin/productos/eliminar', [$productoController, 'confirmarEliminar']);
-$router->get('/admin/productos/reactivar', [$productoController, 'confirmarReactivar']);
+    // Mensajes
+    $router->get('/admin/mensajes', [MensajeController::class, 'listar']);
+    $router->post('/admin/mensajes/marcar-leido', [MensajeController::class, 'marcarLeido']);
+    $router->post('/admin/mensajes/eliminar', [MensajeController::class, 'eliminar']);
 
-$router->post('/admin/productos/guardar', [$productoController, 'crear']);
-$router->post('/admin/productos/actualizar', [$productoController, 'actualizar']);
-$router->post('/admin/productos/eliminar', [$productoController, 'eliminar']);
-$router->post('/admin/productos/reactivar', [$productoController, 'reactivar']);
+    // Categorías
+    $router->get('/admin/categorias', [CategoriaController::class, 'listar']);
+    $router->get('/admin/categorias/crear', [CategoriaController::class, 'nuevo']);
+    $router->get('/admin/categorias/editar', [CategoriaController::class, 'editar']);
 
-
-// Mensajes Admin
-$router->get('/admin/mensajes', [$mensajeController, 'listar']);
-$router->post('/admin/mensajes/marcar-leido', [$mensajeController, 'marcarLeido']);
-$router->post('/admin/mensajes/eliminar', [$mensajeController, 'eliminar']);
-
-
-// Categorías Admin
-$router->get('/admin/categorias', [$categoriaController, 'listar']);
-$router->get('/admin/categorias/crear', [$categoriaController, 'nuevo']);
-$router->get('/admin/categorias/editar', [$categoriaController, 'editar']);
-
-$router->post('/admin/categorias/guardar', [$categoriaController, 'crear']);
-$router->post('/admin/categorias/actualizar', [$categoriaController, 'actualizar']);
-$router->post('/admin/categorias/eliminar', [$categoriaController, 'eliminar']);
-$router->post('/admin/categorias/reactivar', [$categoriaController, 'reactivar']);
+    $router->post('/admin/categorias/guardar', [CategoriaController::class, 'crear']);
+    $router->post('/admin/categorias/actualizar', [CategoriaController::class, 'actualizar']);
+    $router->post('/admin/categorias/eliminar', [CategoriaController::class, 'eliminar']);
+    $router->post('/admin/categorias/reactivar', [CategoriaController::class, 'reactivar']);
+});

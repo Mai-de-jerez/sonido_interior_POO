@@ -1,34 +1,45 @@
 <?php
 
-namespace SonidoInteriorPoo\core; 
+namespace SonidoInteriorPoo\core;
 
 class Router 
 {
     private array $routes = [];
+    private array $groupMiddlewares = [];
 
-    // Registrar rutas HTTP GET
-    public function get(string $path, array|callable $action): void 
+    // Agrupar rutas bajo middlewares comunes
+    public function group(array $middlewares, callable $callback): void
+    {
+        $previousMiddlewares = $this->groupMiddlewares;
+        $this->groupMiddlewares = array_merge($this->groupMiddlewares, $middlewares);
+
+        $callback($this);
+
+        $this->groupMiddlewares = $previousMiddlewares;
+    }
+
+    public function get(string $path, array $action): void 
     {
         $this->addRoute('GET', $path, $action);
     }
 
-    // Registrar rutas HTTP POST
-    public function post(string $path, array|callable $action): void 
+    public function post(string $path, array $action): void 
     {
         $this->addRoute('POST', $path, $action);
     }
 
-    private function addRoute(string $method, string $path, array|callable $action): void 
+    private function addRoute(string $method, string $path, array $action): void 
     {
-        $this->routes["$method $path"] = $action;
+        $this->routes["$method $path"] = [
+            'action' => $action,
+            'middlewares' => $this->groupMiddlewares
+        ];
     }
 
-    // Procesar la petición y ejecutar el controlador
-    public function dispatch(string $method, string $uri): void 
+    public function dispatch(string $method, string $uri, Container $container): void 
     {
-        // Limpiar la URI eliminando la carpeta del proyecto e index.php
         $uri = str_replace([BASE_URL, '/index.php'], '', $uri);
-        $uri = strtok($uri, '?'); // Elimina query strings (?id=1)
+        $uri = strtok($uri, '?'); 
         
         if ($uri === '' || $uri === false) {
             $uri = '/';
@@ -36,18 +47,27 @@ class Router
 
         $clave = "$method $uri";
 
-        if (array_key_exists($clave, $this->routes)) {
-            $accion = $this->routes[$clave];
-
-            if (is_array($accion)) {
-                [$controller, $metodoControlador] = $accion;
-                $controller->$metodoControlador();
-            } else {
-                $accion();
-            }
-        } else {
+        if (!array_key_exists($clave, $this->routes)) {
             http_response_code(404);
             echo "Página no encontrada. URI: " . htmlspecialchars($uri);
+            return;
         }
+
+        $routeData = $this->routes[$clave];
+
+        // 1. Ejecutar Middlewares del grupo (si los hay)
+        foreach ($routeData['middlewares'] as $middlewareClass) {
+            $middleware = new $middlewareClass();
+            $middleware->handle(); // Si falla, redirige y corta con exit;
+        }
+
+        // 2. Resolver el controlador BAJO DEMANDA usando el Container
+        [$controllerClass, $metodo] = $routeData['action'];
+        
+        $controller = is_string($controllerClass) 
+            ? $container->get($controllerClass) 
+            : $controllerClass;
+
+        $controller->$metodo();
     }
 }

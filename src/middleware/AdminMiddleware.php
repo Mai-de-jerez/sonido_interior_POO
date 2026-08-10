@@ -1,9 +1,10 @@
 <?php
+
 namespace SonidoInteriorPoo\middleware;
 
 use SonidoInteriorPoo\core\Session;
 
-class AuthMiddleware
+class AdminMiddleware
 {
     public function handle(): void
     {
@@ -12,10 +13,9 @@ class AuthMiddleware
             exit();
         }
         
-        $rol = Session::getUserRole();
-        if ($rol !== 'CLIENTE' && $rol !== 'ADMIN') {
+        if (Session::getUserRole() !== 'ADMIN') {
             http_response_code(403);
-            echo "Acceso denegado. Se requiere rol de cliente.";
+            echo "Acceso denegado. Se requiere rol de administrador.";
             exit();
         }
     }

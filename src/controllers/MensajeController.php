@@ -4,7 +4,6 @@ namespace SonidoInteriorPoo\controllers;
 use SonidoInteriorPoo\core\Controller;
 use SonidoInteriorPoo\interfaces\MensajeServiceInterface;
 use SonidoInteriorPoo\validators\MensajeValidator;
-use SonidoInteriorPoo\middleware\AuthMiddleware;
 
 class MensajeController extends Controller {
     private MensajeServiceInterface $mensajeService;
@@ -45,7 +44,6 @@ class MensajeController extends Controller {
     // LISTAR MENSAJES (ADMIN)
     // ============================================================
     public function listar(): void {
-        AuthMiddleware::verificarAdmin();
 
         $mensajes = $this->mensajeService->obtenerTodosAdmin();
 
@@ -59,7 +57,6 @@ class MensajeController extends Controller {
     // MARCAR MENSAJE COMO LEÍDO (ADMIN)
     // ============================================================
     public function marcarLeido(): void {
-        AuthMiddleware::verificarAdmin();
 
         $idMensaje = (isset($_POST['id_mensaje']) && ctype_digit($_POST['id_mensaje']))
             ? (int) $_POST['id_mensaje']
@@ -83,7 +80,6 @@ class MensajeController extends Controller {
     // ELIMINAR MENSAJE (ADMIN)
     // ============================================================
     public function eliminar(): void {
-        AuthMiddleware::verificarAdmin();
 
         $idMensaje = (isset($_POST['id_mensaje']) && ctype_digit($_POST['id_mensaje']))
             ? (int) $_POST['id_mensaje']

@@ -19,5 +19,9 @@ $router = new Router();
 // Registramos las rutas
 require_once __DIR__ . '/../config/routes.php';
 
-// --- Despachamos la petición ---
-$router->dispatch($_SERVER['REQUEST_METHOD'], parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH));
+// --- Despachamos la petición pasando el contenedor ---
+$router->dispatch(
+    $_SERVER['REQUEST_METHOD'], 
+    parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH), 
+    $container
+);
