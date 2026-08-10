@@ -1,21 +1,21 @@
 <?php
 namespace SonidoInteriorPoo\services;
 
-use SonidoInteriorPoo\models\Conexion;
-use SonidoInteriorPoo\models\CarritoDAO;
+use SonidoInteriorPoo\core\Conexion;
+use SonidoInteriorPoo\interfaces\CarritoDAOInterface;
 use SonidoInteriorPoo\models\ProductoDAO;
 use SonidoInteriorPoo\models\PedidoDAO;
 use SonidoInteriorPoo\interfaces\CarritoServiceInterface;
 
 class CarritoService implements CarritoServiceInterface {
     private Conexion $conexion;
-    private CarritoDAO $carritoDAO;
+    private CarritoDAOInterface $carritoDAO;
     private ProductoDAO $productoDAO;
     private PedidoDAO $pedidoDAO;
 
     public function __construct(
         Conexion $conexion,
-        CarritoDAO $carritoDAO,
+        CarritoDAOInterface $carritoDAO,
         ProductoDAO $productoDAO,
         PedidoDAO $pedidoDAO
     ) {

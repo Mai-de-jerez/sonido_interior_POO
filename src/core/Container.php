@@ -2,7 +2,7 @@
 
 namespace SonidoInteriorPoo\core;
 
-use SonidoInteriorPoo\models\Conexion;
+use SonidoInteriorPoo\core\Conexion;
 
 use SonidoInteriorPoo\models\CategoriaDAO;
 use SonidoInteriorPoo\models\ProductoDAO;
@@ -71,7 +71,7 @@ class Container
             $categoriaService,
             $productoValidator
         );
-    }
+    } 
 
     public function getUsuarioController(): UsuarioController
     {
@@ -97,7 +97,7 @@ class Container
 
         return new UsuarioController(
             $usuarioService,
-            $usuarioValidator
+            $usuarioValidator    
         );
     }
 

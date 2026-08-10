@@ -1,14 +1,14 @@
 <?php
 namespace SonidoInteriorPoo\services;
 
+use SonidoInteriorPoo\interfaces\CategoriaDAOInterface;
 use SonidoInteriorPoo\models\Categoria;
-use SonidoInteriorPoo\models\CategoriaDAO;
 use SonidoInteriorPoo\interfaces\CategoriaServiceInterface;
 
 class CategoriaService implements CategoriaServiceInterface {
-    private CategoriaDAO $categoriaDAO;
+    private CategoriaDAOInterface $categoriaDAO;
 
-    public function __construct(CategoriaDAO $categoriaDAO) {
+    public function __construct(CategoriaDAOInterface $categoriaDAO) {
         $this->categoriaDAO = $categoriaDAO;
     }
 

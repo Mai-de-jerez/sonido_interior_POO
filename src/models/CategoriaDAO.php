@@ -2,6 +2,7 @@
 namespace SonidoInteriorPoo\models;
 
 use SonidoInteriorPoo\interfaces\CategoriaDAOInterface;
+use SonidoInteriorPoo\core\Conexion;
 
 class CategoriaDAO implements CategoriaDAOInterface {
     private Conexion $conexion;

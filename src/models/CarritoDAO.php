@@ -3,6 +3,7 @@ namespace SonidoInteriorPoo\models;
 
 use SonidoInteriorPoo\interfaces\CarritoDAOInterface;
 use SonidoInteriorPoo\dto\CarritoLineaDTO;
+use SonidoInteriorPoo\core\Conexion;
 
 class CarritoDAO implements CarritoDAOInterface { 
     private Conexion $conexion;

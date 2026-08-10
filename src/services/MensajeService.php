@@ -2,14 +2,14 @@
 namespace SonidoInteriorPoo\services;
 
 use SonidoInteriorPoo\models\Mensaje;
-use SonidoInteriorPoo\models\MensajeDAO;
+use SonidoInteriorPoo\interfaces\MensajeDAOInterface;
 use SonidoInteriorPoo\interfaces\MensajeServiceInterface;
 use SonidoInteriorPoo\utils\EmailHelper;
 
 class MensajeService implements MensajeServiceInterface {
-    private MensajeDAO $mensajeDAO;
+    private MensajeDAOInterface $mensajeDAO;
 
-    public function __construct(MensajeDAO $mensajeDAO) {
+    public function __construct(MensajeDAOInterface $mensajeDAO) {
         $this->mensajeDAO = $mensajeDAO;
     }
 

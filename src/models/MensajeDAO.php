@@ -2,6 +2,7 @@
 namespace SonidoInteriorPoo\models;
 
 use SonidoInteriorPoo\interfaces\MensajeDAOInterface;
+use SonidoInteriorPoo\core\Conexion;
 
 class MensajeDAO implements MensajeDAOInterface {
     private Conexion $conexion;

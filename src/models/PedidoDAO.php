@@ -2,6 +2,7 @@
 namespace SonidoInteriorPoo\models;
 
 use SonidoInteriorPoo\interfaces\PedidoDAOInterface;
+use SonidoInteriorPoo\core\Conexion;
 
 class PedidoDAO implements PedidoDAOInterface {
     private Conexion $conexion;

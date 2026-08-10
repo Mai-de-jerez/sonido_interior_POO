@@ -2,17 +2,18 @@
 namespace SonidoInteriorPoo\services;
 
 use SonidoInteriorPoo\models\Usuario;
-use SonidoInteriorPoo\models\UsuarioDAO;
+use SonidoInteriorPoo\interfaces\UsuarioDAOInterface;
 use SonidoInteriorPoo\interfaces\UsuarioServiceInterface;
 use SonidoInteriorPoo\interfaces\CarritoServiceInterface;
 use SonidoInteriorPoo\utils\EmailHelper;
 
 class UsuarioService implements UsuarioServiceInterface {
-    private UsuarioDAO $usuarioDAO;
+
+    private UsuarioDAOInterface $usuarioDAO;
     private CarritoServiceInterface $carritoService;
 
     public function __construct(
-        UsuarioDAO $usuarioDAO,
+        UsuarioDAOInterface $usuarioDAO,
         CarritoServiceInterface $carritoService
     ) {
         $this->usuarioDAO = $usuarioDAO;

@@ -3,7 +3,7 @@ namespace SonidoInteriorPoo\models;
 
 use SonidoInteriorPoo\interfaces\ProductoDAOInterface;
 use SonidoInteriorPoo\dto\ProductoAdminDTO;
-use SonidoInteriorPoo\models\Conexion;
+use SonidoInteriorPoo\core\Conexion;
 
 class ProductoDAO implements ProductoDAOInterface {
     private Conexion $conexion;

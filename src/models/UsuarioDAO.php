@@ -2,8 +2,10 @@
 namespace SonidoInteriorPoo\models;
 
 use PDOException;
+use SonidoInteriorPoo\core\Conexion;
+use SonidoInteriorPoo\interfaces\UsuarioDAOInterface;
 
-class UsuarioDAO {
+class UsuarioDAO implements UsuarioDAOInterface{
     private Conexion $conexion;
 
     public function __construct(Conexion $conexion) {
@@ -59,7 +61,7 @@ class UsuarioDAO {
             $fila['password'],
             $fila['rol'],
             $fila['fecha_registro']
-        );
+        ); 
     }
 
     // ============================================================

@@ -3,16 +3,16 @@ namespace SonidoInteriorPoo\services;
 
 
 use SonidoInteriorPoo\models\Producto;
-use SonidoInteriorPoo\models\ProductoDAO;
-use SonidoInteriorPoo\models\CategoriaDAO;
-use SonidoInteriorPoo\utils\ArchivosHelper;
+use SonidoInteriorPoo\interfaces\ProductoDAOInterface;
+use SonidoInteriorPoo\interfaces\CategoriaDAOInterface;
 use SonidoInteriorPoo\interfaces\ProductoServiceInterface;
+use SonidoInteriorPoo\utils\ArchivosHelper;
 
 class ProductoService implements ProductoServiceInterface {
-    private ProductoDAO $productoDAO;
-    private CategoriaDAO $categoriaDAO;
+    private ProductoDAOInterface $productoDAO;
+    private CategoriaDAOInterface $categoriaDAO;
 
-    public function __construct(ProductoDAO $productoDAO, CategoriaDAO $categoriaDAO) {
+    public function __construct(ProductoDAOInterface $productoDAO, CategoriaDAOInterface $categoriaDAO) {
         $this->productoDAO = $productoDAO;
         $this->categoriaDAO = $categoriaDAO;
     }

@@ -1,5 +1,5 @@
 <?php
-namespace SonidoInteriorPoo\models;
+namespace SonidoInteriorPoo\core;
 
 use PDO;
 use PDOException;
