@@ -20,6 +20,19 @@ class Usuario {
         $this->fechaRegistro = $fechaRegistro;
     }
 
+    // Named constructor: crea un Usuario a partir de una fila de BD (array asociativo de PDO)
+    public static function fromArray(array $fila): self {
+        return new self(
+            (int) $fila['id_usuario'],
+            $fila['nombre'],
+            $fila['email'],
+            $fila['usuario'],
+            $fila['password'],
+            $fila['rol'],
+            $fila['fecha_registro']
+        );
+    }
+
     public function getIdUsuario(): ?int { return $this->idUsuario; }
     public function getNombre(): ?string { return $this->nombre; }
     public function getEmail(): string { return $this->email; }

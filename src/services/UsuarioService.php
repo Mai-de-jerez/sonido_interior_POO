@@ -6,18 +6,22 @@ use SonidoInteriorPoo\interfaces\UsuarioDAOInterface;
 use SonidoInteriorPoo\interfaces\UsuarioServiceInterface;
 use SonidoInteriorPoo\interfaces\CarritoServiceInterface;
 use SonidoInteriorPoo\utils\EmailHelper;
+use SonidoInteriorPoo\interfaces\TransactionManagerInterface;
 
 class UsuarioService implements UsuarioServiceInterface {
 
     private UsuarioDAOInterface $usuarioDAO;
     private CarritoServiceInterface $carritoService;
+    private TransactionManagerInterface $transactionManager;
 
     public function __construct(
         UsuarioDAOInterface $usuarioDAO,
-        CarritoServiceInterface $carritoService
+        CarritoServiceInterface $carritoService,
+        TransactionManagerInterface $transactionManager
     ) {
         $this->usuarioDAO = $usuarioDAO;
         $this->carritoService = $carritoService;
+        $this->transactionManager = $transactionManager;
     }
 
     // ============================================================
@@ -53,6 +57,10 @@ class UsuarioService implements UsuarioServiceInterface {
         return $this->usuarioDAO->registrar($usuario, $email, $passwordHash);
     }
 
+    public function obtenerEmailPorToken(string $token): ?string {
+        return $this->usuarioDAO->obtenerEmailPorToken($token);
+    }
+
     // ============================================================
     // RECUPERACIÓN DE CONTRASEÑA
     // ============================================================
@@ -65,13 +73,12 @@ class UsuarioService implements UsuarioServiceInterface {
 
         $token = bin2hex(random_bytes(32));
 
-        if ($this->usuarioDAO->guardarTokenRecuperacion($email, $token)) {
-            EmailHelper::enviarEnlaceRecuperacion($email, $usuario->getUsuario(), $token);
-        }
-    }
+        $this->transactionManager->transaction(function () use ($email, $token) {
+            $this->usuarioDAO->borrarTokensDe($email);
+            $this->usuarioDAO->insertarToken($email, $token);
+        });
 
-    public function obtenerEmailPorToken(string $token): ?string {
-        return $this->usuarioDAO->obtenerEmailPorToken($token);
+        EmailHelper::enviarEnlaceRecuperacion($email, $usuario->getUsuario(), $token);
     }
 
     /**
@@ -80,7 +87,13 @@ class UsuarioService implements UsuarioServiceInterface {
      */
     private function actualizarPasswordConToken(string $email, string $nuevaPassword): bool {
         $passwordHash = password_hash($nuevaPassword, PASSWORD_DEFAULT);
-        return $this->usuarioDAO->actualizarPasswordYBorrarToken($email, $passwordHash);
+
+        $this->transactionManager->transaction(function () use ($email, $passwordHash) {
+            $this->usuarioDAO->actualizarPassword($email, $passwordHash);
+            $this->usuarioDAO->borrarTokenDe($email);
+        });
+
+        return true;
     }
 
     public function actualizarPasswordPorToken(string $token, string $nuevaPassword): bool {

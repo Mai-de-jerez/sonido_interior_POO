@@ -108,7 +108,8 @@ class Container
 
         $usuarioService = new UsuarioService(
             $usuarioDAO,
-            $carritoService
+            $carritoService,
+            $this->getConexion()
         );
 
         $usuarioValidator = new UsuarioValidator();

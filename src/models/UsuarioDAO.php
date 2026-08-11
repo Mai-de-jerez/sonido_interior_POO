@@ -23,19 +23,7 @@ class UsuarioDAO implements UsuarioDAOInterface{
         $stmt->execute([$usuario]);
         $fila = $stmt->fetch();
 
-        if (!$fila) {
-            return null;
-        }
-
-        return new Usuario(
-            (int) $fila['id_usuario'],
-            $fila['nombre'],
-            $fila['email'],
-            $fila['usuario'],
-            $fila['password'],
-            $fila['rol'],
-            $fila['fecha_registro']
-        );
+        return $fila ? Usuario::fromArray($fila) : null;
     }
 
     // ============================================================
@@ -49,19 +37,7 @@ class UsuarioDAO implements UsuarioDAOInterface{
         $stmt->execute([$email]);
         $fila = $stmt->fetch();
 
-        if (!$fila) {
-            return null;
-        }
-
-        return new Usuario(
-            (int) $fila['id_usuario'],
-            $fila['nombre'],
-            $fila['email'],
-            $fila['usuario'],
-            $fila['password'],
-            $fila['rol'],
-            $fila['fecha_registro']
-        ); 
+        return $fila ? Usuario::fromArray($fila) : null; 
     }
 
     // ============================================================
@@ -75,19 +51,7 @@ class UsuarioDAO implements UsuarioDAOInterface{
         $stmt->execute([$idUsuario]);
         $fila = $stmt->fetch();
 
-        if (!$fila) {
-            return null;
-        }
-
-        return new Usuario(
-            (int) $fila['id_usuario'],
-            $fila['nombre'],
-            $fila['email'],
-            $fila['usuario'],
-            $fila['password'],
-            $fila['rol'],
-            $fila['fecha_registro']
-        );
+        return $fila ? Usuario::fromArray($fila) : null;
     }
 
     // ============================================================
@@ -102,37 +66,26 @@ class UsuarioDAO implements UsuarioDAOInterface{
     }
 
     // ============================================================
-    // GUARDAR TOKEN DE RECUPERACIÓN
+    // RECUPERACIÓN DE CONTRASEÑA
     // ============================================================
-    public function guardarTokenRecuperacion(string $email, string $token): bool {
+    
+
+    // borrar token de recuperación (por email)
+    public function borrarTokensDe(string $email): bool {
         $pdo = $this->conexion->getPdo();
-        
-        // Iniciar transacción
-        $pdo->beginTransaction();
-        
-        try {
-            // Borrar tokens anteriores del mismo email
-            $sqlDelete = "DELETE FROM password_resets WHERE email = ?";
-            $stmtDelete = $pdo->prepare($sqlDelete);
-            $stmtDelete->execute([$email]);
-            
-            // Insertar nuevo token con expiración de 30 minutos
-            $sqlInsert = "INSERT INTO password_resets (email, token, expira) VALUES (?, ?, DATE_ADD(NOW(), INTERVAL 30 MINUTE))";
-            $stmtInsert = $pdo->prepare($sqlInsert);
-            $stmtInsert->execute([$email, $token]);
-            
-            $pdo->commit();
-            return true;
-            
-        } catch (PDOException $e) {
-            $pdo->rollBack();
-            return false;
-        }
+        $stmt = $pdo->prepare("DELETE FROM password_resets WHERE email = ?");
+        return $stmt->execute([$email]);
     }
 
-    // ============================================================
-    // OBTENER EMAIL POR TOKEN (VÁLIDO)
-    // ============================================================
+    // insertar token de recuperación (nuevo)
+    public function insertarToken(string $email, string $token): bool {
+        $pdo = $this->conexion->getPdo();
+        $sql = "INSERT INTO password_resets (email, token, expira) VALUES (?, ?, DATE_ADD(NOW(), INTERVAL 30 MINUTE))";
+        $stmt = $pdo->prepare($sql);
+        return $stmt->execute([$email, $token]);
+    }
+
+    // Obtener email por token de recuperación
     public function obtenerEmailPorToken(string $token): ?string {
         $pdo = $this->conexion->getPdo();
         $sql = "SELECT email FROM password_resets WHERE token = ? AND expira > NOW() LIMIT 1";
@@ -144,33 +97,18 @@ class UsuarioDAO implements UsuarioDAOInterface{
         return $fila ? $fila['email'] : null;
     }
 
-    // ============================================================
-    // ACTUALIZAR CONTRASEÑA Y BORRAR TOKEN
-    // ============================================================
-    public function actualizarPasswordYBorrarToken(string $email, string $nuevaPasswordHash): bool {
+    // actualizar password 
+    public function actualizarPassword(string $email, string $nuevaPasswordHash): bool {
         $pdo = $this->conexion->getPdo();
-        
-        // Iniciar transacción
-        $pdo->beginTransaction();
-        
-        try {
-            // Actualizar contraseña en usuarios
-            $sqlUser = "UPDATE usuarios SET password = ? WHERE email = ?";
-            $stmtUser = $pdo->prepare($sqlUser);
-            $stmtUser->execute([$nuevaPasswordHash, $email]);
-            
-            // Borrar token usado
-            $sqlToken = "DELETE FROM password_resets WHERE email = ?";
-            $stmtToken = $pdo->prepare($sqlToken);
-            $stmtToken->execute([$email]);
-            
-            $pdo->commit();
-            return true;
-            
-        } catch (PDOException $e) {
-            $pdo->rollBack();
-            return false;
-        }
+        $stmt = $pdo->prepare("UPDATE usuarios SET password = ? WHERE email = ?");
+        return $stmt->execute([$nuevaPasswordHash, $email]);
+    }
+
+    // borrar token de recuperación
+    public function borrarTokenDe(string $email): bool {
+        $pdo = $this->conexion->getPdo();
+        $stmt = $pdo->prepare("DELETE FROM password_resets WHERE email = ?");
+        return $stmt->execute([$email]);
     }
 
     // ============================================================
