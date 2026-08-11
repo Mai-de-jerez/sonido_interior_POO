@@ -1,7 +1,7 @@
 <?php
 namespace SonidoInteriorPoo\interfaces;
 
-use SonidoInteriorPoo\Models\Producto;
+use SonidoInteriorPoo\models\Producto;
 
 interface ProductoDAOInterface {
     public function obtenerProductosAdmin(): array;
@@ -17,4 +17,7 @@ interface ProductoDAOInterface {
     // Métodos para las estadísticas del dashboard
     public function contarTodosAdmin(): int;
     public function contarActivosAdmin(): int;
+    // Métodos para el carrito y stock
+    public function obtenerStockParaUpdate(int $idProducto): ?array;
+    public function descontarStock(int $idProducto, int $cantidad): bool;
 }

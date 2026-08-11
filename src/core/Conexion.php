@@ -3,8 +3,9 @@ namespace SonidoInteriorPoo\core;
 
 use PDO;
 use PDOException;
+use SonidoInteriorPoo\interfaces\TransactionManagerInterface;
 
-class Conexion {
+class Conexion implements TransactionManagerInterface {
     private string $host;
     private string $db;
     private string $user;
@@ -38,5 +39,18 @@ class Conexion {
             }
         }
         return $this->pdo;
+    }
+
+    public function transaction(callable $fn): mixed {
+        $pdo = $this->getPdo();
+        $pdo->beginTransaction();
+        try {
+            $resultado = $fn();
+            $pdo->commit();
+            return $resultado;
+        } catch (\Throwable $e) {
+            $pdo->rollBack();
+            throw $e;
+        }
     }
 }

@@ -1,7 +1,7 @@
 <?php
 namespace SonidoInteriorPoo\interfaces;
 
-use SonidoInteriorPoo\Models\Categoria;
+use SonidoInteriorPoo\models\Categoria;
 
 interface CategoriaDAOInterface {
     public function obtenerPorId(int $idCategoria): ?Categoria;

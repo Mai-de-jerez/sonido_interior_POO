@@ -1,25 +1,25 @@
 <?php
 namespace SonidoInteriorPoo\services;
 
-use SonidoInteriorPoo\core\Conexion;
+use SonidoInteriorPoo\interfaces\TransactionManagerInterface;
 use SonidoInteriorPoo\interfaces\CarritoDAOInterface;
-use SonidoInteriorPoo\models\ProductoDAO;
-use SonidoInteriorPoo\models\PedidoDAO;
+use SonidoInteriorPoo\interfaces\ProductoDAOInterface;
+use SonidoInteriorPoo\interfaces\PedidoDAOInterface;
 use SonidoInteriorPoo\interfaces\CarritoServiceInterface;
 
 class CarritoService implements CarritoServiceInterface {
-    private Conexion $conexion;
+    private TransactionManagerInterface $transactionManager;
     private CarritoDAOInterface $carritoDAO;
-    private ProductoDAO $productoDAO;
-    private PedidoDAO $pedidoDAO;
+    private ProductoDAOInterface $productoDAO;
+    private PedidoDAOInterface $pedidoDAO;
 
     public function __construct(
-        Conexion $conexion,
+        TransactionManagerInterface $transactionManager,
         CarritoDAOInterface $carritoDAO,
-        ProductoDAO $productoDAO,
-        PedidoDAO $pedidoDAO
+        ProductoDAOInterface $productoDAO,
+        PedidoDAOInterface $pedidoDAO
     ) {
-        $this->conexion = $conexion;
+        $this->transactionManager = $transactionManager;
         $this->carritoDAO = $carritoDAO;
         $this->productoDAO = $productoDAO;
         $this->pedidoDAO = $pedidoDAO;
@@ -135,17 +135,15 @@ class CarritoService implements CarritoServiceInterface {
 
     // Devuelve ['ok' => bool, 'mensaje' => string, 'idPedido' => ?int]
     public function procesarCheckout(int $idUsuario, string $direccionEnvio): array {
-        $idCarrito = $this->carritoDAO->obtenerOCrearCarrito($idUsuario);
-        $lineas = $this->carritoDAO->obtenerLineas($idCarrito);
+    $idCarrito = $this->carritoDAO->obtenerOCrearCarrito($idUsuario);
+    $lineas = $this->carritoDAO->obtenerLineas($idCarrito);
 
-        if (empty($lineas)) {
-            return ['ok' => false, 'mensaje' => 'Tu carrito está vacío.', 'idPedido' => null];
-        }
+    if (empty($lineas)) {
+        return ['ok' => false, 'mensaje' => 'Tu carrito está vacío.', 'idPedido' => null];
+    }
 
-        $pdo = $this->conexion->getPdo();
-        $pdo->beginTransaction();
-
-        try {
+    try {
+        return $this->transactionManager->transaction(function () use ($idUsuario, $direccionEnvio, $idCarrito, $lineas) {
             $totalPedido = 0;
 
             foreach ($lineas as $linea) {
@@ -183,13 +181,10 @@ class CarritoService implements CarritoServiceInterface {
 
             $this->carritoDAO->vaciarCarrito($idCarrito);
 
-            $pdo->commit();
-
             return ['ok' => true, 'mensaje' => "¡Pedido #{$idPedido} realizado con éxito!", 'idPedido' => $idPedido];
-
-        } catch (\Exception $e) {
-            $pdo->rollBack();
-            return ['ok' => false, 'mensaje' => $e->getMessage(), 'idPedido' => null];
-        }
+        });
+    } catch (\Throwable $e) {
+        return ['ok' => false, 'mensaje' => $e->getMessage(), 'idPedido' => null];
     }
+}
 }

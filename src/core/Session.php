@@ -52,6 +52,13 @@ class Session {
     }
 
     /**
+     * Limpia todas las variables de la sesión actual sin destruirla.
+     */
+    public static function clear(): void {
+        $_SESSION = [];
+    }
+
+    /**
      * Regenera el ID de la sesión para prevenir Session Fixation.
      */
     public static function regenerate(): void {

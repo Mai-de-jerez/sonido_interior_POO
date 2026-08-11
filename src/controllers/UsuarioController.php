@@ -4,6 +4,7 @@ namespace SonidoInteriorPoo\controllers;
 use SonidoInteriorPoo\core\Controller;
 use SonidoInteriorPoo\interfaces\UsuarioServiceInterface;
 use SonidoInteriorPoo\validators\UsuarioValidator;
+use SonidoInteriorPoo\core\Session;
 
 class UsuarioController extends Controller {
     private UsuarioServiceInterface $usuarioService;
@@ -36,9 +37,9 @@ class UsuarioController extends Controller {
             $this->redirigir('login');
         }
 
-        // Limpiar y regenerar sesión
-        session_unset();
-        session_regenerate_id(true);
+        // Limpiar datos anteriores de sesión y regenerar el ID
+        Session::clear();
+        Session::regenerate(); 
 
         $this->setSession('id_usuario', $usuarioData['id_usuario']);
         $this->setSession('usuario', $usuarioData['usuario']);
@@ -158,8 +159,7 @@ class UsuarioController extends Controller {
     // CERRAR SESIÓN
     // ============================================================
     public function logout(): void {
-        session_unset();
-        session_destroy();
+        Session::destroy();
         $this->redirigir('');
     }
 }
