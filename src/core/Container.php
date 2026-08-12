@@ -10,10 +10,12 @@ use SonidoInteriorPoo\models\UsuarioDAO;
 use SonidoInteriorPoo\models\MensajeDAO;
 use SonidoInteriorPoo\models\CarritoDAO;
 use SonidoInteriorPoo\models\PedidoDAO;
+use SonidoInteriorPoo\models\PasswordResetDAO;
 
 use SonidoInteriorPoo\services\CategoriaService;
 use SonidoInteriorPoo\services\ProductoService;
 use SonidoInteriorPoo\services\UsuarioService;
+use SonidoInteriorPoo\services\PasswordResetService;
 use SonidoInteriorPoo\services\MensajeService;
 use SonidoInteriorPoo\services\CarritoService;
 
@@ -91,12 +93,13 @@ class Container
         );
     } 
 
+
     public function getUsuarioController(): UsuarioController
     {
         $usuarioDAO = new UsuarioDAO($this->getConexion());
-
         $carritoDAO = new CarritoDAO($this->getConexion());
         $productoDAO = new ProductoDAO($this->getConexion());
+        $passwordResetDAO = new PasswordResetDAO($this->getConexion());
         $pedidoDAO = new PedidoDAO($this->getConexion());
 
         $carritoService = new CarritoService(
@@ -108,7 +111,12 @@ class Container
 
         $usuarioService = new UsuarioService(
             $usuarioDAO,
-            $carritoService,
+            $carritoService
+        );
+
+        $passwordResetService = new PasswordResetService(
+            $usuarioDAO,
+            $passwordResetDAO,
             $this->getConexion()
         );
 
@@ -116,7 +124,8 @@ class Container
 
         return new UsuarioController(
             $usuarioService,
-            $usuarioValidator    
+            $passwordResetService,
+            $usuarioValidator
         );
     }
 

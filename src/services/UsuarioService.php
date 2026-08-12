@@ -5,23 +5,20 @@ use SonidoInteriorPoo\models\Usuario;
 use SonidoInteriorPoo\interfaces\UsuarioDAOInterface;
 use SonidoInteriorPoo\interfaces\UsuarioServiceInterface;
 use SonidoInteriorPoo\interfaces\CarritoServiceInterface;
-use SonidoInteriorPoo\utils\EmailHelper;
-use SonidoInteriorPoo\interfaces\TransactionManagerInterface;
+
 
 class UsuarioService implements UsuarioServiceInterface {
 
     private UsuarioDAOInterface $usuarioDAO;
     private CarritoServiceInterface $carritoService;
-    private TransactionManagerInterface $transactionManager;
 
     public function __construct(
         UsuarioDAOInterface $usuarioDAO,
-        CarritoServiceInterface $carritoService,
-        TransactionManagerInterface $transactionManager
+        CarritoServiceInterface $carritoService
+  
     ) {
         $this->usuarioDAO = $usuarioDAO;
         $this->carritoService = $carritoService;
-        $this->transactionManager = $transactionManager;
     }
 
     // ============================================================
@@ -57,72 +54,11 @@ class UsuarioService implements UsuarioServiceInterface {
         return $this->usuarioDAO->registrar($usuario, $email, $passwordHash);
     }
 
-    public function obtenerEmailPorToken(string $token): ?string {
-        return $this->usuarioDAO->obtenerEmailPorToken($token);
-    }
-
-    // ============================================================
-    // RECUPERACIÓN DE CONTRASEÑA
-    // ============================================================
-    public function solicitarRecuperacion(string $email): void {
-        $usuario = $this->usuarioDAO->obtenerPorEmail($email);
-
-        if (!$usuario) {
-            return;
-        }
-
-        $token = bin2hex(random_bytes(32));
-
-        $this->transactionManager->transaction(function () use ($email, $token) {
-            $this->usuarioDAO->borrarTokensDe($email);
-            $this->usuarioDAO->insertarToken($email, $token);
-        });
-
-        EmailHelper::enviarEnlaceRecuperacion($email, $usuario->getUsuario(), $token);
-    }
-
-    /**
-     * Hashea la nueva contraseña y llama al DAO para actualizarla en la BD
-     * y borrar el token de recuperación (un solo uso por seguridad).
-     */
-    private function actualizarPasswordConToken(string $email, string $nuevaPassword): bool {
-        $passwordHash = password_hash($nuevaPassword, PASSWORD_DEFAULT);
-
-        $this->transactionManager->transaction(function () use ($email, $passwordHash) {
-            $this->usuarioDAO->actualizarPassword($email, $passwordHash);
-            $this->usuarioDAO->borrarTokenDe($email);
-        });
-
-        return true;
-    }
-
-    public function actualizarPasswordPorToken(string $token, string $nuevaPassword): bool {
-        $email = $this->obtenerEmailPorToken($token);
-        if (!$email) {
-            return false;
-        }
-        return $this->actualizarPasswordConToken($email, $nuevaPassword);
-    }
 
     // ============================================================
     // GESTIÓN DE PERFIL Y USUARIO
     // ============================================================
     public function obtenerPorId(int $idUsuario): ?Usuario {
         return $this->usuarioDAO->obtenerPorId($idUsuario);
-    }
-
-    public function cambiarPassword(int $idUsuario, string $passwordActual, string $nuevaPassword): bool {
-        $usuario = $this->usuarioDAO->obtenerPorId($idUsuario);
-        
-        if (!$usuario || !password_verify($passwordActual, $usuario->getPassword())) {
-            return false;
-        }
-
-        $passwordHash = password_hash($nuevaPassword, PASSWORD_DEFAULT);
-        return $this->usuarioDAO->cambiarPassword($idUsuario, $passwordHash);
-    }
-
-    public function actualizarNombre(int $idUsuario, string $nombre): bool {
-        return $this->usuarioDAO->actualizarNombre($idUsuario, $nombre);
     }
 }

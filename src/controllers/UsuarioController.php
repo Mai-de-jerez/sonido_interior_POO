@@ -3,18 +3,22 @@ namespace SonidoInteriorPoo\controllers;
 
 use SonidoInteriorPoo\core\Controller;
 use SonidoInteriorPoo\interfaces\UsuarioServiceInterface;
+use SonidoInteriorPoo\interfaces\PasswordResetServiceInterface;
 use SonidoInteriorPoo\validators\UsuarioValidator;
 use SonidoInteriorPoo\core\Session;
 
 class UsuarioController extends Controller {
     private UsuarioServiceInterface $usuarioService;
+    private PasswordResetServiceInterface $passwordResetService;
     private UsuarioValidator $usuarioValidator;
 
     public function __construct(
         UsuarioServiceInterface $usuarioService,
+        PasswordResetServiceInterface $passwordResetService,
         UsuarioValidator $usuarioValidator
     ) {
         $this->usuarioService = $usuarioService;
+        $this->passwordResetService = $passwordResetService;
         $this->usuarioValidator = $usuarioValidator;
     }
 
@@ -106,7 +110,7 @@ class UsuarioController extends Controller {
             $this->redirigir('recuperar-password');
         }
 
-        $this->usuarioService->solicitarRecuperacion(trim($_POST['email']));
+        $this->passwordResetService->solicitarRecuperacion(trim($_POST['email']));
 
         $this->setFlash('mensaje_exito', 'Si el correo introducido está registrado, recibirás las instrucciones en tu bandeja de entrada.');
         $this->redirigir('recuperar-password');
@@ -144,7 +148,7 @@ class UsuarioController extends Controller {
             $this->redirigir('restablecer-password?token=' . urlencode($token));
         }
 
-        $actualizado = $this->usuarioService->actualizarPasswordPorToken($token, $_POST['password']);
+        $actualizado = $this->passwordResetService->actualizarPasswordPorToken($token, $_POST['password']);
 
         if ($actualizado) {
             $this->setFlash('mensaje_exito', '¡Contraseña cambiada con éxito! Ya puedes acceder.');
