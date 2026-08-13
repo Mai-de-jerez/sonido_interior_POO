@@ -12,17 +12,11 @@ class Conexion implements TransactionManagerInterface {
     private string $pass;
     private ?PDO $pdo = null;
 
-    public function __construct(
-        string $host = '', 
-        string $db = 'sonido_interior', 
-        string $user = 'root', 
-        string $pass = ''
-    ) {
-        // Si no le pasamos los datos, tira de tus variables de entorno o valores por defecto
-        $this->host = $host !== '' ? $host : (getenv('DB_HOST') ?: '127.0.0.1');
-        $this->db = $db;
-        $this->user = $user;
-        $this->pass = $pass !== '' ? $pass : (getenv('PASSWORD_DB') ?: '');
+    public function __construct() {
+        $this->host = DB_HOST;
+        $this->db = DB_NAME;
+        $this->user = DB_USER;
+        $this->pass = DB_PASS;
     }
 
     public function getPdo(): PDO {

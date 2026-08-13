@@ -49,7 +49,9 @@ class Router
 
         if (!array_key_exists($clave, $this->routes)) {
             http_response_code(404);
-            echo "Página no encontrada. URI: " . htmlspecialchars($uri);
+
+            require __DIR__ . '/../views/public/not-found.php';
+
             return;
         }
 

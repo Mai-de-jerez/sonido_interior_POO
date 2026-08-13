@@ -15,7 +15,6 @@ abstract class Controller {
     // REDIRECCIONES
     // ============================================================
     protected function redirigir(string $ruta): void {
-        // Si la ruta ya es absoluta (http:// o https://), la usamos tal cual
         if (filter_var($ruta, FILTER_VALIDATE_URL)) {
             header("Location: " . $ruta);
             exit();
@@ -67,5 +66,25 @@ abstract class Controller {
 
     protected function getUserRole(): ?string {
         return Session::getUserRole();
+    }
+
+    // ============================================================
+    // CSRF PROTECTION 
+    // ============================================================
+
+    /**
+     * Obtiene el token CSRF actual para usarlo en vistas
+     */
+    protected function csrfToken(): string {
+        return Session::getCsrfToken();
+    }
+
+    /**
+     * Valida el token CSRF de una petición POST
+     * Devuelve true si es válido
+     */
+    protected function validarCsrf(): bool {
+        $token = $_POST['csrf_token'] ?? '';
+        return Session::verifyCsrfToken($token);
     }
 }

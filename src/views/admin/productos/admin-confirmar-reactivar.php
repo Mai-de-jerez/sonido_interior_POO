@@ -1,5 +1,6 @@
 <?php
 $producto = $data['producto'] ?? null;
+$csrf_token = $data['csrf_token'] ?? '';
 
 if (!$producto) {
     header("Location: " . BASE_URL . "/admin/productos?status=notfound");
@@ -34,6 +35,7 @@ include __DIR__ . '/../../includes/menu-admin.php';
 
                 <form action="<?php echo BASE_URL; ?>/admin/productos/reactivar" method="post">
                     <input type="hidden" name="id_producto" value="<?php echo $producto->getIdProducto(); ?>">
+                    <input type="hidden" name="csrf_token" value="<?php echo $csrf_token; ?>">
 
                     <div class="acciones-formulario">
                         <a href="<?php echo BASE_URL; ?>/admin/productos" class="boton cancelar">Cancelar</a>

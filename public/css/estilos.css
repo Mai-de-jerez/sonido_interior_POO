@@ -1525,6 +1525,85 @@ textarea {
     margin-bottom: 8px;
 }
 
+/* ==========================================
+   PÁGINA 404
+   ========================================== */
+
+.pagina-error {
+    min-height: calc(100vh - 170px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 70px 24px;
+    background: #fbf7f0;
+}
+
+.error-card {
+    width: 100%;
+    max-width: 1000px;
+    text-align: center;
+    padding: 70px 40px;
+}
+
+.error-numero {
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: clamp(150px, 20vw, 260px);
+    line-height: 0.8;
+    font-weight: bold;
+    color: #b9823d;
+    margin-bottom: 35px;
+}
+
+.error-card h2 {
+    font-size: 42px;
+    margin-bottom: 18px;
+    color: #3f2c22;
+}
+
+.error-card p {
+    max-width: 650px;
+    margin: 0 auto 35px;
+    color: #665448;
+    font-size: 17px;
+}
+
+.error-acciones {
+    display: flex;
+    justify-content: center;
+    gap: 14px;
+    flex-wrap: wrap;
+}
+
+.error-acciones .boton {
+    min-width: 190px;
+}
+
+@media (max-width: 768px) {
+
+    .pagina-error {
+        min-height: calc(100vh - 220px);
+        padding: 50px 20px;
+    }
+
+    .error-card {
+        padding: 40px 20px;
+    }
+
+    .error-numero {
+        font-size: 150px;
+    }
+
+    .error-card h2 {
+        font-size: 32px;
+    }
+
+    .error-card p {
+        font-size: 15px;
+    }
+
+}
+
+/* Responsive */
 @media (max-width: 900px) {
     .contacto-grid {
         grid-template-columns: 1fr;

@@ -9,65 +9,44 @@ class Session {
     public static function start(): void {
         if (session_status() === PHP_SESSION_NONE) {
             session_set_cookie_params([
-                'lifetime' => 0,                            // Expira al cerrar el navegador
-                'path'     => '/',                          // Disponible en todo el sitio
-                'domain'   => '',                           // Dominio actual
-                'secure'   => isset($_SERVER['HTTPS']),     // Solo encriptado si hay HTTPS
-                'httponly' => true,                         // Impide acceso vía Javascript (protección XSS)
-                'samesite' => 'Lax'                         // Mitiga ataques CSRF
+                'lifetime' => 0,
+                'path'     => '/',
+                'domain'   => '',
+                'secure'   => isset($_SERVER['HTTPS']),
+                'httponly' => true,
+                'samesite' => 'Lax'
             ]);
             
             session_start();
         }
     }
 
-    /**
-     * Guarda un valor en la sesión.
-     */
     public static function set(string $key, mixed $value): void {
         $_SESSION[$key] = $value;
     }
 
-    /**
-     * Obtiene un valor de la sesión. Si no existe, devuelve el valor por defecto.
-     */
     public static function get(string $key, mixed $default = null): mixed {
         return $_SESSION[$key] ?? $default;
     }
 
-    /**
-     * Comprueba si existe una clave en la sesión.
-     */
     public static function has(string $key): bool {
         return isset($_SESSION[$key]);
     }
 
-    /**
-     * Elimina una clave concreta de la sesión.
-     */
     public static function remove(string $key): void {
         if (self::has($key)) {
             unset($_SESSION[$key]);
         }
     }
 
-    /**
-     * Limpia todas las variables de la sesión actual sin destruirla.
-     */
     public static function clear(): void {
         $_SESSION = [];
     }
 
-    /**
-     * Regenera el ID de la sesión para prevenir Session Fixation.
-     */
     public static function regenerate(): void {
         session_regenerate_id(true);
     }
 
-    /**
-     * Destruye por completo la sesión y limpia la cookie del navegador (Logout).
-     */
     public static function destroy(): void {
         if (session_status() === PHP_SESSION_ACTIVE) {
             $_SESSION = [];
@@ -93,16 +72,10 @@ class Session {
     // MENSÁJERÍA EFÍMERA (FLASH MESSAGES)
     // ============================================================
 
-    /**
-     * Guarda un mensaje o dato efímero para la siguiente petición.
-     */
     public static function setFlash(string $key, mixed $value): void {
         $_SESSION['_flash'][$key] = $value;
     }
 
-    /**
-     * Lee un mensaje efímero y lo elimina de la sesión.
-     */
     public static function getFlash(string $key, mixed $default = null): mixed {
         if (isset($_SESSION['_flash'][$key])) {
             $value = $_SESSION['_flash'][$key];
@@ -132,5 +105,47 @@ class Session {
 
     public static function getUserRole(): ?string {
         return self::get('rol');
+    }
+
+    // ============
+    // CSRF TOKEN 
+    // ============
+
+    /**
+     * Genera un token CSRF y lo guarda en sesión
+     * Devuelve el token generado
+     */
+    public static function generateCsrfToken(): string {
+        $token = bin2hex(random_bytes(32));
+        self::set('csrf_token', $token);
+        return $token;
+    }
+
+    /**
+     * Obtiene el token CSRF actual
+     * Si no existe, lo genera
+     */
+    public static function getCsrfToken(): string {
+        $token = self::get('csrf_token');
+        if ($token === null) {
+            $token = self::generateCsrfToken();
+        }
+        return $token;
+    }
+
+    /**
+     * Verifica si el token recibido es válido
+     * El token se elimina después de usarlo (ONE-TIME)
+     */
+    public static function verifyCsrfToken(string $token): bool {
+        $stored = self::get('csrf_token');
+        
+        if ($stored === null || $token !== $stored) {
+            return false;
+        }
+        
+        // Token válido, lo eliminamos para que sea de un solo uso
+        self::remove('csrf_token');
+        return true;
     }
 }

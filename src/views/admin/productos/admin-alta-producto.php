@@ -3,6 +3,7 @@
 $producto = $data['producto'] ?? null;       
 $categorias = $data['categorias'] ?? [];      
 $esEdicion = $producto !== null;
+$csrf_token = $data['csrf_token'] ?? ''; 
 
 // Mensajes de sesión para los errores
 $errores = $_SESSION['errores'] ?? [];
@@ -34,6 +35,8 @@ include __DIR__ . '/../../includes/menu-admin.php';
             method="post" enctype="multipart/form-data"
             data-es-edicion="<?php echo $esEdicion ? '1' : '0'; ?>">
 
+            <!-- CSRF TOKEN -->
+            <input type="hidden" name="csrf_token" value="<?php echo $csrf_token; ?>">
             <?php if ($esEdicion): ?>
                 <input type="hidden" name="id_producto" value="<?php echo $producto->getIdProducto(); ?>">
             <?php endif; ?>

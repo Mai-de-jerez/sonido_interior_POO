@@ -50,7 +50,8 @@ class ProductoController extends Controller {
         $categorias = $this->categoriaService->obtenerActivas();
         $this->renderizar('admin/productos/admin-alta-producto', [
             'producto' => null,
-            'categorias' => $categorias
+            'categorias' => $categorias,
+            'csrf_token' => $this->csrfToken() 
         ]);
     }
 
@@ -76,7 +77,8 @@ class ProductoController extends Controller {
 
         $this->renderizar('admin/productos/admin-alta-producto', [
             'producto' => $producto,
-            'categorias' => $categorias
+            'categorias' => $categorias,
+            'csrf_token' => $this->csrfToken()
         ]);
     }
 
@@ -100,7 +102,8 @@ class ProductoController extends Controller {
         }
 
         $this->renderizar('admin/productos/admin-confirmar-eliminar', [
-            'producto' => $producto
+            'producto' => $producto,
+            'csrf_token' => $this->csrfToken()
         ]);
     }
 
@@ -124,7 +127,8 @@ class ProductoController extends Controller {
         }
 
         $this->renderizar('admin/productos/admin-confirmar-reactivar', [
-            'producto' => $producto
+            'producto' => $producto,
+            'csrf_token' => $this->csrfToken()
         ]);
     }
 
@@ -194,42 +198,55 @@ class ProductoController extends Controller {
     // CREAR PRODUCTO (POST)
     // ============================================================
     public function crear(): void {
-
-        if (empty($_POST['nombre'])) {
-            $this->redirigir('admin/productos');
-        }
-
-        $errores = array_merge(
-            $this->productoValidator->validar($_POST, esEdicion: false),
-            $this->productoService->validarCategoria($_POST)
-        );
-
-        if (!empty($errores)) {
-            $this->setSession('errores', $errores);
-            $this->redirigir('admin/productos/crear');
-        }
-
-        try {
-            $creado = $this->productoService->crear($_POST, $_FILES);
-        } catch (\RuntimeException $e) {
-            $this->setFlash('mensaje_error', $e->getMessage());
-            $this->redirigir('admin/productos/crear');
-            return;
-        }
-
-        if ($creado) {
-            $this->setFlash('mensaje_exito', 'Producto guardado con éxito.');
-            $this->redirigir('admin/productos');
-        } else {
-            $this->setFlash('mensaje_error', 'Error al guardar el producto.');
-            $this->redirigir('admin/productos/crear');
-        }
+    // Validar CSRF
+    if (!$this->validarCsrf()) {
+        $this->setFlash('mensaje_error', 'Token de seguridad inválido. Por favor, recarga la página e inténtalo de nuevo.');
+        $this->redirigir('admin/productos/crear');
+        return;
     }
+
+    if (empty($_POST['nombre'])) {
+        $this->redirigir('admin/productos');
+    }
+
+    $errores = array_merge(
+        $this->productoValidator->validar($_POST, esEdicion: false),
+        $this->productoService->validarCategoria($_POST)
+    );
+
+    if (!empty($errores)) {
+        $this->setSession('errores', $errores);
+        $this->redirigir('admin/productos/crear');
+    }
+
+    try {
+        $creado = $this->productoService->crear($_POST, $_FILES);
+    } catch (\RuntimeException $e) {
+        $this->setFlash('mensaje_error', $e->getMessage());
+        $this->redirigir('admin/productos/crear');
+        return;
+    }
+
+    if ($creado) {
+        $this->setFlash('mensaje_exito', 'Producto guardado con éxito.');
+        $this->redirigir('admin/productos');
+    } else {
+        $this->setFlash('mensaje_error', 'Error al guardar el producto.');
+        $this->redirigir('admin/productos/crear');
+    }
+}
 
     // ============================================================
     // ACTUALIZAR PRODUCTO (POST)
     // ============================================================
     public function actualizar(): void {
+        // Validar CSRF
+        if (!$this->validarCsrf()) {
+            $this->setFlash('mensaje_error', 'Token de seguridad inválido. Por favor, recarga la página e inténtalo de nuevo.');
+            $idProducto = $_POST['id_producto'] ?? 0;
+            $this->redirigir('admin/productos/editar?id=' . $idProducto);
+            return;
+        }
 
         $idProducto = (isset($_POST['id_producto']) && ctype_digit($_POST['id_producto']))
             ? (int) $_POST['id_producto']
@@ -272,6 +289,12 @@ class ProductoController extends Controller {
     // ELIMINAR PRODUCTO (POST)
     // ============================================================
     public function eliminar(): void {
+        //  VALIDAR CSRF
+        if (!$this->validarCsrf()) {
+            $this->setFlash('mensaje_error', 'Token de seguridad inválido.');
+            $this->redirigir('admin/productos');
+            return;
+        }
 
         $idProducto = (isset($_POST['id_producto']) && ctype_digit($_POST['id_producto']))
             ? (int) $_POST['id_producto']
@@ -302,6 +325,12 @@ class ProductoController extends Controller {
     // REACTIVAR PRODUCTO (POST)
     // ============================================================
     public function reactivar(): void {
+        // 🔥 VALIDAR CSRF
+        if (!$this->validarCsrf()) {
+            $this->setFlash('mensaje_error', 'Token de seguridad inválido.');
+            $this->redirigir('admin/productos');
+            return;
+        }
 
         $idProducto = (isset($_POST['id_producto']) && ctype_digit($_POST['id_producto']))
             ? (int) $_POST['id_producto']
