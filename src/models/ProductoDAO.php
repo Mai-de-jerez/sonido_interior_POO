@@ -15,9 +15,8 @@ class ProductoDAO implements ProductoDAOInterface {
     // Obtener todos los productos para el admin (con categoría)
     public function obtenerProductosAdmin(): array {
         $pdo = $this->conexion->getPdo();
-        $sql = "SELECT p.id_producto, p.nombre, p.descripcion, p.precio, p.stock, p.imagen,
-                    p.diametro, p.peso, p.material, p.nota_musical, p.procedencia,
-                    p.id_categoria, p.activo, p.fecha_alta, c.nombre AS nombre_categoria
+        $sql = "SELECT p.id_producto, p.nombre, p.precio, p.stock, p.imagen,
+                    p.nota_musical, p.id_categoria, p.activo, p.fecha_alta, c.nombre AS nombre_categoria
                 FROM productos p
                 INNER JOIN categorias c ON p.id_categoria = c.id_categoria
                 ORDER BY p.id_producto DESC";
@@ -36,8 +35,7 @@ class ProductoDAO implements ProductoDAOInterface {
     // Obtener los últimos 4 productos para el inicio
     public function obtenerUltimosProductosInicio(): array {
         $pdo = $this->conexion->getPdo();
-        $sql = "SELECT id_producto, id_categoria, imagen, nombre, descripcion, precio, stock,
-                       diametro, peso, material, nota_musical, procedencia, activo, fecha_alta
+        $sql = "SELECT id_producto, imagen, nombre, precio
                 FROM productos
                 WHERE activo = 1
                 ORDER BY id_producto DESC
@@ -52,9 +50,7 @@ class ProductoDAO implements ProductoDAOInterface {
         $pdo = $this->conexion->getPdo();
         $offset = ($pagina - 1) * $porPagina;
 
-        $sql = "SELECT id_producto, id_categoria, nombre, precio, imagen, stock,
-                       SUBSTRING(descripcion, 1, 150) AS descripcion,
-                       diametro, peso, material, nota_musical, procedencia, activo, fecha_alta
+        $sql = "SELECT id_producto, nombre, precio, imagen
                 FROM productos
                 WHERE activo = 1";
 
@@ -171,9 +167,9 @@ class ProductoDAO implements ProductoDAOInterface {
         $sql = "UPDATE productos
                 SET stock = stock - ?,
                     activo = CASE WHEN stock - ? <= 0 THEN 0 ELSE activo END
-                WHERE id_producto = ?";
+                WHERE id_producto = ? AND stock >= ?";
         $stmt = $pdo->prepare($sql);
-        return $stmt->execute([$cantidad, $cantidad, $idProducto]);
+        return $stmt->execute([$cantidad, $cantidad, $idProducto, $cantidad]);
     }
 
     // Insertar nuevo producto

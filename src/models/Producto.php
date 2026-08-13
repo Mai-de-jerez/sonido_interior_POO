@@ -44,11 +44,11 @@ class Producto {
     public static function fromArray(array $fila): self {
         return new self(
             (int) $fila['id_producto'],
-            (int) $fila['id_categoria'],
+            (int) ($fila['id_categoria'] ?? 0),
             $fila['nombre'],
             $fila['descripcion'] ?? null,
             (float) $fila['precio'],
-            (int) $fila['stock'],
+            (int) ($fila['stock'] ?? 0),
             $fila['imagen'] ?? null,
             isset($fila['diametro']) ? (float) $fila['diametro'] : null,
             isset($fila['peso']) ? (float) $fila['peso'] : null,

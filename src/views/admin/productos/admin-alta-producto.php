@@ -1,9 +1,5 @@
 <?php
-// ===============================
-// VISTA: admin-alta-producto.php 
-// ===============================
 
-// Datos que llegan del controlador 
 $producto = $data['producto'] ?? null;       
 $categorias = $data['categorias'] ?? [];      
 $esEdicion = $producto !== null;

@@ -1,28 +1,19 @@
 <?php
-$rolNecesario = 'ADMIN';
-require_once __DIR__ . '/../../../includes/seguridad.php';
-require_once __DIR__ . '/../../../includes/conexion.php';
-require_once __DIR__ . '/../../../models/categorias.php';
 
-$categoria = null;
-$esEdicion = false;
+$categoria = $data['categoria'] ?? null;
+$esEdicion = $categoria !== null;
 
-if (isset($_GET['id']) && ctype_digit($_GET['id'])) {
-    $id_categoria = (int) $_GET['id'];
-    $categoria = obtenerCategoriaPorId($conexion, $id_categoria);
-    if ($categoria) {
-        $esEdicion = true;
-    }
-}
+// Mensajes de sesión para los errores
+$errores = $_SESSION['errores'] ?? [];
+$old = $_SESSION['form_old'] ?? [];
+unset($_SESSION['errores'], $_SESSION['form_old']);
 
 $titulo = $esEdicion ? "Editar categoría | Administración" : "Añadir categoría | Administración";
 $bodyClass = "admin-body";
 $paginaAdmin = "categorias";
-include __DIR__ . '/../../../includes/header.php';
-include __DIR__ . '/../../../includes/menu-admin.php';
 
-$errores = $_SESSION['errores'] ?? [];
-unset($_SESSION['errores']);
+include __DIR__ . '/../../includes/header.php';
+include __DIR__ . '/../../includes/menu-admin.php';
 ?>
 
 <main class="admin-main">
@@ -35,28 +26,31 @@ unset($_SESSION['errores']);
     </header>
 
     <section class="admin-contenido">
-        <form class="formulario-admin" action="controllers/categorias/guardar-categoria.php" method="post">
-            
+        <form class="formulario-admin"
+            action="<?php echo BASE_URL . ($esEdicion ? '/admin/categorias/actualizar' : '/admin/categorias/guardar'); ?>"
+            method="post">
+
             <?php if ($esEdicion): ?>
-                <input type="hidden" name="id_categoria" value="<?php echo $categoria['id_categoria']; ?>">
+                <input type="hidden" name="id_categoria" value="<?php echo $categoria->getIdCategoria(); ?>">
             <?php endif; ?>
 
             <div class="form-grid">
                 <div class="campo ancho-completo">
                     <label for="nombre">Nombre de la categoría *</label>
-                    <input type="text" id="nombre" name="nombre" placeholder="Ej: Cuencos grandes" value="<?php echo $esEdicion ? htmlspecialchars($categoria['nombre']) : ''; ?>">
+                    <input type="text" id="nombre" name="nombre" placeholder="Ej: Cuencos grandes"
+                           value="<?php echo $esEdicion ? htmlspecialchars($categoria->getNombre()) : htmlspecialchars($old['nombre'] ?? ''); ?>">
                     <span class="mensaje-error" id="error-nombre"><?= isset($errores['nombre']) ? htmlspecialchars($errores['nombre']) : '' ?></span>
                 </div>
 
                 <div class="campo ancho-completo">
                     <label for="descripcion">Descripción *</label>
-                    <textarea id="descripcion" name="descripcion" placeholder="Describe brevemente esta categoría..."><?php echo $esEdicion ? htmlspecialchars($categoria['descripcion']) : ''; ?></textarea>
+                    <textarea id="descripcion" name="descripcion" placeholder="Describe brevemente esta categoría..."><?php echo $esEdicion ? htmlspecialchars($categoria->getDescripcion()) : htmlspecialchars($old['descripcion'] ?? ''); ?></textarea>
                     <span class="mensaje-error" id="error-descripcion"><?= isset($errores['descripcion']) ? htmlspecialchars($errores['descripcion']) : '' ?></span>
                 </div>
             </div>
 
             <div class="acciones-formulario">
-                <a href="views/admin/categorias/admin-listado-categorias.php" class="boton cancelar">Cancelar</a>
+                <a href="<?php echo BASE_URL; ?>/admin/categorias" class="boton cancelar">Cancelar</a>
                 <button type="submit" class="boton principal"><?php echo $esEdicion ? "Actualizar categoría" : "Guardar categoría"; ?></button>
             </div>
         </form>
@@ -127,4 +121,4 @@ if (formCategoria) {
 }
 </script>
 
-<?php include __DIR__ . "/../../../includes/footer-simple.php"; ?>
+<?php include __DIR__ . '/../../includes/footer-simple.php'; ?>

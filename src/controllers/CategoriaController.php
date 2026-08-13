@@ -154,12 +154,60 @@ class CategoriaController extends Controller {
     }
 
     // ============================================================
+    // CONFIRMAR ELIMINAR
+    // ============================================================
+    public function confirmarEliminar(): void {
+
+        $idCategoria = isset($_GET['id']) && ctype_digit($_GET['id'])
+            ? (int) $_GET['id']
+            : 0;
+
+        if ($idCategoria === 0) {
+            $this->redirigir('admin/categorias?status=notfound');
+        }
+
+        $categoria = $this->categoriaService->obtenerPorId($idCategoria);
+
+        if ($categoria === null) {
+            $this->redirigir('admin/categorias?status=notfound');
+        }
+
+        $this->renderizar('admin/categorias/admin-confirmar-eliminar', [
+            'categoria' => $categoria
+        ]);
+    }
+
+    // ============================================================
+    // CONFIRMAR REACTIVAR
+    // ============================================================
+    public function confirmarReactivar(): void {
+
+        $idCategoria = isset($_GET['id']) && ctype_digit($_GET['id'])
+            ? (int) $_GET['id']
+            : 0;
+
+        if ($idCategoria === 0) {
+            $this->redirigir('admin/categorias?status=notfound');
+        }
+
+        $categoria = $this->categoriaService->obtenerPorId($idCategoria);
+
+        if ($categoria === null) {
+            $this->redirigir('admin/categorias?status=notfound');
+        }
+
+        $this->renderizar('admin/categorias/admin-confirmar-reactivar', [
+            'categoria' => $categoria
+        ]);
+    }
+
+    // ============================================================
     // REACTIVAR CATEGORÍA
     // ============================================================
     public function reactivar(): void {
 
-        $idCategoria = isset($_GET['id']) && ctype_digit($_GET['id'])
-            ? (int) $_GET['id']
+        $idCategoria = (isset($_POST['id_categoria']) && ctype_digit($_POST['id_categoria']))
+            ? (int) $_POST['id_categoria']
             : null;
 
         if ($idCategoria === null) {

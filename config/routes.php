@@ -78,6 +78,8 @@ $router->group([AdminMiddleware::class], function($router) {
     $router->get('/admin/categorias', [CategoriaController::class, 'listar']);
     $router->get('/admin/categorias/crear', [CategoriaController::class, 'nuevo']);
     $router->get('/admin/categorias/editar', [CategoriaController::class, 'editar']);
+    $router->get('/admin/categorias/eliminar', [CategoriaController::class, 'confirmarEliminar']);
+    $router->get('/admin/categorias/reactivar', [CategoriaController::class, 'confirmarReactivar']);
 
     $router->post('/admin/categorias/guardar', [CategoriaController::class, 'crear']);
     $router->post('/admin/categorias/actualizar', [CategoriaController::class, 'actualizar']);
