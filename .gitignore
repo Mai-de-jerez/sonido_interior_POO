@@ -1,0 +1,31 @@
+# Dependencias
+vendor/
+
+# Variables de entorno
+.env
+.env.local
+.env.production
+
+# Archivos de log
+*.log
+
+# Archivos temporales
+*.tmp
+*.swp
+*.swo
+
+# IDE
+.vscode/
+.idea/
+*.iml
+
+# Sistema operativo
+.DS_Store
+Thumbs.db
+
+# Archivos subidos por usuarios
+public/uploads/
+public/img/productos/  # ← OJO: solo si no quieres versionar imágenes
+
+# Archivos de base de datos
+*.sql
