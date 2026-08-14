@@ -31,12 +31,12 @@ include __DIR__ . '/../../includes/menu-admin.php';
                 <p>
                     Vas a desactivar <strong><?php echo htmlspecialchars($categoria->getNombre()); ?></strong>.
                     Dejará de verse como activa y no la podrás asignar a productos.
-                </p>
-
-            <form action="<?php echo BASE_URL; ?>/admin/categorias/eliminar" method="post"> 
-
+                </p> 
+            <form
+                action="<?php echo BASE_URL; ?>/admin/categorias/eliminar/<?php echo $categoria->getIdCategoria(); ?>"
+                method="post"
+            >
                 <input type="hidden" name="csrf_token" value="<?php echo $csrf_token; ?>">
-                <input type="hidden" name="id_categoria" value="<?php echo $categoria->getIdCategoria(); ?>"> 
 
                 <div class="acciones-formulario">
                     <a href="<?php echo BASE_URL; ?>/admin/categorias" class="boton cancelar">Cancelar</a>

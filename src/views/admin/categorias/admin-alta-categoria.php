@@ -27,15 +27,11 @@ include __DIR__ . '/../../includes/menu-admin.php';
     </header>
 
     <section class="admin-contenido">
-        <form class="formulario-admin"
-            action="<?php echo BASE_URL . ($esEdicion ? '/admin/categorias/actualizar' : '/admin/categorias/guardar'); ?>"
+        <form class="formulario-admin" 
+            action="<?php echo BASE_URL . ($esEdicion ? '/admin/categorias/actualizar/' . $categoria->getIdCategoria(): '/admin/categorias/guardar'); ?>"
             method="post">
 
             <input type="hidden" name="csrf_token" value="<?php echo $csrf_token; ?>">
-
-            <?php if ($esEdicion): ?>
-                <input type="hidden" name="id_categoria" value="<?php echo $categoria->getIdCategoria(); ?>">
-            <?php endif; ?>
 
             <div class="form-grid">
                 <div class="campo ancho-completo">

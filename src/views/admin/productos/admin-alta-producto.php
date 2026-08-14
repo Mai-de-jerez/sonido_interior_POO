@@ -31,15 +31,12 @@ include __DIR__ . '/../../includes/menu-admin.php';
 
     <section class="admin-contenido dos-columnas-admin">
         <form class="formulario-admin"
-            action="<?php echo BASE_URL . ($esEdicion ? '/admin/productos/actualizar' : '/admin/productos/guardar'); ?>"
+            action="<?php echo BASE_URL . ($esEdicion ? '/admin/productos/actualizar/' . $producto->getIdProducto(): '/admin/productos/guardar'); ?>"
             method="post" enctype="multipart/form-data"
             data-es-edicion="<?php echo $esEdicion ? '1' : '0'; ?>">
 
             <!-- CSRF TOKEN -->
             <input type="hidden" name="csrf_token" value="<?php echo $csrf_token; ?>">
-            <?php if ($esEdicion): ?>
-                <input type="hidden" name="id_producto" value="<?php echo $producto->getIdProducto(); ?>">
-            <?php endif; ?>
 
             <div class="form-grid">
                 <!-- ===== NOMBRE ===== -->

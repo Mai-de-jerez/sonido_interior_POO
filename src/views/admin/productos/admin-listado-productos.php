@@ -78,11 +78,11 @@ include __DIR__ . '/../../includes/menu-admin.php';
                                     <?php endif; ?>
                                 </td>
                                 <td class="acciones-tabla">
-                                    <a href="<?php echo BASE_URL; ?>/admin/productos/editar?id=<?php echo $prod->getIdProducto(); ?>">✎</a>                                
+                                    <a href="<?php echo BASE_URL; ?>/admin/productos/editar/<?php echo $prod->getIdProducto(); ?>">✎</a>                                
                                     <?php if ($prod->isActivo()): ?>
-                                        <a href="<?php echo BASE_URL; ?>/admin/productos/eliminar?id=<?php echo $prod->getIdProducto(); ?>">🗑</a>
+                                        <a href="<?php echo BASE_URL; ?>/admin/productos/eliminar/<?php echo $prod->getIdProducto(); ?>">🗑</a>
                                     <?php else: ?>
-                                        <a href="<?php echo BASE_URL; ?>/admin/productos/reactivar?id=<?php echo $prod->getIdProducto(); ?>">↺</a>
+                                        <a href="<?php echo BASE_URL; ?>/admin/productos/reactivar/<?php echo $prod->getIdProducto(); ?>">↺</a>
                                     <?php endif; ?>
                                 </td>
                             </tr>

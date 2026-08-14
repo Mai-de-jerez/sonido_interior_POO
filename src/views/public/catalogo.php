@@ -75,7 +75,7 @@ include __DIR__ . '/../includes/menu.php';
                         'pag' => $paginaActual
                     ]);
                     ?>
-                    <a href="detalle-producto?id=<?php echo $prod->getIdProducto(); ?>&volver=<?php echo urlencode($queryActual); ?>" class="boton secundario">Ver producto</a>
+                    <a href="<?php echo BASE_URL; ?>/detalle-producto/<?php echo $prod->getIdProducto(); ?>?volver=<?php echo urlencode($queryActual); ?>" class="boton secundario">Ver producto</a>
                     
                     <form method="POST" action="carrito/agregar" style="display:inline;">
                         <input type="hidden" name="id_producto" value="<?php echo $prod->getIdProducto(); ?>">

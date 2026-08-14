@@ -3,7 +3,9 @@
 $producto = $data['producto'] ?? null;
 
 // Construir URL de "volver" al catálogo
-$urlVolver = "catalogo";
+
+$urlVolver = BASE_URL . "/catalogo";
+
 if (!empty($_GET['volver'])) {
     $urlVolver .= "?" . $_GET['volver'];
 }
@@ -33,7 +35,7 @@ include __DIR__ . '/../includes/menu.php';
 
             <div class="detalle-producto-imagen">
                 <?php if (!empty($producto->getImagen())): ?>
-                    <img src="public/img/productos/<?php echo htmlspecialchars($producto->getImagen()); ?>" alt="<?php echo htmlspecialchars($producto->getNombre()); ?>">
+                    <img src="<?php echo BASE_URL; ?>/public/img/productos/<?php echo htmlspecialchars($producto->getImagen()); ?>" alt="<?php echo htmlspecialchars($producto->getNombre()); ?>">
                 <?php else: ?>
                     <img src="public/img/cuenco-12.svg" alt="Por defecto">
                 <?php endif; ?>

@@ -31,17 +31,9 @@ class CategoriaController extends Controller {
     // ============================================================
     // MOSTRAR FORMULARIO EDITAR
     // ============================================================
-    public function editar(): void {
+    public function editar(int $id): void {
 
-        $idCategoria = isset($_GET['id']) && ctype_digit($_GET['id'])
-            ? (int) $_GET['id']
-            : 0;
-
-        if ($idCategoria === 0) {
-            $this->redirigir('admin/categorias?status=notfound');
-        }
-
-        $categoria = $this->categoriaService->obtenerPorId($idCategoria);
+        $categoria = $this->categoriaService->obtenerPorId($id);
 
         if ($categoria === null) {
             $this->redirigir('admin/categorias?status=notfound');
@@ -98,76 +90,91 @@ class CategoriaController extends Controller {
 
     // ============================================================
     // ACTUALIZAR CATEGORÍA
-    // ============================================================
-    public function actualizar(): void {
-        // Validar token CSRF
+    // ============================================================  
+     public function actualizar(int $id): void
+    {
         if (!$this->validarCsrf()) {
-            $this->setFlash('mensaje_error', 'Token de seguridad inválido. Por favor, recarga la página e inténtalo de nuevo.');
-            $idCategoria = $_POST['id_categoria'] ?? 0;
-            $this->redirigir('admin/categorias/editar?id=' . $idCategoria);
-            return;
+            $this->setFlash(
+                'mensaje_error',
+                'Token de seguridad inválido. Por favor, recarga la página e inténtalo de nuevo.'
+            );
+
+            $this->redirigir('admin/categorias/editar/' . $id);
         }
 
-        $idCategoria = (isset($_POST['id_categoria']) && ctype_digit($_POST['id_categoria']))
-            ? (int) $_POST['id_categoria']
-            : null;
-
-        if ($idCategoria === null) {
-            $this->redirigir('admin/categorias');
-        }
-
-        $urlVuelta = 'admin/categorias/editar?id=' . $idCategoria;
+        $urlVuelta = 'admin/categorias/editar/' . $id;
 
         $errores = $this->categoriaValidator->validar($_POST);
 
         if (!empty($errores)) {
             $this->setSession('errores', $errores);
             $this->setSession('form_old', $_POST);
+
             $this->redirigir($urlVuelta);
         }
 
         try {
-            $actualizado = $this->categoriaService->actualizar($idCategoria, $_POST);
+            $actualizado = $this->categoriaService->actualizar($id, $_POST);
+
             if ($actualizado) {
-                $this->setFlash('mensaje_exito', 'Categoría actualizada con éxito.');
+                $this->setFlash(
+                    'mensaje_exito',
+                    'Categoría actualizada con éxito.'
+                );
+
                 $this->redirigir('admin/categorias');
-            } else {
-                $this->setFlash('mensaje_error', 'Error al actualizar la categoría.');
-                $this->redirigir($urlVuelta);
             }
+
+            $this->setFlash(
+                'mensaje_error',
+                'Error al actualizar la categoría.'
+            );
+
+            $this->redirigir($urlVuelta);
+
         } catch (\RuntimeException $e) {
-            $this->setFlash('mensaje_error', $e->getMessage());
+            $this->setFlash(
+                'mensaje_error',
+                $e->getMessage()
+            );
+
             $this->redirigir($urlVuelta);
         }
     }
-
     // ============================================================
     // ELIMINAR CATEGORÍA (BORRADO LÓGICO)
     // ============================================================
-    public function eliminar(): void {
-        // Validar token CSRF
+    public function eliminar(int $id): void
+    {
         if (!$this->validarCsrf()) {
-            $this->setFlash('mensaje_error', 'Token de seguridad inválido.');
-            $this->redirigir('admin/categorias');
-            return;
-        }
-        $idCategoria = (isset($_POST['id_categoria']) && ctype_digit($_POST['id_categoria']))
-            ? (int) $_POST['id_categoria']
-            : null;
+            $this->setFlash(
+                'mensaje_error',
+                'Token de seguridad inválido.'
+            );
 
-        if ($idCategoria === null) {
             $this->redirigir('admin/categorias');
         }
 
         try {
-            $eliminado = $this->categoriaService->eliminarLogica($idCategoria);
+            $eliminado = $this->categoriaService->eliminarLogica($id);
+
             if ($eliminado) {
-                $this->setFlash('mensaje_exito', 'Categoría eliminada correctamente.');
+                $this->setFlash(
+                    'mensaje_exito',
+                    'Categoría eliminada correctamente.'
+                );
             } else {
-                $this->setFlash('mensaje_error', 'No se pudo eliminar la categoría.');
+                $this->setFlash(
+                    'mensaje_error',
+                    'No se pudo eliminar la categoría.'
+                );
             }
+
         } catch (\RuntimeException $e) {
-            $this->setFlash('mensaje_error', $e->getMessage());
+            $this->setFlash(
+                'mensaje_error',
+                $e->getMessage()
+            );
         }
 
         $this->redirigir('admin/categorias');
@@ -176,17 +183,9 @@ class CategoriaController extends Controller {
     // ============================================================
     // CONFIRMAR ELIMINAR
     // ============================================================
-    public function confirmarEliminar(): void {
-
-        $idCategoria = isset($_GET['id']) && ctype_digit($_GET['id'])
-            ? (int) $_GET['id']
-            : 0;
-
-        if ($idCategoria === 0) {
-            $this->redirigir('admin/categorias?status=notfound');
-        }
-
-        $categoria = $this->categoriaService->obtenerPorId($idCategoria);
+    public function confirmarEliminar(int $id): void
+    {
+        $categoria = $this->categoriaService->obtenerPorId($id);
 
         if ($categoria === null) {
             $this->redirigir('admin/categorias?status=notfound');
@@ -201,17 +200,9 @@ class CategoriaController extends Controller {
     // ============================================================
     // CONFIRMAR REACTIVAR
     // ============================================================
-    public function confirmarReactivar(): void {
-
-        $idCategoria = isset($_GET['id']) && ctype_digit($_GET['id'])
-            ? (int) $_GET['id']
-            : 0;
-
-        if ($idCategoria === 0) {
-            $this->redirigir('admin/categorias?status=notfound');
-        }
-
-        $categoria = $this->categoriaService->obtenerPorId($idCategoria);
+    public function confirmarReactivar(int $id): void
+    {
+        $categoria = $this->categoriaService->obtenerPorId($id);
 
         if ($categoria === null) {
             $this->redirigir('admin/categorias?status=notfound');
@@ -226,30 +217,37 @@ class CategoriaController extends Controller {
     // ============================================================
     // REACTIVAR CATEGORÍA
     // ============================================================
-    public function reactivar(): void {
-        // Validar token CSRF
+    public function reactivar(int $id): void
+    {
         if (!$this->validarCsrf()) {
-            $this->setFlash('mensaje_error', 'Token de seguridad inválido.');
-            $this->redirigir('admin/categorias');
-            return;
-        }
-        $idCategoria = (isset($_POST['id_categoria']) && ctype_digit($_POST['id_categoria']))
-            ? (int) $_POST['id_categoria']
-            : null;
+            $this->setFlash(
+                'mensaje_error',
+                'Token de seguridad inválido.'
+            );
 
-        if ($idCategoria === null) {
             $this->redirigir('admin/categorias');
         }
 
         try {
-            $reactivado = $this->categoriaService->reactivar($idCategoria);
+            $reactivado = $this->categoriaService->reactivar($id);
+
             if ($reactivado) {
-                $this->setFlash('mensaje_exito', 'Categoría reactivada correctamente.');
+                $this->setFlash(
+                    'mensaje_exito',
+                    'Categoría reactivada correctamente.'
+                );
             } else {
-                $this->setFlash('mensaje_error', 'No se pudo reactivar la categoría.');
+                $this->setFlash(
+                    'mensaje_error',
+                    'No se pudo reactivar la categoría.'
+                );
             }
+
         } catch (\RuntimeException $e) {
-            $this->setFlash('mensaje_error', $e->getMessage());
+            $this->setFlash(
+                'mensaje_error',
+                $e->getMessage()
+            );
         }
 
         $this->redirigir('admin/categorias');

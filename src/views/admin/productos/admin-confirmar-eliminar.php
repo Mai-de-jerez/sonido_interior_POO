@@ -32,10 +32,11 @@ include __DIR__ . '/../../includes/menu-admin.php';
                     Vas a desactivar <strong><?php echo htmlspecialchars($producto->getNombre()); ?></strong>.
                     Dejará de verse en la tienda, pero sus datos no se borrarán.
                 </p>
-
-                <form action="<?php echo BASE_URL; ?>/admin/productos/eliminar" method="post">
+                <form
+                    action="<?php echo BASE_URL; ?>/admin/productos/eliminar/<?php echo $producto->getIdProducto(); ?>"
+                    method="post"
+                >
                     <input type="hidden" name="csrf_token" value="<?php echo $csrf_token; ?>">
-                    <input type="hidden" name="id_producto" value="<?php echo $producto->getIdProducto(); ?>">
 
                     <div class="acciones-formulario">
                         <a href="<?php echo BASE_URL; ?>/admin/productos" class="boton cancelar">Cancelar</a>

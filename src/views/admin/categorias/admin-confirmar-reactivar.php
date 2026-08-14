@@ -33,11 +33,13 @@ include __DIR__ . '/../../includes/menu-admin.php';
                     Vas a reactivar <strong><?php echo htmlspecialchars($categoria->getNombre()); ?></strong>.
                     Volverá a estar visible en la tienda.
                 </p>
-
-                <form action="<?php echo BASE_URL; ?>/admin/categorias/reactivar" method="post">
+                
+                <form
+                    action="<?php echo BASE_URL; ?>/admin/categorias/reactivar/<?php echo $categoria->getIdCategoria(); ?>"
+                    method="post"
+                >
 
                     <input type="hidden" name="csrf_token" value="<?php echo $csrf_token; ?>">
-                    <input type="hidden" name="id_categoria" value="<?php echo $categoria->getIdCategoria(); ?>">
 
                     <div class="acciones-formulario">
                         <a href="<?php echo BASE_URL; ?>/admin/categorias" class="boton cancelar">Cancelar</a>

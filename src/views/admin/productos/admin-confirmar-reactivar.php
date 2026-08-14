@@ -33,8 +33,9 @@ include __DIR__ . '/../../includes/menu-admin.php';
                     Volverá a estar visible en la tienda.
                 </p>
 
-                <form action="<?php echo BASE_URL; ?>/admin/productos/reactivar" method="post">
-                    <input type="hidden" name="id_producto" value="<?php echo $producto->getIdProducto(); ?>">
+                <form 
+                    action="<?php echo BASE_URL; ?>/admin/productos/reactivar/<?php echo $producto->getIdProducto(); ?>"
+                    method="post">
                     <input type="hidden" name="csrf_token" value="<?php echo $csrf_token; ?>">
 
                     <div class="acciones-formulario">

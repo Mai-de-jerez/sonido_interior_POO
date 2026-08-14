@@ -54,11 +54,11 @@ include __DIR__ . '/../../includes/menu-admin.php';
                                     <?php endif; ?>
                                 </td>
                                 <td class="acciones-tabla">
-                                    <a href="<?php echo BASE_URL; ?>/admin/categorias/editar?id=<?php echo $cat->getIdCategoria(); ?>">✎</a>
+                                    <a href="<?php echo BASE_URL; ?>/admin/categorias/editar/<?php echo $cat->getIdCategoria(); ?>">✎</a>
                                     <?php if ($cat->isActivo()): ?>
-                                        <a href="<?php echo BASE_URL; ?>/admin/categorias/eliminar?id=<?php echo $cat->getIdCategoria(); ?>">🗑</a>
+                                        <a href="<?php echo BASE_URL; ?>/admin/categorias/eliminar/<?php echo $cat->getIdCategoria(); ?>">🗑</a>
                                     <?php else: ?>
-                                        <a href="<?php echo BASE_URL; ?>/admin/categorias/reactivar?id=<?php echo $cat->getIdCategoria(); ?>">↺</a>
+                                        <a href="<?php echo BASE_URL; ?>/admin/categorias/reactivar/<?php echo $cat->getIdCategoria(); ?>">↺</a>
                                     <?php endif; ?>
                                 </td>
                             </tr>

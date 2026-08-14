@@ -11,7 +11,7 @@ include __DIR__ . '/../includes/menu.php';
     <!-- HERO: imagen + texto + puntos destacados -->
     <div class="nosotros-hero">
         <div class="nosotros-imagen">
-            <img src="public/img/cuencos.jpg" alt="Cuenco tibetano usado en sonoterapia">
+            <img src="<?php echo BASE_URL; ?>/public/img/cuencos.jpg" alt="Cuenco tibetano usado en sonoterapia">
         </div>
 
         <div class="nosotros-texto">

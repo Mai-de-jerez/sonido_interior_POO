@@ -2,74 +2,169 @@
 
 namespace SonidoInteriorPoo\core;
 
-class Router 
+class Router
 {
     private array $routes = [];
     private array $groupMiddlewares = [];
 
-    // Agrupar rutas bajo middlewares comunes
+    /**
+     * Agrupa rutas bajo uno o varios middlewares.
+     */
     public function group(array $middlewares, callable $callback): void
     {
         $previousMiddlewares = $this->groupMiddlewares;
-        $this->groupMiddlewares = array_merge($this->groupMiddlewares, $middlewares);
+
+        $this->groupMiddlewares = array_merge(
+            $this->groupMiddlewares,
+            $middlewares
+        );
 
         $callback($this);
 
         $this->groupMiddlewares = $previousMiddlewares;
     }
 
-    public function get(string $path, array $action): void 
+    public function get(string $path, array $action): void
     {
         $this->addRoute('GET', $path, $action);
     }
 
-    public function post(string $path, array $action): void 
+    public function post(string $path, array $action): void
     {
         $this->addRoute('POST', $path, $action);
     }
 
-    private function addRoute(string $method, string $path, array $action): void 
-    {
-        $this->routes["$method $path"] = [
+    /**
+     * Registra una ruta.
+     */
+    private function addRoute(
+        string $method,
+        string $path,
+        array $action
+    ): void {
+        $this->routes[] = [
+            'method' => $method,
+            'path' => $path,
+            'pattern' => $this->crearPattern($path),
             'action' => $action,
             'middlewares' => $this->groupMiddlewares
         ];
     }
 
-    public function dispatch(string $method, string $uri, Container $container): void 
+    /**
+     * Convierte:
+     *
+     * /productos/{id}
+     *
+     * en:
+     *
+     * #^/productos/(?P<id>[^/]+)$#
+     */
+    private function crearPattern(string $path): string
     {
-        $uri = str_replace([BASE_URL, '/index.php'], '', $uri);
-        $uri = strtok($uri, '?'); 
-        
+        $pattern = preg_replace_callback(
+            '/\{([a-zA-Z_][a-zA-Z0-9_]*)\}/',
+            function (array $match): string {
+                $nombreParametro = $match[1];
+
+                return '(?P<' . $nombreParametro . '>[^/]+)';
+            },
+            $path
+        );
+
+        return '#^' . $pattern . '$#';
+    }
+
+    /**
+     * Busca y ejecuta la ruta correspondiente.
+     */
+    public function dispatch(
+        string $method,
+        string $uri,
+        Container $container
+    ): void {
+        // Eliminar BASE_URL e index.php
+        $uri = str_replace(
+            [BASE_URL, '/index.php'],
+            '',
+            $uri
+        );
+
+        // Eliminar query string
+        $uri = strtok($uri, '?');
+
         if ($uri === '' || $uri === false) {
             $uri = '/';
         }
 
-        $clave = "$method $uri";
+        foreach ($this->routes as $route) {
 
-        if (!array_key_exists($clave, $this->routes)) {
-            http_response_code(404);
+            // El método HTTP tiene que coincidir
+            if ($route['method'] !== $method) {
+                continue;
+            }
 
-            require __DIR__ . '/../views/public/not-found.php';
+            // ¿Coincide la URL con el patrón?
+            if (!preg_match($route['pattern'], $uri, $matches)) {
+                continue;
+            }
+
+            // Extraer únicamente parámetros con nombre
+            $params = [];
+
+            foreach ($matches as $key => $value) {
+                if (is_string($key)) {
+                    $params[$key] = $value;
+                }
+            }
+
+            $this->ejecutarRoute(
+                $route,
+                $container,
+                $params
+            );
 
             return;
         }
 
-        $routeData = $this->routes[$clave];
+        // No existe ninguna ruta
+        $this->mostrar404();
+    }
 
-        // 1. Ejecutar Middlewares del grupo (si los hay)
-        foreach ($routeData['middlewares'] as $middlewareClass) {
+    /**
+     * Ejecuta middleware, resuelve controlador y ejecuta acción.
+     */
+    private function ejecutarRoute(
+        array $route,
+        Container $container,
+        array $params
+    ): void {
+        // 1. Middlewares
+        foreach ($route['middlewares'] as $middlewareClass) {
             $middleware = new $middlewareClass();
-            $middleware->handle(); // Si falla, redirige y corta con exit;
+            $middleware->handle();
         }
 
-        // 2. Resolver el controlador BAJO DEMANDA usando el Container
-        [$controllerClass, $metodo] = $routeData['action'];
-        
-        $controller = is_string($controllerClass) 
-            ? $container->get($controllerClass) 
+        // 2. Resolver controlador mediante Container
+        [$controllerClass, $metodo] = $route['action'];
+
+        $controller = is_string($controllerClass)
+            ? $container->get($controllerClass)
             : $controllerClass;
 
-        $controller->$metodo();
+        // 3. Ejecutar acción pasando parámetros
+        $controller->$metodo(...$params);
+    }
+
+    /**
+     * Mostrar página 404.
+     */
+    private function mostrar404(): void
+    {
+        http_response_code(404);
+
+        require __DIR__ . '/../views/public/not-found.php';
     }
 }
+
+

@@ -19,7 +19,7 @@ include __DIR__ . '/../includes/menu.php';
         <div class="hero-texto">
             <h2>Armonía que<br>se siente</h2>
             <p>Cuencos tibetanos artesanales para meditación, relajación y bienestar interior.</p>
-            <a href="catalogo" class="boton principal">Ver catálogo</a>
+            <a href="<?php echo BASE_URL; ?>/catalogo" class="boton principal">Ver catálogo</a>
         </div>
     </section>
 
@@ -48,7 +48,7 @@ include __DIR__ . '/../includes/menu.php';
                 <p style="text-align: center; grid-column: 1 / -1; color: #8a735f; padding: 20px;">Próximamente nuevos cuencos disponibles.</p>
             <?php else: ?>
                 <?php foreach ($productos as $prod): ?>
-                    <a href="detalle-producto?id=<?php echo $prod->getIdProducto(); ?>" class="tarjeta-producto">
+                    <a href="<?php echo BASE_URL; ?>/detalle-producto/<?php echo $prod->getIdProducto(); ?>" class="tarjeta-producto">
                         <?php if ($prod->getImagen()): ?>
                             <img src="public/img/productos/<?php echo htmlspecialchars($prod->getImagen()); ?>" alt="<?php echo htmlspecialchars($prod->getNombre()); ?>">
                         <?php else: ?>
