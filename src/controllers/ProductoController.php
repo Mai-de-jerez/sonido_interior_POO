@@ -130,7 +130,8 @@ class ProductoController extends Controller
         }
 
         $this->renderizar('public/detalle-producto', [
-            'producto' => $producto
+            'producto' => $producto,
+            'csrf_token' => $this->csrfToken()
         ]);
     }
 
@@ -155,7 +156,7 @@ class ProductoController extends Controller
             $idCategoria,
             $orden,
             $pagina,
-            $porPagina
+            $porPagina,
         );
 
         $totalProductos = $this->productoService->contarProductosCatalogo(
@@ -173,7 +174,8 @@ class ProductoController extends Controller
             'orden' => $orden,
             'pagina' => $pagina,
             'totalPaginas' => $totalPaginas,
-            'totalProductos' => $totalProductos
+            'totalProductos' => $totalProductos,
+            'csrf_token' => $this->csrfToken()
         ]);
     }
 

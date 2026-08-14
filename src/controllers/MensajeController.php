@@ -64,23 +64,16 @@ class MensajeController extends Controller {
     // ============================================================
     // MARCAR MENSAJE COMO LEÍDO (ADMIN)
     // ============================================================
-    public function marcarLeido(): void {
+    public function marcarLeido(int $id): void
+    {
         if (!$this->validarCsrf()) {
             $this->setFlash('mensaje_error', 'Token de seguridad inválido.');
             $this->redirigir('admin/mensajes');
             return;
         }
 
-        $idMensaje = (isset($_POST['id_mensaje']) && ctype_digit($_POST['id_mensaje']))
-            ? (int) $_POST['id_mensaje']
-            : null;
-
-        if ($idMensaje === null) {
-            $this->redirigir('admin/mensajes');
-        }
-
         try {
-            $this->mensajeService->marcarComoLeido($idMensaje);
+            $this->mensajeService->marcarComoLeido($id);
             $this->setFlash('mensaje_exito', 'Mensaje marcado como leído.');
         } catch (\RuntimeException $e) {
             $this->setFlash('mensaje_error', $e->getMessage());
@@ -92,29 +85,23 @@ class MensajeController extends Controller {
     // ============================================================
     // ELIMINAR MENSAJE (ADMIN)
     // ============================================================
-    public function eliminar(): void {
-
+    public function eliminar(int $id): void
+    {
         if (!$this->validarCsrf()) {
             $this->setFlash('mensaje_error', 'Token de seguridad inválido.');
             $this->redirigir('admin/mensajes');
             return;
         }
 
-        $idMensaje = (isset($_POST['id_mensaje']) && ctype_digit($_POST['id_mensaje']))
-            ? (int) $_POST['id_mensaje']
-            : null;
-
-        if ($idMensaje === null) {
-            $this->redirigir('admin/mensajes');
-        }
-
         try {
-            $eliminado = $this->mensajeService->eliminar($idMensaje);
+            $eliminado = $this->mensajeService->eliminar($id);
+
             if ($eliminado) {
                 $this->setFlash('mensaje_exito', 'Mensaje eliminado correctamente.');
             } else {
                 $this->setFlash('mensaje_error', 'No se pudo eliminar el mensaje.');
             }
+
         } catch (\RuntimeException $e) {
             $this->setFlash('mensaje_error', $e->getMessage());
         }

@@ -12,7 +12,7 @@ $paginaActual = $data['pagina'] ?? 1;
 $totalPaginas = $data['totalPaginas'] ?? 1;
 $totalProductos = $data['totalProductos'] ?? 0;
 $porPagina = 8;
-
+$csrf_token = $data['csrf_token'] ?? '';
 $titulo = "Catálogo | Sonido Interior";
 $pagina = "catalogo";
 
@@ -78,6 +78,7 @@ include __DIR__ . '/../includes/menu.php';
                     <a href="<?php echo BASE_URL; ?>/detalle-producto/<?php echo $prod->getIdProducto(); ?>?volver=<?php echo urlencode($queryActual); ?>" class="boton secundario">Ver producto</a>
                     
                     <form method="POST" action="carrito/agregar" style="display:inline;">
+                        <input type="hidden" name="csrf_token" value="<?php echo $csrf_token; ?>">
                         <input type="hidden" name="id_producto" value="<?php echo $prod->getIdProducto(); ?>">
                         <input type="hidden" name="cantidad" value="1">
                         <button type="submit" class="boton">Añadir al carrito</button>
