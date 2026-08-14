@@ -1,5 +1,6 @@
 <?php
 $lineas = $data['lineas'] ?? [];
+$csrf_token = $data['csrf_token'] ?? '';
 
 $totalCarrito = 0;
 foreach ($lineas as $linea) {
@@ -55,12 +56,14 @@ include __DIR__ . '/../includes/menu.php';
                             <td>
                                 <div class="carrito-stepper">
                                     <form action="<?php echo BASE_URL; ?>/carrito/actualizar-cantidad" method="post">
+                                        <input type="hidden" name="csrf_token" value="<?php echo $csrf_token; ?>">
                                         <input type="hidden" name="id_carrito_producto" value="<?php echo $linea->getIdCarritoProducto(); ?>">
                                         <input type="hidden" name="accion" value="restar">
                                         <button type="submit" class="stepper-btn" <?php echo ($linea->getCantidad() <= 1) ? 'disabled' : ''; ?>>−</button>
                                     </form>
                                     <span class="stepper-cantidad"><?php echo $linea->getCantidad(); ?></span>
                                     <form action="<?php echo BASE_URL; ?>/carrito/actualizar-cantidad" method="post">
+                                        <input type="hidden" name="csrf_token" value="<?php echo $csrf_token; ?>">
                                         <input type="hidden" name="id_carrito_producto" value="<?php echo $linea->getIdCarritoProducto(); ?>">
                                         <input type="hidden" name="accion" value="sumar">
                                         <button type="submit" class="stepper-btn" <?php echo ($linea->getCantidad() >= $producto->getStock()) ? 'disabled' : ''; ?>>+</button>
@@ -73,6 +76,7 @@ include __DIR__ . '/../includes/menu.php';
                             <td><?php echo number_format($linea->getSubtotal(), 2, ',', '.'); ?> €</td>
                             <td>
                                 <form action="<?php echo BASE_URL; ?>/carrito/eliminar" method="post">
+                                    <input type="hidden" name="csrf_token" value="<?php echo $csrf_token; ?>">
                                     <input type="hidden" name="id_carrito_producto" value="<?php echo $linea->getIdCarritoProducto(); ?>">
                                     <button type="submit" class="btn-quitar-linea" title="Quitar del carrito">✕</button>
                                 </form>

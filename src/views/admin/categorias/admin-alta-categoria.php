@@ -2,6 +2,7 @@
 
 $categoria = $data['categoria'] ?? null;
 $esEdicion = $categoria !== null;
+$csrf_token = $data['csrf_token'] ?? '';
 
 // Mensajes de sesión para los errores
 $errores = $_SESSION['errores'] ?? [];
@@ -29,6 +30,8 @@ include __DIR__ . '/../../includes/menu-admin.php';
         <form class="formulario-admin"
             action="<?php echo BASE_URL . ($esEdicion ? '/admin/categorias/actualizar' : '/admin/categorias/guardar'); ?>"
             method="post">
+
+            <input type="hidden" name="csrf_token" value="<?php echo $csrf_token; ?>">
 
             <?php if ($esEdicion): ?>
                 <input type="hidden" name="id_categoria" value="<?php echo $categoria->getIdCategoria(); ?>">

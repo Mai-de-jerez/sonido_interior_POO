@@ -23,7 +23,8 @@ class CategoriaController extends Controller {
     public function nuevo(): void {
 
         $this->renderizar('admin/categorias/admin-alta-categoria', [
-            'categoria' => null
+            'categoria' => null,
+            'csrf_token' => $this->csrfToken()
         ]);
     }
 
@@ -47,7 +48,8 @@ class CategoriaController extends Controller {
         }
 
         $this->renderizar('admin/categorias/admin-alta-categoria', [
-            'categoria' => $categoria
+            'categoria' => $categoria,
+            'csrf_token' => $this->csrfToken()
         ]);
     }
 
@@ -69,12 +71,18 @@ class CategoriaController extends Controller {
     // ============================================================
     public function crear(): void {
 
+        if (!$this->validarCsrf()) {
+            $this->setFlash('mensaje_error', 'Token de seguridad inválido. Por favor, recarga la página e inténtalo de nuevo.');
+            $this->redirigir('admin/categorias/crear');
+            return;
+        }
+
         $errores = $this->categoriaValidator->validar($_POST);
 
         if (!empty($errores)) {
             $this->setSession('errores', $errores);
             $this->setSession('form_old', $_POST);
-            $this->redirigir('admin/categorias/nueva');
+            $this->redirigir('admin/categorias/crear');
         }
 
         $creado = $this->categoriaService->crear($_POST);
@@ -84,7 +92,7 @@ class CategoriaController extends Controller {
             $this->redirigir('admin/categorias');
         } else {
             $this->setFlash('mensaje_error', 'Error al guardar la categoría.');
-            $this->redirigir('admin/categorias/nueva');
+            $this->redirigir('admin/categorias/crear');
         }
     }
 
@@ -92,6 +100,13 @@ class CategoriaController extends Controller {
     // ACTUALIZAR CATEGORÍA
     // ============================================================
     public function actualizar(): void {
+        // Validar token CSRF
+        if (!$this->validarCsrf()) {
+            $this->setFlash('mensaje_error', 'Token de seguridad inválido. Por favor, recarga la página e inténtalo de nuevo.');
+            $idCategoria = $_POST['id_categoria'] ?? 0;
+            $this->redirigir('admin/categorias/editar?id=' . $idCategoria);
+            return;
+        }
 
         $idCategoria = (isset($_POST['id_categoria']) && ctype_digit($_POST['id_categoria']))
             ? (int) $_POST['id_categoria']
@@ -130,7 +145,12 @@ class CategoriaController extends Controller {
     // ELIMINAR CATEGORÍA (BORRADO LÓGICO)
     // ============================================================
     public function eliminar(): void {
-
+        // Validar token CSRF
+        if (!$this->validarCsrf()) {
+            $this->setFlash('mensaje_error', 'Token de seguridad inválido.');
+            $this->redirigir('admin/categorias');
+            return;
+        }
         $idCategoria = (isset($_POST['id_categoria']) && ctype_digit($_POST['id_categoria']))
             ? (int) $_POST['id_categoria']
             : null;
@@ -173,7 +193,8 @@ class CategoriaController extends Controller {
         }
 
         $this->renderizar('admin/categorias/admin-confirmar-eliminar', [
-            'categoria' => $categoria
+            'categoria' => $categoria,
+            'csrf_token' => $this->csrfToken()
         ]);
     }
 
@@ -197,7 +218,8 @@ class CategoriaController extends Controller {
         }
 
         $this->renderizar('admin/categorias/admin-confirmar-reactivar', [
-            'categoria' => $categoria
+            'categoria' => $categoria,
+            'csrf_token' => $this->csrfToken()
         ]);
     }
 
@@ -205,7 +227,12 @@ class CategoriaController extends Controller {
     // REACTIVAR CATEGORÍA
     // ============================================================
     public function reactivar(): void {
-
+        // Validar token CSRF
+        if (!$this->validarCsrf()) {
+            $this->setFlash('mensaje_error', 'Token de seguridad inválido.');
+            $this->redirigir('admin/categorias');
+            return;
+        }
         $idCategoria = (isset($_POST['id_categoria']) && ctype_digit($_POST['id_categoria']))
             ? (int) $_POST['id_categoria']
             : null;

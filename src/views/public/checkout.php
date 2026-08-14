@@ -1,6 +1,7 @@
 <?php
 $lineas = $data['lineas'] ?? [];
 $totalCarrito = $data['totalCarrito'] ?? 0;
+$csrf_token = $data['csrf_token'] ?? '';
 
 $titulo = "Finalizar compra | Sonido Interior";
 $pagina = "checkout";
@@ -23,6 +24,7 @@ unset($_SESSION['errores'], $_SESSION['form_old']);
         <section class="checkout-formulario tabla-card">
             <h3>Datos de entrega</h3>
             <form class="formulario-checkout" action="<?php echo BASE_URL; ?>/checkout" method="post">
+                <input type="hidden" name="csrf_token" value="<?php echo $csrf_token; ?>">
                 <div class="campo-form">
                     <label for="direccion_envio">Dirección de envío completa *</label>
                     <input type="text" 

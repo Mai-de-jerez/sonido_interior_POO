@@ -26,13 +26,24 @@ class CarritoController extends Controller {
 
         $lineas = $this->carritoService->obtenerLineas($idUsuario);
 
-        $this->renderizar('public/carrito', ['lineas' => $lineas]);
-    }
+        $this->renderizar('public/carrito', [
+            'lineas' => $lineas,
+            'csrf_token' => $this->csrfToken()
+            ]);
+        }
 
     // ============================================================
     // AÑADIR PRODUCTO AL CARRITO
     // ============================================================
     public function agregar(): void {
+
+        $origen = $_SERVER['HTTP_REFERER'] ?? (BASE_URL . '/catalogo');
+
+        if (!$this->validarCsrf()) {
+            $this->setFlash('mensaje_error', 'Token de seguridad inválido.');
+            $this->redirigir($origen);
+            return;
+        }
 
         $idUsuario = $this->getUserId();
 
@@ -43,8 +54,6 @@ class CarritoController extends Controller {
         $cantidad = (isset($_POST['cantidad']) && ctype_digit($_POST['cantidad']))
             ? (int) $_POST['cantidad']
             : 1;
-
-        $origen = $_SERVER['HTTP_REFERER'] ?? (BASE_URL . '/catalogo');
 
         if ($idProducto === null) {
             $this->redirigir($origen);
@@ -66,6 +75,12 @@ class CarritoController extends Controller {
     // ACTUALIZAR CANTIDAD (sumar / restar)
     // ============================================================
     public function actualizarCantidad(): void {
+        
+        if (!$this->validarCsrf()) {
+            $this->setFlash('mensaje_error', 'Token de seguridad inválido.');
+            $this->redirigir('carrito');
+            return;
+        }
 
         $idUsuario = $this->getUserId();
 
@@ -94,6 +109,12 @@ class CarritoController extends Controller {
     // ELIMINAR LÍNEA DEL CARRITO
     // ============================================================
     public function eliminar(): void {
+
+        if (!$this->validarCsrf()) {
+            $this->setFlash('mensaje_error', 'Token de seguridad inválido.');
+            $this->redirigir('carrito');
+            return;
+        }
 
         $idUsuario = $this->getUserId();
 
@@ -144,7 +165,8 @@ class CarritoController extends Controller {
 
         $this->renderizar('public/checkout', [
             'lineas' => $lineas,
-            'totalCarrito' => $totalCarrito
+            'totalCarrito' => $totalCarrito,
+            'csrf_token' => $this->csrfToken()
         ]);
     }
 
@@ -152,6 +174,12 @@ class CarritoController extends Controller {
     // PROCESAR CHECKOUT
     // ============================================================
     public function procesarCheckout(): void {
+        // Validación CSRF
+        if (!$this->validarCsrf()) {
+            $this->setFlash('mensaje_error', 'Token de seguridad inválido.');
+            $this->redirigir('checkout');
+            return;
+        }
 
         $idUsuario = $this->getUserId();
 

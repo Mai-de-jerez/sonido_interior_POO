@@ -8,6 +8,7 @@ include __DIR__ . "/../includes/menu-login.php";
 $errores = $_SESSION['errores'] ?? [];
 $mensajeError = $_SESSION['mensaje_error'] ?? null;
 $old = $_SESSION['form_old'] ?? [];
+$csrf_token = $data['csrf_token'] ?? '';
 
 // Limpiamos la sesión tras leerlos
 unset($_SESSION['errores'], $_SESSION['mensaje_error'], $_SESSION['form_old']);
@@ -26,7 +27,9 @@ unset($_SESSION['errores'], $_SESSION['mensaje_error'], $_SESSION['form_old']);
             <p style="color: #b03030; text-align: center; margin-bottom: 15px;"><?= htmlspecialchars($mensajeError) ?></p>
         <?php endif; ?>
 
-        <form class="formulario-registro" action="<?php echo BASE_URL; ?>/registro" method="post">           
+        <form class="formulario-registro" action="<?php echo BASE_URL; ?>/registro" method="post"> 
+            
+            <input type="hidden" name="csrf_token" value="<?php echo $csrf_token; ?>">          
 
             <div class="campo">
                 <label for="usuario">Usuario</label>

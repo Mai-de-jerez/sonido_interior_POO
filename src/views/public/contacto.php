@@ -7,6 +7,7 @@ include __DIR__ . '/../includes/menu.php';
 
 $errores = $_SESSION['errores'] ?? [];
 $old = $_SESSION['form_old'] ?? [];
+$csrf_token = $data['csrf_token'] ?? '';
 unset($_SESSION['errores'], $_SESSION['form_old']);
 ?>
 
@@ -17,15 +18,6 @@ unset($_SESSION['errores'], $_SESSION['form_old']);
         <div class="linea-adorno-centro"></div>
         <p>¿Tienes alguna duda sobre nuestros cuencos o necesitas asesoramiento? Escríbenos y te responderemos encantados.</p>
     </div>
-
-    <?php if (isset($_SESSION['contacto_status'])): ?>
-        <?php if ($_SESSION['contacto_status'] === 'success'): ?>
-            <p style="text-align: center; color: #356b2f; font-weight: bold; margin-bottom: 20px;">¡Mensaje enviado correctamente! Te responderemos lo antes posible.</p>
-        <?php else: ?>
-            <p style="text-align: center; color: #b03030; font-weight: bold; margin-bottom: 20px;">Ha habido un problema al enviar el mensaje. Inténtalo de nuevo.</p>
-        <?php endif; ?>
-        <?php unset($_SESSION['contacto_status']); ?>
-    <?php endif; ?>
 
     <div class="contacto-grid">
         
@@ -67,7 +59,8 @@ unset($_SESSION['errores'], $_SESSION['form_old']);
         </aside>
 
         <section class="tarjeta-beneficio contacto-form">
-            <form class="formulario-contacto" action="contacto" method="POST">
+            <form class="formulario-contacto" action="<?php echo BASE_URL; ?>/contacto" method="POST"> 
+                <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrf_token); ?>">
                 <div class="campo-form">
                     <label for="nombre">Nombre completo *</label>
                     <input type="text" id="nombre" name="nombre" placeholder="Tu nombre"

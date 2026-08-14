@@ -26,6 +26,13 @@ class UsuarioController extends Controller {
     // PROCESAR LOGIN
     // ============================================================
     public function procesarLogin(): void {
+
+        if (!$this->validarCsrf()) {
+            $this->setFlash('mensaje_error', 'Token de seguridad inválido. Por favor, recarga la página e inténtalo de nuevo.');
+            $this->redirigir('login');
+            return;
+        }
+
         $errores = $this->usuarioValidator->validarLogin($_POST);
 
         if (!empty($errores)) {
@@ -61,6 +68,13 @@ class UsuarioController extends Controller {
     // PROCESAR REGISTRO
     // ============================================================
     public function procesarRegistro(): void {
+
+        if (!$this->validarCsrf()) {
+            $this->setFlash('mensaje_error', 'Token de seguridad inválido. Por favor, recarga la página e inténtalo de nuevo.');
+            $this->redirigir('registro');
+            return;
+        }
+
         $errores = $this->usuarioValidator->validarRegistro($_POST);
 
         if (!empty($errores)) {
@@ -95,13 +109,22 @@ class UsuarioController extends Controller {
     // MOSTRAR FORMULARIO DE SOLICITUD DE RECUPERACIÓN
     // ============================================================
     public function mostrarRecuperar(): void {
-        $this->renderizar('public/recuperar-password');
+        $this->renderizar('public/recuperar-password', [
+            'csrf_token' => $this->csrfToken()
+        ]);
     }
 
     // ============================================================
     // PROCESAR SOLICITUD DE RECUPERACIÓN
     // ============================================================
     public function procesarRecuperar(): void {
+        
+        if (!$this->validarCsrf()) {
+            $this->setFlash('mensaje_error', 'Token de seguridad inválido. Por favor, recarga la página e inténtalo de nuevo.');
+            $this->redirigir('recuperar-password');
+            return;
+        }
+
         $errores = $this->usuarioValidator->validarRecuperacion($_POST);
 
         if (!empty($errores)) {
@@ -127,7 +150,8 @@ class UsuarioController extends Controller {
         }
 
         $this->renderizar('public/restablecer-password', [
-            'token' => $token
+            'token' => $token,
+            'csrf_token' => $this->csrfToken()
         ]);
     }
 
@@ -135,6 +159,14 @@ class UsuarioController extends Controller {
     // PROCESAR RESTABLECIMIENTO DE CONTRASEÑA
     // ============================================================
     public function procesarRestablecer(): void {
+        
+        if (!$this->validarCsrf()) {
+            $this->setFlash('mensaje_error', 'Token de seguridad inválido. Por favor, recarga la página e inténtalo de nuevo.');
+            $token = $_POST['token'] ?? '';
+            $this->redirigir('restablecer-password?token=' . urlencode($token));
+            return;
+        }
+
         $token = $_POST['token'] ?? '';
 
         if ($token === '') {

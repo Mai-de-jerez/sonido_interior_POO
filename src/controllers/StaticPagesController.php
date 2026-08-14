@@ -6,11 +6,15 @@ use SonidoInteriorPoo\core\Controller;
 class StaticPagesController extends Controller {
     
     public function login(): void {
-        $this->renderizar('public/login');
+        $this->renderizar('public/login', [
+            'csrf_token' => $this->csrfToken()
+        ]);
     }
     
     public function registro(): void {
-        $this->renderizar('public/registro');
+        $this->renderizar('public/registro', [
+            'csrf_token' => $this->csrfToken()
+        ]);
     }    
     
     public function sonoterapia(): void {
@@ -22,6 +26,8 @@ class StaticPagesController extends Controller {
     }
     
     public function contacto(): void {
-        $this->renderizar('public/contacto');
+        $this->renderizar('public/contacto', [
+            'csrf_token' => $this->csrfToken()
+        ]);
     }
 }

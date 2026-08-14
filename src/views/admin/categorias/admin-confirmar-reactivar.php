@@ -1,5 +1,6 @@
 <?php
 $categoria = $data['categoria'] ?? null;
+$csrf_token = $data['csrf_token'] ?? '';
 
 if (!$categoria) {
     header("Location: " . BASE_URL . "/admin/categorias?status=notfound");
@@ -34,6 +35,8 @@ include __DIR__ . '/../../includes/menu-admin.php';
                 </p>
 
                 <form action="<?php echo BASE_URL; ?>/admin/categorias/reactivar" method="post">
+
+                    <input type="hidden" name="csrf_token" value="<?php echo $csrf_token; ?>">
                     <input type="hidden" name="id_categoria" value="<?php echo $categoria->getIdCategoria(); ?>">
 
                     <div class="acciones-formulario">

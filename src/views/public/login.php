@@ -7,6 +7,7 @@ include __DIR__ . "/../includes/menu-login.php";
 $errores = $_SESSION['errores'] ?? [];
 $old = $_SESSION['form_old'] ?? [];
 $mensajeError = $_SESSION['mensaje_error'] ?? null;
+$csrf_token = $data['csrf_token'] ?? '';
 unset($_SESSION['errores'], $_SESSION['form_old'], $_SESSION['mensaje_error']);
 ?>
 
@@ -24,7 +25,8 @@ unset($_SESSION['errores'], $_SESSION['form_old'], $_SESSION['mensaje_error']);
         <?php endif; ?>
 
         <!-- FORMULARIO -->
-        <form class="formulario-login" action="login" method="post" autocomplete="off">
+        <form class="formulario-login" action="<?php echo BASE_URL; ?>/login" method="post" autocomplete="off">
+            <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrf_token); ?>">
             <div class="campo">
                 <label for="usuario">Usuario</label>
                 <input type="text" id="usuario" name="usuario" placeholder="Introduce tu usuario"

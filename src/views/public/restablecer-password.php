@@ -1,8 +1,9 @@
 <?php
 $token = $data['token'] ?? ($_GET['token'] ?? '');
-
+$csrf_token = $data['csrf_token'] ?? '';
 $titulo = "Sonido Interior | Nueva Contraseña";
 $pagina = "restablecer";
+
 
 include __DIR__ . '/../includes/header.php';
 include __DIR__ . "/../includes/menu-login.php";
@@ -24,6 +25,7 @@ unset($_SESSION['errores']);
             <section class="tarjeta-beneficio">
                 <form class="formulario-restablecer" action="<?php echo BASE_URL; ?>/restablecer-password" method="POST" autocomplete="off">
                     <input type="hidden" name="token" value="<?= htmlspecialchars($token); ?>">
+                    <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrf_token); ?>">
 
                     <div class="campo">
                         <label for="password">Nueva contraseña *</label>

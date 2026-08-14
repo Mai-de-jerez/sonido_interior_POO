@@ -7,6 +7,7 @@ include __DIR__ . "/../includes/menu-login.php";
 
 $errores = $_SESSION['errores'] ?? [];
 $old = $_SESSION['form_old'] ?? [];
+$csrf_token = $data['csrf_token'] ?? '';
 unset($_SESSION['errores'], $_SESSION['form_old']);
 ?>
 
@@ -20,6 +21,7 @@ unset($_SESSION['errores'], $_SESSION['form_old']);
     <div style="max-width: 450px; margin: 0 auto;">
         <section class="tarjeta-beneficio">
             <form class="formulario-recuperar" action="<?php echo BASE_URL; ?>/recuperar-password" method="POST" autocomplete="off">
+                <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($csrf_token); ?>">
                 <div class="campo">
                     <label for="email">Correo electrónico *</label>
                     <input type="email" id="email" name="email" placeholder="tu@email.com"

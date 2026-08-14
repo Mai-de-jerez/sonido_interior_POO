@@ -325,7 +325,7 @@ class ProductoController extends Controller {
     // REACTIVAR PRODUCTO (POST)
     // ============================================================
     public function reactivar(): void {
-        // 🔥 VALIDAR CSRF
+        // VALIDAR CSRF
         if (!$this->validarCsrf()) {
             $this->setFlash('mensaje_error', 'Token de seguridad inválido.');
             $this->redirigir('admin/productos');

@@ -21,6 +21,13 @@ class MensajeController extends Controller {
     // PROCESAR FORMULARIO DE CONTACTO
     // ============================================================
     public function procesarContacto(): void {
+
+        if (!$this->validarCsrf()) {
+            $this->setFlash('mensaje_error', 'Token de seguridad inválido. Por favor, recarga la página e inténtalo de nuevo.');
+            $this->redirigir('contacto');
+            return;
+        }
+        
         $errores = $this->mensajeValidator->validar($_POST);
 
         if (!empty($errores)) {
@@ -49,7 +56,8 @@ class MensajeController extends Controller {
 
         $this->renderizar('admin/mensajes/admin-listado-mensajes', [
             'mensajes' => $mensajes,
-            'paginaAdmin' => 'mensajes'
+            'paginaAdmin' => 'mensajes',
+            'csrf_token' => $this->csrfToken()
         ]);
     }
 
@@ -57,6 +65,11 @@ class MensajeController extends Controller {
     // MARCAR MENSAJE COMO LEÍDO (ADMIN)
     // ============================================================
     public function marcarLeido(): void {
+        if (!$this->validarCsrf()) {
+            $this->setFlash('mensaje_error', 'Token de seguridad inválido.');
+            $this->redirigir('admin/mensajes');
+            return;
+        }
 
         $idMensaje = (isset($_POST['id_mensaje']) && ctype_digit($_POST['id_mensaje']))
             ? (int) $_POST['id_mensaje']
@@ -80,6 +93,12 @@ class MensajeController extends Controller {
     // ELIMINAR MENSAJE (ADMIN)
     // ============================================================
     public function eliminar(): void {
+
+        if (!$this->validarCsrf()) {
+            $this->setFlash('mensaje_error', 'Token de seguridad inválido.');
+            $this->redirigir('admin/mensajes');
+            return;
+        }
 
         $idMensaje = (isset($_POST['id_mensaje']) && ctype_digit($_POST['id_mensaje']))
             ? (int) $_POST['id_mensaje']
