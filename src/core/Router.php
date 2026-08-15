@@ -131,6 +131,7 @@ class Router
         $this->mostrar404();
     }
 
+
     /**
      * Ejecuta middleware, resuelve controlador y ejecuta acción.
      */
@@ -152,8 +153,26 @@ class Router
             ? $container->get($controllerClass)
             : $controllerClass;
 
-        // 3. Ejecutar acción pasando parámetros
-        $controller->$metodo(...$params);
+        // 3. Inspeccionar la firma del método para saber si espera Request
+        $reflection = new \ReflectionMethod($controller, $metodo);
+        $parametros = $reflection->getParameters();
+
+        $esperaRequest = isset($parametros[0])
+            && $parametros[0]->getType() instanceof \ReflectionNamedType
+            && $parametros[0]->getType()->getName() === Request::class;
+
+        // 4. Ejecutar acción, pasando Request solo si el método lo espera
+        if ($esperaRequest) {
+            $resultado = $controller->$metodo(Request::fromGlobals(), ...$params);
+        } else {
+            $resultado = $controller->$metodo(...$params);
+        }
+
+        // 5. Si el Controller devuelve un Response (estilo nuevo), lo enviamos.
+        //    Si devuelve null (estilo viejo), ya generó su salida por dentro.
+        if ($resultado instanceof Response) {
+            $resultado->send();
+        }
     }
 
     /**
@@ -161,9 +180,7 @@ class Router
      */
     private function mostrar404(): void
     {
-        http_response_code(404);
-
-        require __DIR__ . '/../views/public/not-found.php';
+        Response::notFound()->send();
     }
 }
 

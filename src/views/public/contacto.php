@@ -7,7 +7,7 @@ include __DIR__ . '/../includes/menu.php';
 
 $errores = $_SESSION['errores'] ?? [];
 $old = $_SESSION['form_old'] ?? [];
-$csrf_token = $data['csrf_token'] ?? '';
+$csrf_token = $csrf_token ?? '';
 unset($_SESSION['errores'], $_SESSION['form_old']);
 ?>
 

@@ -1,9 +1,10 @@
 <?php
 
-$producto = $data['producto'] ?? null;       
-$categorias = $data['categorias'] ?? [];      
+$producto = $producto ?? null;      
+$categorias = $categorias ?? [];      
 $esEdicion = $producto !== null;
-$csrf_token = $data['csrf_token'] ?? ''; 
+$csrf_token = $csrf_token ?? ''; 
+
 
 // Mensajes de sesión para los errores
 $errores = $_SESSION['errores'] ?? [];
@@ -31,7 +32,7 @@ include __DIR__ . '/../../includes/menu-admin.php';
 
     <section class="admin-contenido dos-columnas-admin">
         <form class="formulario-admin"
-            action="<?php echo BASE_URL . ($esEdicion ? '/admin/productos/actualizar/' . $producto->getIdProducto(): '/admin/productos/guardar'); ?>"
+            action="<?php echo BASE_URL . ($esEdicion && $producto !== null ? '/admin/productos/actualizar/' . $producto->getIdProducto() : '/admin/productos/guardar'); ?>"
             method="post" enctype="multipart/form-data"
             data-es-edicion="<?php echo $esEdicion ? '1' : '0'; ?>">
 
@@ -43,7 +44,7 @@ include __DIR__ . '/../../includes/menu-admin.php';
                 <div class="campo ancho-completo">
                     <label for="nombre">Nombre del producto *</label>
                     <input type="text" id="nombre" name="nombre" placeholder="Ej: Cuenco tibetano artesanal 18 cm"
-                           value="<?php echo $esEdicion ? htmlspecialchars($producto->getNombre()) : ''; ?>">
+                           value="<?php echo $esEdicion && $producto !== null ? htmlspecialchars($producto->getNombre()) : htmlspecialchars($old['nombre'] ?? ''); ?>">
                     <span class="mensaje-error" id="error-nombre"><?= isset($errores['nombre']) ? htmlspecialchars($errores['nombre']) : '' ?></span>
                 </div>
 
@@ -54,7 +55,7 @@ include __DIR__ . '/../../includes/menu-admin.php';
                         <option value="">Selecciona una categoría</option>
                         <?php foreach ($categorias as $cat): ?>
                             <option value="<?php echo $cat->getIdCategoria(); ?>"
-                                <?php echo ($esEdicion && $cat->getIdCategoria() == $producto->getIdCategoria()) ? 'selected' : ''; ?>>
+                                <?php echo ($esEdicion && $producto !== null && $cat->getIdCategoria() == $producto->getIdCategoria()) ? 'selected' : ''; ?>>
                                 <?php echo htmlspecialchars($cat->getNombre()); ?>
                             </option>
                         <?php endforeach; ?>
@@ -66,7 +67,7 @@ include __DIR__ . '/../../includes/menu-admin.php';
                 <div class="campo">
                     <label for="precio">Precio (€) *</label>
                     <input type="number" id="precio" name="precio" step="0.01" placeholder="Ej: 79.90"
-                           value="<?php echo $esEdicion ? htmlspecialchars($producto->getPrecio()) : ''; ?>">
+                           value="<?php echo $esEdicion && $producto !== null ? htmlspecialchars($producto->getPrecio()) : htmlspecialchars($old['precio'] ?? ''); ?>">
                     <span class="mensaje-error" id="error-precio"><?= isset($errores['precio']) ? htmlspecialchars($errores['precio']) : '' ?></span>
                 </div>
 
@@ -74,7 +75,7 @@ include __DIR__ . '/../../includes/menu-admin.php';
                 <div class="campo">
                     <label for="stock">Stock *</label>
                     <input type="number" id="stock" name="stock" placeholder="Ej: 5"
-                           value="<?php echo $esEdicion ? htmlspecialchars($producto->getStock()) : ''; ?>">
+                           value="<?php echo $esEdicion && $producto !== null ? htmlspecialchars($producto->getStock()) : htmlspecialchars($old['stock'] ?? ''); ?>">
                     <span class="mensaje-error" id="error-stock"><?= isset($errores['stock']) ? htmlspecialchars($errores['stock']) : '' ?></span>
                 </div>
 
@@ -82,7 +83,7 @@ include __DIR__ . '/../../includes/menu-admin.php';
                 <div class="campo">
                     <label for="diametro">Diámetro (cm)</label>
                     <input type="number" id="diametro" name="diametro" placeholder="Ej: 18"
-                           value="<?php echo $esEdicion ? htmlspecialchars($producto->getDiametro() ?? '') : ''; ?>">
+                           value="<?php echo $esEdicion && $producto !== null ? htmlspecialchars($producto->getDiametro()) : htmlspecialchars($old['diametro'] ?? ''); ?>">
                     <span class="mensaje-error" id="error-diametro"><?= isset($errores['diametro']) ? htmlspecialchars($errores['diametro']) : '' ?></span>
                 </div>
 
@@ -90,7 +91,7 @@ include __DIR__ . '/../../includes/menu-admin.php';
                 <div class="campo">
                     <label for="peso">Peso (g) *</label>
                     <input type="number" id="peso" name="peso" placeholder="Ej: 850"
-                           value="<?php echo $esEdicion ? htmlspecialchars($producto->getPeso() ?? '') : ''; ?>">
+                           value="<?php echo $esEdicion && $producto !== null ? htmlspecialchars($producto->getPeso()) : htmlspecialchars($old['peso'] ?? ''); ?>">
                     <span class="mensaje-error" id="error-peso"><?= isset($errores['peso']) ? htmlspecialchars($errores['peso']) : '' ?></span>
                 </div>
 
@@ -105,7 +106,7 @@ include __DIR__ . '/../../includes/menu-admin.php';
                 <div class="campo">
                     <label for="material">Material *</label>
                     <input type="text" id="material" name="material" placeholder="Ej: Aleación de metales"
-                           value="<?php echo $esEdicion ? htmlspecialchars($producto->getMaterial() ?? '') : ''; ?>">
+                           value="<?php echo $esEdicion && $producto !== null ? htmlspecialchars($producto->getMaterial()) : htmlspecialchars($old['material'] ?? ''); ?>">
                     <span class="mensaje-error" id="error-material"><?= isset($errores['material']) ? htmlspecialchars($errores['material']) : '' ?></span>
                 </div>
 
@@ -113,14 +114,14 @@ include __DIR__ . '/../../includes/menu-admin.php';
                 <div class="campo">
                     <label for="procedencia">Procedencia *</label>
                     <input type="text" id="procedencia" name="procedencia" placeholder="Ej: Nepal"
-                           value="<?php echo $esEdicion ? htmlspecialchars($producto->getProcedencia() ?? '') : ''; ?>">
+                           value="<?php echo $esEdicion && $producto !== null ? htmlspecialchars($producto->getProcedencia()) : htmlspecialchars($old['procedencia'] ?? ''); ?>">
                     <span class="mensaje-error" id="error-procedencia"><?= isset($errores['procedencia']) ? htmlspecialchars($errores['procedencia']) : '' ?></span>
                 </div>
 
                 <!-- ===== DESCRIPCIÓN ===== -->
                 <div class="campo ancho-completo">
                     <label for="descripcion">Descripción *</label>
-                    <textarea id="descripcion" name="descripcion" placeholder="Describe el producto, sus características, beneficios y usos..."><?php echo $esEdicion ? htmlspecialchars($producto->getDescripcion()) : ''; ?></textarea>
+                    <textarea id="descripcion" name="descripcion" placeholder="Describe el producto, sus características, beneficios y usos..."><?php echo $esEdicion && $producto !== null ? htmlspecialchars($producto->getDescripcion()) : htmlspecialchars($old['descripcion'] ?? ''); ?></textarea>
                     <span class="mensaje-error" id="error-descripcion"><?= isset($errores['descripcion']) ? htmlspecialchars($errores['descripcion']) : '' ?></span>
                 </div>
             </div>
@@ -148,7 +149,7 @@ include __DIR__ . '/../../includes/menu-admin.php';
         <aside class="vista-previa-admin">
             <h3><?php echo $esEdicion ? "Imagen actual" : "Vista previa"; ?></h3>
             <article class="tarjeta-producto">
-                <?php if ($esEdicion): ?>
+                <?php if ($esEdicion && $producto !== null): ?>
                     <?php if (!empty($producto->getImagen())): ?>
                         <img id="previa-imagen" src="<?php echo BASE_URL; ?>/public/img/productos/<?php echo htmlspecialchars($producto->getImagen()); ?>" alt="<?php echo htmlspecialchars($producto->getNombre()); ?>">
                     <?php else: ?>

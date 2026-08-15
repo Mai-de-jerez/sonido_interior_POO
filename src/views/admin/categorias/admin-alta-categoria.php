@@ -1,8 +1,8 @@
 <?php
 
-$categoria = $data['categoria'] ?? null;
+$categoria = $categoria ?? null;
 $esEdicion = $categoria !== null;
-$csrf_token = $data['csrf_token'] ?? '';
+$csrf_token = $csrf_token ?? '';
 
 // Mensajes de sesión para los errores
 $errores = $_SESSION['errores'] ?? [];
@@ -28,7 +28,7 @@ include __DIR__ . '/../../includes/menu-admin.php';
 
     <section class="admin-contenido">
         <form class="formulario-admin" 
-            action="<?php echo BASE_URL . ($esEdicion ? '/admin/categorias/actualizar/' . $categoria->getIdCategoria(): '/admin/categorias/guardar'); ?>"
+            action="<?php echo BASE_URL . ($esEdicion && $categoria !== null ? '/admin/categorias/actualizar/' . $categoria->getIdCategoria() : '/admin/categorias/guardar'); ?>"
             method="post">
 
             <input type="hidden" name="csrf_token" value="<?php echo $csrf_token; ?>">
@@ -37,13 +37,13 @@ include __DIR__ . '/../../includes/menu-admin.php';
                 <div class="campo ancho-completo">
                     <label for="nombre">Nombre de la categoría *</label>
                     <input type="text" id="nombre" name="nombre" placeholder="Ej: Cuencos grandes"
-                           value="<?php echo $esEdicion ? htmlspecialchars($categoria->getNombre()) : htmlspecialchars($old['nombre'] ?? ''); ?>">
+                           value="<?php echo $esEdicion && $categoria !== null ? htmlspecialchars($categoria->getNombre()) : htmlspecialchars($old['nombre'] ?? ''); ?>">
                     <span class="mensaje-error" id="error-nombre"><?= isset($errores['nombre']) ? htmlspecialchars($errores['nombre']) : '' ?></span>
                 </div>
 
                 <div class="campo ancho-completo">
                     <label for="descripcion">Descripción *</label>
-                    <textarea id="descripcion" name="descripcion" placeholder="Describe brevemente esta categoría..."><?php echo $esEdicion ? htmlspecialchars($categoria->getDescripcion()) : htmlspecialchars($old['descripcion'] ?? ''); ?></textarea>
+                    <textarea id="descripcion" name="descripcion" placeholder="Describe brevemente esta categoría..."><?php echo $esEdicion && $categoria !== null ? htmlspecialchars($categoria->getDescripcion()) : htmlspecialchars($old['descripcion'] ?? ''); ?></textarea>
                     <span class="mensaje-error" id="error-descripcion"><?= isset($errores['descripcion']) ? htmlspecialchars($errores['descripcion']) : '' ?></span>
                 </div>
             </div>

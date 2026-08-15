@@ -1,6 +1,7 @@
 <?php
-$token = $data['token'] ?? ($_GET['token'] ?? '');
-$csrf_token = $data['csrf_token'] ?? '';
+
+$token = $token ?? '';
+$csrf_token = $csrf_token ?? '';
 $titulo = "Sonido Interior | Nueva Contraseña";
 $pagina = "restablecer";
 

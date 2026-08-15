@@ -1,11 +1,15 @@
 <?php
+
 namespace SonidoInteriorPoo\controllers;
 
 use SonidoInteriorPoo\core\Controller;
+use SonidoInteriorPoo\core\Request;
+use SonidoInteriorPoo\core\Response;
 use SonidoInteriorPoo\interfaces\MensajeServiceInterface;
 use SonidoInteriorPoo\validators\MensajeValidator;
 
-class MensajeController extends Controller {
+class MensajeController extends Controller
+{
     private MensajeServiceInterface $mensajeService;
     private MensajeValidator $mensajeValidator;
 
@@ -20,92 +24,106 @@ class MensajeController extends Controller {
     // ============================================================
     // PROCESAR FORMULARIO DE CONTACTO
     // ============================================================
-    public function procesarContacto(): void {
 
-        if (!$this->validarCsrf()) {
-            $this->setFlash('mensaje_error', 'Token de seguridad inválido. Por favor, recarga la página e inténtalo de nuevo.');
-            $this->redirigir('contacto');
-            return;
-        }
-        
-        $errores = $this->mensajeValidator->validar($_POST);
+    public function procesarContacto(Request $request): Response
+    {
+        $datos = $request->allPost();
+
+        $errores = $this->mensajeValidator->validar($datos);
 
         if (!empty($errores)) {
             $this->setSession('errores', $errores);
-            $this->setSession('form_old', $_POST);
-            $this->redirigir('contacto');
+            $this->setSession('form_old', $request->allPost());
+
+            return Response::redirect('contacto');
         }
 
-        $creado = $this->mensajeService->crear($_POST);
+        $creado = $this->mensajeService->crear($datos);
 
         if ($creado) {
-            $this->setFlash('mensaje_exito', 'Mensaje enviado correctamente. Te responderemos lo antes posible.');
+            $this->setFlash(
+                'mensaje_exito',
+                'Mensaje enviado correctamente. Te responderemos lo antes posible.'
+            );
         } else {
-            $this->setFlash('mensaje_error', 'Ha habido un problema al enviar el mensaje. Inténtalo de nuevo.');
+            $this->setFlash(
+                'mensaje_error',
+                'Ha habido un problema al enviar el mensaje. Inténtalo de nuevo.'
+            );
         }
 
-        $this->redirigir('contacto');
+        return Response::redirect('contacto');
     }
 
     // ============================================================
     // LISTAR MENSAJES (ADMIN)
     // ============================================================
-    public function listar(): void {
 
-        $mensajes = $this->mensajeService->obtenerTodosAdmin();
+    public function listar(): Response
+    {
+        $mensajes = $this->mensajeService
+            ->obtenerTodosAdmin();
 
-        $this->renderizar('admin/mensajes/admin-listado-mensajes', [
-            'mensajes' => $mensajes,
-            'paginaAdmin' => 'mensajes',
-            'csrf_token' => $this->csrfToken()
-        ]);
+        return Response::view(
+            'admin/mensajes/admin-listado-mensajes',
+            [
+                'mensajes' => $mensajes,
+                'paginaAdmin' => 'mensajes',
+                'csrf_token' => $this->csrfToken()
+            ]
+        );
     }
 
     // ============================================================
     // MARCAR MENSAJE COMO LEÍDO (ADMIN)
     // ============================================================
-    public function marcarLeido(int $id): void
-    {
-        if (!$this->validarCsrf()) {
-            $this->setFlash('mensaje_error', 'Token de seguridad inválido.');
-            $this->redirigir('admin/mensajes');
-            return;
-        }
 
+    public function marcarLeido(int $id): Response
+    {
         try {
             $this->mensajeService->marcarComoLeido($id);
-            $this->setFlash('mensaje_exito', 'Mensaje marcado como leído.');
+
+            $this->setFlash(
+                'mensaje_exito',
+                'Mensaje marcado como leído.'
+            );
         } catch (\RuntimeException $e) {
-            $this->setFlash('mensaje_error', $e->getMessage());
+            $this->setFlash(
+                'mensaje_error',
+                $e->getMessage()
+            );
         }
 
-        $this->redirigir('admin/mensajes');
+        return Response::redirect('admin/mensajes');
     }
 
     // ============================================================
     // ELIMINAR MENSAJE (ADMIN)
     // ============================================================
-    public function eliminar(int $id): void
-    {
-        if (!$this->validarCsrf()) {
-            $this->setFlash('mensaje_error', 'Token de seguridad inválido.');
-            $this->redirigir('admin/mensajes');
-            return;
-        }
 
+    public function eliminar(int $id): Response
+    {
         try {
             $eliminado = $this->mensajeService->eliminar($id);
 
             if ($eliminado) {
-                $this->setFlash('mensaje_exito', 'Mensaje eliminado correctamente.');
+                $this->setFlash(
+                    'mensaje_exito',
+                    'Mensaje eliminado correctamente.'
+                );
             } else {
-                $this->setFlash('mensaje_error', 'No se pudo eliminar el mensaje.');
+                $this->setFlash(
+                    'mensaje_error',
+                    'No se pudo eliminar el mensaje.'
+                );
             }
-
         } catch (\RuntimeException $e) {
-            $this->setFlash('mensaje_error', $e->getMessage());
+            $this->setFlash(
+                'mensaje_error',
+                $e->getMessage()
+            );
         }
 
-        $this->redirigir('admin/mensajes');
+        return Response::redirect('admin/mensajes');
     }
 }

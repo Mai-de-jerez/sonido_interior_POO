@@ -4,7 +4,7 @@
 // ============================================
 
 // Datos que llegan del controlador
-$categorias = $data['categorias'] ?? [];
+$categorias = $categorias ?? [];
 
 $titulo = "Listado de categorías | Administración";
 $bodyClass = "admin-body";

@@ -3,8 +3,8 @@
 // LISTADO DE MENSAJES - ADMIN (POO)
 // ============================================
 
-$mensajes = $data['mensajes'] ?? [];
-$csrf_token = $data['csrf_token'] ?? '';
+$mensajes = $mensajes ?? [];
+$csrf_token = $csrf_token ?? '';
 
 $titulo = "Mensajes | Administración";
 $bodyClass = "admin-body";

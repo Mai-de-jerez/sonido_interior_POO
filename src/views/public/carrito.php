@@ -1,6 +1,7 @@
 <?php
-$lineas = $data['lineas'] ?? [];
-$csrf_token = $data['csrf_token'] ?? '';
+
+$lineas = $lineas ?? [];
+$csrf_token = $csrf_token ?? '';
 
 $totalCarrito = 0;
 foreach ($lineas as $linea) {

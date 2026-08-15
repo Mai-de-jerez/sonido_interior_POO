@@ -4,26 +4,6 @@ namespace SonidoInteriorPoo\core;
 abstract class Controller {
 
     // ============================================================
-    // RENDERIZAR VISTAS
-    // ============================================================
-    protected function renderizar(string $vista, array $data = []): void {
-        extract($data);
-        require_once __DIR__ . '/../views/' . $vista . '.php';
-    }
-
-    // ============================================================
-    // REDIRECCIONES
-    // ============================================================
-    protected function redirigir(string $ruta): void {
-        if (filter_var($ruta, FILTER_VALIDATE_URL)) {
-            header("Location: " . $ruta);
-            exit();
-        }
-        header("Location: " . BASE_URL . "/" . ltrim($ruta, '/'));
-        exit();
-    }
-
-    // ============================================================
     // ACCESO A SESIÓN (WRAPPER DE Session)
     // ============================================================
     protected function setSession(string $key, mixed $value): void {
@@ -69,22 +49,10 @@ abstract class Controller {
     }
 
     // ============================================================
-    // CSRF PROTECTION 
+    // CSRF PROTECTION
     // ============================================================
 
-    /**
-     * Obtiene el token CSRF actual para usarlo en vistas
-     */
     protected function csrfToken(): string {
         return Session::getCsrfToken();
-    }
-
-    /**
-     * Valida el token CSRF de una petición POST
-     * Devuelve true si es válido
-     */
-    protected function validarCsrf(): bool {
-        $token = $_POST['csrf_token'] ?? '';
-        return Session::verifyCsrfToken($token);
     }
 }

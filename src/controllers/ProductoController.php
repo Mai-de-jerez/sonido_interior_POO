@@ -3,6 +3,8 @@
 namespace SonidoInteriorPoo\controllers;
 
 use SonidoInteriorPoo\core\Controller;
+use SonidoInteriorPoo\core\Request;
+use SonidoInteriorPoo\core\Response;
 use SonidoInteriorPoo\interfaces\ProductoServiceInterface;
 use SonidoInteriorPoo\interfaces\CategoriaServiceInterface;
 use SonidoInteriorPoo\validators\ProductoValidator;
@@ -24,36 +26,43 @@ class ProductoController extends Controller
     }
 
     // ============================================================
-    // HOME (ÚLTIMOS PRODUCTOS)
+    // HOME
     // ============================================================
-    public function home(): void
-    {
-        $productos = $this->productoService->obtenerUltimosProductosInicio();
 
-        $this->renderizar('public/index', [
+    public function home(): Response
+    {
+        $productos = $this->productoService
+            ->obtenerUltimosProductosInicio();
+
+        return Response::view('public/index', [
             'productos' => $productos
         ]);
     }
 
     // ============================================================
-    // DASHBOARD (ADMIN)
+    // DASHBOARD
     // ============================================================
-    public function dashboard(): void
+
+    public function dashboard(): Response
     {
-        $this->renderizar('admin/dashboard', [
-            'totalProductos' => $this->productoService->obtenerTotalProductosAdmin(),
-            'totalActivos'   => $this->productoService->obtenerTotalActivosAdmin()
+        return Response::view('admin/dashboard', [
+            'totalProductos' => $this->productoService
+                ->obtenerTotalProductosAdmin(),
+
+            'totalActivos' => $this->productoService
+                ->obtenerTotalActivosAdmin()
         ]);
     }
 
     // ============================================================
     // FORMULARIO NUEVO PRODUCTO
     // ============================================================
-    public function nuevo(): void
+
+    public function nuevo(): Response
     {
         $categorias = $this->categoriaService->obtenerActivas();
 
-        $this->renderizar('admin/productos/admin-alta-producto', [
+        return Response::view('admin/productos/admin-alta-producto', [
             'producto' => null,
             'categorias' => $categorias,
             'csrf_token' => $this->csrfToken()
@@ -63,18 +72,21 @@ class ProductoController extends Controller
     // ============================================================
     // FORMULARIO EDITAR PRODUCTO
     // ============================================================
-    public function editar(int $id): void
+
+    public function editar(int $id): Response
     {
-        $producto = $this->productoService->obtenerPorIdAdmin($id);
+        $producto = $this->productoService
+            ->obtenerPorIdAdmin($id);
 
         if ($producto === null) {
-            $this->redirigir('admin/productos?status=notfound');
-            return;
+            return Response::redirect(
+                'admin/productos?status=notfound'
+            );
         }
 
         $categorias = $this->categoriaService->obtenerActivas();
 
-        $this->renderizar('admin/productos/admin-alta-producto', [
+        return Response::view('admin/productos/admin-alta-producto', [
             'producto' => $producto,
             'categorias' => $categorias,
             'csrf_token' => $this->csrfToken()
@@ -84,90 +96,112 @@ class ProductoController extends Controller
     // ============================================================
     // CONFIRMAR ELIMINAR
     // ============================================================
-    public function confirmarEliminar(int $id): void
+
+    public function confirmarEliminar(int $id): Response
     {
-        $producto = $this->productoService->obtenerPorIdAdmin($id);
+        $producto = $this->productoService
+            ->obtenerPorIdAdmin($id);
 
         if ($producto === null) {
-            $this->redirigir('admin/productos?status=notfound');
-            return;
+            return Response::redirect(
+                'admin/productos?status=notfound'
+            );
         }
 
-        $this->renderizar('admin/productos/admin-confirmar-eliminar', [
-            'producto' => $producto,
-            'csrf_token' => $this->csrfToken()
-        ]);
+        return Response::view(
+            'admin/productos/admin-confirmar-eliminar',
+            [
+                'producto' => $producto,
+                'csrf_token' => $this->csrfToken()
+            ]
+        );
     }
 
     // ============================================================
     // CONFIRMAR REACTIVAR
     // ============================================================
-    public function confirmarReactivar(int $id): void
+
+    public function confirmarReactivar(int $id): Response
     {
-        $producto = $this->productoService->obtenerPorIdAdmin($id);
+        $producto = $this->productoService
+            ->obtenerPorIdAdmin($id);
 
         if ($producto === null) {
-            $this->redirigir('admin/productos?status=notfound');
-            return;
+            return Response::redirect(
+                'admin/productos?status=notfound'
+            );
         }
 
-        $this->renderizar('admin/productos/admin-confirmar-reactivar', [
+        return Response::view(
+            'admin/productos/admin-confirmar-reactivar',
+            [
+                'producto' => $producto,
+                'csrf_token' => $this->csrfToken()
+            ]
+        );
+    }
+
+    // ============================================================
+    // DETALLE PRODUCTO
+    // ============================================================
+
+    public function detalle(int $id): Response
+    {
+        $producto = $this->productoService
+            ->obtenerPorId($id);
+
+        if ($producto === null) {
+            return Response::redirect(
+                'catalogo?error=producto_no_encontrado'
+            );
+        }
+
+        return Response::view('public/detalle-producto', [
             'producto' => $producto,
             'csrf_token' => $this->csrfToken()
         ]);
     }
 
     // ============================================================
-    // DETALLE PRODUCTO (PÚBLICO)
+    // CATÁLOGO
     // ============================================================
-    public function detalle(int $id): void
+
+    public function catalogo(Request $request): Response
     {
-        $producto = $this->productoService->obtenerPorId($id);
+        $categoria = $request->get('categoria');
 
-        if ($producto === null) {
-            $this->redirigir('catalogo?error=producto_no_encontrado');
-            return;
-        }
-
-        $this->renderizar('public/detalle-producto', [
-            'producto' => $producto,
-            'csrf_token' => $this->csrfToken()
-        ]);
-    }
-
-    // ============================================================
-    // CATÁLOGO (PÚBLICO)
-    // ============================================================
-    public function catalogo(): void
-    {
-        $idCategoria = isset($_GET['categoria']) && ctype_digit($_GET['categoria'])
-            ? (int) $_GET['categoria']
+        $idCategoria = ctype_digit((string) $categoria)
+            ? (int) $categoria
             : null;
 
-        $orden = $_GET['orden'] ?? 'recientes';
+        $orden = $request->get('orden', 'recientes');
 
-        $pagina = isset($_GET['pag']) && ctype_digit($_GET['pag'])
-            ? (int) $_GET['pag']
+        $pag = $request->get('pag');
+
+        $pagina = ctype_digit((string) $pag)
+            ? (int) $pag
             : 1;
 
         $porPagina = 8;
 
-        $productos = $this->productoService->obtenerProductosCatalogo(
-            $idCategoria,
-            $orden,
-            $pagina,
-            $porPagina,
-        );
+        $productos = $this->productoService
+            ->obtenerProductosCatalogo(
+                $idCategoria,
+                $orden,
+                $pagina,
+                $porPagina
+            );
 
-        $totalProductos = $this->productoService->contarProductosCatalogo(
-            $idCategoria
-        );
+        $totalProductos = $this->productoService
+            ->contarProductosCatalogo($idCategoria);
 
-        $totalPaginas = (int) ceil($totalProductos / $porPagina);
+        $totalPaginas = (int) ceil(
+            $totalProductos / $porPagina
+        );
 
         $categorias = $this->categoriaService->obtenerActivas();
 
-        $this->renderizar('public/catalogo', [
+        return Response::view('public/catalogo', [
             'productos' => $productos,
             'categorias' => $categorias,
             'idCategoria' => $idCategoria,
@@ -180,55 +214,65 @@ class ProductoController extends Controller
     }
 
     // ============================================================
-    // LISTAR PRODUCTOS (ADMIN)
+    // LISTAR PRODUCTOS
     // ============================================================
-    public function listar(): void
-    {
-        $productos = $this->productoService->obtenerProductosAdmin();
 
-        $this->renderizar('admin/productos/admin-listado-productos', [
-            'productos' => $productos
-        ]);
+    public function listar(): Response
+    {
+        $productos = $this->productoService
+            ->obtenerProductosAdmin();
+
+        return Response::view(
+            'admin/productos/admin-listado-productos',
+            [
+                'productos' => $productos
+            ]
+        );
     }
 
     // ============================================================
-    // CREAR PRODUCTO (POST)
+    // CREAR PRODUCTO
     // ============================================================
-    public function crear(): void
+
+    public function crear(Request $request): Response
     {
-        // Validar CSRF
-        if (!$this->validarCsrf()) {
-            $this->setFlash(
-                'mensaje_error',
-                'Token de seguridad inválido. Por favor, recarga la página e inténtalo de nuevo.'
-            );
+        $datos = $request->allPost();
+        $archivos = $request->allFiles();
 
-            $this->redirigir('admin/productos/crear');
-            return;
-        }
-
-        if (empty($_POST['nombre'])) {
-            $this->redirigir('admin/productos');
-            return;
+        if (empty($request->post('nombre'))) {
+            return Response::redirect('admin/productos');
         }
 
         $errores = array_merge(
-            $this->productoValidator->validar($_POST, esEdicion: false),
-            $this->productoService->validarCategoria($_POST)
+            $this->productoValidator->validar(
+                $datos,
+                esEdicion: false
+            ),
+            $this->productoService->validarCategoria($datos)
         );
 
         if (!empty($errores)) {
             $this->setSession('errores', $errores);
-            $this->redirigir('admin/productos/crear');
-            return;
+
+            return Response::redirect(
+                'admin/productos/crear'
+            );
         }
 
         try {
-            $creado = $this->productoService->crear($_POST, $_FILES);
+            $creado = $this->productoService->crear(
+                $datos,
+                $archivos
+            );
         } catch (\RuntimeException $e) {
-            $this->setFlash('mensaje_error', $e->getMessage());
-            $this->redirigir('admin/productos/crear');
-            return;
+            $this->setFlash(
+                'mensaje_error',
+                $e->getMessage()
+            );
+
+            return Response::redirect(
+                'admin/productos/crear'
+            );
         }
 
         if ($creado) {
@@ -237,8 +281,9 @@ class ProductoController extends Controller
                 'Producto guardado con éxito.'
             );
 
-            $this->redirigir('admin/productos');
-            return;
+            return Response::redirect(
+                'admin/productos'
+            );
         }
 
         $this->setFlash(
@@ -246,48 +291,49 @@ class ProductoController extends Controller
             'Error al guardar el producto.'
         );
 
-        $this->redirigir('admin/productos/crear');
+        return Response::redirect(
+            'admin/productos/crear'
+        );
     }
 
     // ============================================================
-    // ACTUALIZAR PRODUCTO (POST)
+    // ACTUALIZAR PRODUCTO
     // ============================================================
-    public function actualizar(int $id): void
-    {
-        // Validar CSRF
-        if (!$this->validarCsrf()) {
-            $this->setFlash(
-                'mensaje_error',
-                'Token de seguridad inválido. Por favor, recarga la página e inténtalo de nuevo.'
-            );
 
-            $this->redirigir('admin/productos/editar/' . $id);
-            return;
-        }
-
-        if (empty($_POST['nombre'])) {
-            $this->redirigir('admin/productos');
-            return;
-        }
+    public function actualizar(
+        Request $request,
+        int $id
+    ): Response {
+        $datos = $request->allPost();
+        $archivos = $request->allFiles();
 
         $urlVuelta = 'admin/productos/editar/' . $id;
 
+        if (empty($request->post('nombre'))) {
+            return Response::redirect(
+                'admin/productos'
+            );
+        }
+
         $errores = array_merge(
-            $this->productoValidator->validar($_POST, esEdicion: true),
-            $this->productoService->validarCategoria($_POST)
+            $this->productoValidator->validar(
+                $datos,
+                esEdicion: true
+            ),
+            $this->productoService->validarCategoria($datos)
         );
 
         if (!empty($errores)) {
             $this->setSession('errores', $errores);
-            $this->redirigir($urlVuelta);
-            return;
+
+            return Response::redirect($urlVuelta);
         }
 
         try {
             $actualizado = $this->productoService->actualizar(
                 $id,
-                $_POST,
-                $_FILES
+                $datos,
+                $archivos
             );
         } catch (\RuntimeException $e) {
             $this->setFlash(
@@ -295,8 +341,7 @@ class ProductoController extends Controller
                 $e->getMessage()
             );
 
-            $this->redirigir($urlVuelta);
-            return;
+            return Response::redirect($urlVuelta);
         }
 
         if ($actualizado) {
@@ -305,8 +350,9 @@ class ProductoController extends Controller
                 'Producto actualizado con éxito.'
             );
 
-            $this->redirigir('admin/productos');
-            return;
+            return Response::redirect(
+                'admin/productos'
+            );
         }
 
         $this->setFlash(
@@ -314,35 +360,27 @@ class ProductoController extends Controller
             'Error al actualizar el producto.'
         );
 
-        $this->redirigir($urlVuelta);
+        return Response::redirect($urlVuelta);
     }
 
     // ============================================================
-    // ELIMINAR PRODUCTO (POST)
+    // ELIMINAR PRODUCTO
     // ============================================================
-    public function eliminar(int $id): void
+
+    public function eliminar(int $id): Response
     {
-        // Validar CSRF
-        if (!$this->validarCsrf()) {
-            $this->setFlash(
-                'mensaje_error',
-                'Token de seguridad inválido.'
-            );
-
-            $this->redirigir('admin/productos');
-            return;
-        }
-
         try {
-            $eliminado = $this->productoService->eliminarLogico($id);
+            $eliminado = $this->productoService
+                ->eliminarLogico($id);
         } catch (\RuntimeException $e) {
             $this->setFlash(
                 'mensaje_error',
                 $e->getMessage()
             );
 
-            $this->redirigir('admin/productos?status=error');
-            return;
+            return Response::redirect(
+                'admin/productos?status=error'
+            );
         }
 
         if ($eliminado) {
@@ -351,8 +389,9 @@ class ProductoController extends Controller
                 'Producto eliminado correctamente.'
             );
 
-            $this->redirigir('admin/productos?status=deleted');
-            return;
+            return Response::redirect(
+                'admin/productos?status=deleted'
+            );
         }
 
         $this->setFlash(
@@ -360,35 +399,29 @@ class ProductoController extends Controller
             'No se pudo eliminar el producto.'
         );
 
-        $this->redirigir('admin/productos?status=error');
+        return Response::redirect(
+            'admin/productos?status=error'
+        );
     }
 
     // ============================================================
-    // REACTIVAR PRODUCTO (POST)
+    // REACTIVAR PRODUCTO
     // ============================================================
-    public function reactivar(int $id): void
+
+    public function reactivar(int $id): Response
     {
-        // Validar CSRF
-        if (!$this->validarCsrf()) {
-            $this->setFlash(
-                'mensaje_error',
-                'Token de seguridad inválido.'
-            );
-
-            $this->redirigir('admin/productos');
-            return;
-        }
-
         try {
-            $reactivado = $this->productoService->reactivar($id);
+            $reactivado = $this->productoService
+                ->reactivar($id);
         } catch (\RuntimeException $e) {
             $this->setFlash(
                 'mensaje_error',
                 $e->getMessage()
             );
 
-            $this->redirigir('admin/productos?status=error');
-            return;
+            return Response::redirect(
+                'admin/productos?status=error'
+            );
         }
 
         if ($reactivado) {
@@ -397,8 +430,9 @@ class ProductoController extends Controller
                 'Producto reactivado correctamente.'
             );
 
-            $this->redirigir('admin/productos?status=reactivated');
-            return;
+            return Response::redirect(
+                'admin/productos?status=reactivated'
+            );
         }
 
         $this->setFlash(
@@ -406,6 +440,8 @@ class ProductoController extends Controller
             'No se pudo reactivar el producto. Por favor, inténtalo de nuevo.'
         );
 
-        $this->redirigir('admin/productos?status=error');
+        return Response::redirect(
+            'admin/productos?status=error'
+        );
     }
 }

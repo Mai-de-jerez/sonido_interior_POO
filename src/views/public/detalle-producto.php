@@ -1,8 +1,7 @@
 <?php
 
-$producto = $data['producto'] ?? null;
-$csrf_token = $data['csrf_token'] ?? '';
-
+$producto = $producto ?? null;
+$csrf_token = $csrf_token ?? '';
 // Construir URL de "volver" al catálogo
 
 $urlVolver = BASE_URL . "/catalogo";

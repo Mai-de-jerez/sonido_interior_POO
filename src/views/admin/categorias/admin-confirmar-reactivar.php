@@ -1,6 +1,7 @@
 <?php
-$categoria = $data['categoria'] ?? null;
-$csrf_token = $data['csrf_token'] ?? '';
+
+$categoria = $categoria ?? null;
+$csrf_token = $csrf_token ?? '';
 
 if (!$categoria) {
     header("Location: " . BASE_URL . "/admin/categorias?status=notfound");

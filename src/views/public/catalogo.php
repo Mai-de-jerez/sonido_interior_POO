@@ -2,17 +2,17 @@
 // ============================================
 // VISTA: catalogo.php (POO)
 // ============================================
-
 // Datos que llegan del controlador 
-$productos = $data['productos'] ?? [];
-$categorias = $data['categorias'] ?? [];
-$idCategoria = $data['idCategoria'] ?? null;
-$orden = $data['orden'] ?? 'recientes';
-$paginaActual = $data['pagina'] ?? 1;
-$totalPaginas = $data['totalPaginas'] ?? 1;
-$totalProductos = $data['totalProductos'] ?? 0;
+$productos = $productos ?? [];
+$categorias = $categorias ?? [];
+$idCategoria = $idCategoria ?? null;
+$orden = $orden ?? 'recientes';
+$paginaActual = $pagina ?? 1;
+$totalPaginas = $totalPaginas ?? 1;
+$totalProductos = $totalProductos ?? 0;
 $porPagina = 8;
-$csrf_token = $data['csrf_token'] ?? '';
+$csrf_token = $csrf_token ?? '';
+
 $titulo = "Catálogo | Sonido Interior";
 $pagina = "catalogo";
 

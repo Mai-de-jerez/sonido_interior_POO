@@ -4,7 +4,7 @@
 // ============================================
 
 // Datos que llegan del controlador 
-$productos = $data['productos'] ?? [];
+$productos = $productos ?? [];
 
 $titulo = "Sonido Interior | Cuencos Tibetanos";
 $bodyClass = "home";
