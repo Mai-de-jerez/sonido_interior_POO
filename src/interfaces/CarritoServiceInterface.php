@@ -8,5 +8,4 @@ interface CarritoServiceInterface {
     public function actualizarCantidad(int $idUsuario, int $idCarritoProducto, string $accion): array;
     public function eliminarLinea(int $idUsuario, int $idCarritoProducto): bool;
     public function obtenerCantidadLinea(int $idUsuario, int $idCarritoProducto): ?int;
-    public function procesarCheckout(int $idUsuario, string $direccionEnvio): array;
 }

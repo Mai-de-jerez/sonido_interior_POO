@@ -38,6 +38,10 @@ class Request {
         return $this->files;
     }
 
+    public function referer(?string $default = null): ?string {
+        return $this->server['HTTP_REFERER'] ?? $default;
+    }
+
     public function method(): string {
         return $this->server['REQUEST_METHOD'] ?? 'GET';
     }

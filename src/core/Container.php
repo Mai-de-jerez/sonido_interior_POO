@@ -18,6 +18,8 @@ use SonidoInteriorPoo\services\UsuarioService;
 use SonidoInteriorPoo\services\PasswordResetService;
 use SonidoInteriorPoo\services\MensajeService;
 use SonidoInteriorPoo\services\CarritoService;
+use SonidoInteriorPoo\services\CheckoutService;
+use SonidoInteriorPoo\services\PedidoService;
 
 use SonidoInteriorPoo\controllers\CategoriaController;
 use SonidoInteriorPoo\controllers\ProductoController;
@@ -79,6 +81,7 @@ class Container
         $productoDAO = new ProductoDAO($this->getConexion());
 
         $categoriaService = new CategoriaService($categoriaDAO);
+        
         $productoService = new ProductoService(
             $productoDAO,
             $categoriaDAO
@@ -100,13 +103,10 @@ class Container
         $carritoDAO = new CarritoDAO($this->getConexion());
         $productoDAO = new ProductoDAO($this->getConexion());
         $passwordResetDAO = new PasswordResetDAO($this->getConexion());
-        $pedidoDAO = new PedidoDAO($this->getConexion());
 
         $carritoService = new CarritoService(
-            $this->getConexion(),
             $carritoDAO,
-            $productoDAO,
-            $pedidoDAO
+            $productoDAO
         );
 
         $usuarioService = new UsuarioService(
@@ -155,16 +155,26 @@ class Container
         $pedidoDAO = new PedidoDAO($this->getConexion());
 
         $carritoService = new CarritoService(
-            $this->getConexion(),
+            $carritoDAO,
+            $productoDAO
+        );
+
+        $pedidoService = new PedidoService(
+            $pedidoDAO
+        );
+
+        $checkoutService = new CheckoutService(
+            $this->getConexion(), 
             $carritoDAO,
             $productoDAO,
-            $pedidoDAO
+            $pedidoService
         );
 
         $checkoutValidator = new CheckoutValidator();
 
         return new CarritoController(
             $carritoService,
+            $checkoutService,
             $checkoutValidator
         );
     }

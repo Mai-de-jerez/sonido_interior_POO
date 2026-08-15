@@ -1,7 +1,7 @@
 <?php
-$lineas = $data['lineas'] ?? [];
-$totalCarrito = $data['totalCarrito'] ?? 0;
-$csrf_token = $data['csrf_token'] ?? '';
+$lineas = $lineas ?? [];
+$totalCarrito = $totalCarrito ?? 0;
+$csrf_token = $csrf_token ?? '';
 
 $titulo = "Finalizar compra | Sonido Interior";
 $pagina = "checkout";
