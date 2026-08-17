@@ -4,14 +4,10 @@ $producto = $producto ?? null;
 $categorias = $categorias ?? [];      
 $esEdicion = $producto !== null;
 $csrf_token = $csrf_token ?? ''; 
+$errores = $errores ?? [];
+$old = $old ?? [];
 
-
-// Mensajes de sesión para los errores
-$errores = $_SESSION['errores'] ?? [];
-$old = $_SESSION['form_old'] ?? [];
-unset($_SESSION['errores'], $_SESSION['form_old']);
-
-
+// Variables para el header y menú
 $titulo = $esEdicion ? "Editar producto | Administración" : "Añadir producto | Administración";
 $bodyClass = "admin-body";
 $paginaAdmin = $esEdicion ? "productos" : "alta-producto";

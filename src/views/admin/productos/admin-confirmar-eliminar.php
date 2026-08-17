@@ -1,11 +1,6 @@
 <?php
-$producto = $data['producto'] ?? null;
-$csrf_token = $data['csrf_token'] ?? '';
-
-if (!$producto) {
-    header("Location: " . BASE_URL . "/admin/productos?status=notfound");
-    exit();
-}
+$producto = $producto ?? null;
+$csrf_token = $csrf_token ?? '';
 
 $titulo = "Eliminar producto | Administración";
 $bodyClass = "admin-body";
@@ -29,11 +24,11 @@ include __DIR__ . '/../../includes/menu-admin.php';
                 <div class="modal-confirmacion-icono">✕</div>
                 <h3>¿Dar de baja este producto?</h3>
                 <p>
-                    Vas a desactivar <strong><?php echo htmlspecialchars($producto->getNombre()); ?></strong>.
+                    Vas a desactivar <strong><?php echo $producto !== null ? htmlspecialchars($producto->getNombre()) : 'Producto no encontrado'; ?></strong>.
                     Dejará de verse en la tienda, pero sus datos no se borrarán.
                 </p>
                 <form
-                    action="<?php echo BASE_URL; ?>/admin/productos/eliminar/<?php echo $producto->getIdProducto(); ?>"
+                    action="<?php echo BASE_URL; ?>/admin/productos/eliminar/<?php echo $producto !== null ? $producto->getIdProducto() : ''; ?>"
                     method="post"
                 >
                     <input type="hidden" name="csrf_token" value="<?php echo $csrf_token; ?>">

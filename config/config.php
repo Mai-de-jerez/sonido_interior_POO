@@ -27,6 +27,12 @@ if (APP_ENV === 'development') {
     ini_set('display_errors', 1);
     error_reporting(E_ALL);
 } else {
+    // No mostramos errores al usuario, pero seguimos generándolos
+    // internamente (E_ALL) y los mandamos a un log propio — si no,
+    // con error_reporting(0) un fallo en producción puede desaparecer
+    // sin dejar rastro ni en pantalla ni en ningún sitio.
     ini_set('display_errors', 0);
-    error_reporting(0);
+    error_reporting(E_ALL);
+    ini_set('log_errors', 1);
+    ini_set('error_log', __DIR__ . '/../logs/error.log');
 }

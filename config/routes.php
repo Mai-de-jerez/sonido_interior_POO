@@ -6,6 +6,7 @@ use SonidoInteriorPoo\controllers\UsuarioController;
 use SonidoInteriorPoo\controllers\StaticPagesController;
 use SonidoInteriorPoo\controllers\MensajeController;
 use SonidoInteriorPoo\controllers\CarritoController;
+use SonidoInteriorPoo\controllers\CheckoutController;
 use SonidoInteriorPoo\middleware\AuthMiddleware;
 use SonidoInteriorPoo\middleware\AdminMiddleware;
 use SonidoInteriorPoo\middleware\CsrfMiddleware;
@@ -40,13 +41,15 @@ $router->group([CsrfMiddleware::class], function ($router) {
     // RUTAS PRIVADAS DE CLIENTE (Requieren estar autenticado)
     // ============================================================
     $router->group([AuthMiddleware::class], function ($router) {
+        // carrito
         $router->get('/carrito', [CarritoController::class, 'ver']);
         $router->post('/carrito/agregar', [CarritoController::class, 'agregar']);
         $router->post('/carrito/actualizar-cantidad', [CarritoController::class, 'actualizarCantidad']);
         $router->post('/carrito/eliminar', [CarritoController::class, 'eliminar']);
-        $router->get('/checkout', [CarritoController::class, 'mostrarCheckout']);
-        $router->post('/checkout', [CarritoController::class, 'procesarCheckout']);
-        $router->get('/pedido-exito', [CarritoController::class, 'pedidoExito']);
+        // checkout
+        $router->get('/checkout', [CheckoutController::class, 'mostrarCheckout']);
+        $router->post('/checkout', [CheckoutController::class, 'procesarCheckout']);
+        $router->get('/pedido-exito', [CheckoutController::class, 'pedidoExito']);
     });
 
     // ============================================================

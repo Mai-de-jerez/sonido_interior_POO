@@ -3,11 +3,8 @@
 $categoria = $categoria ?? null;
 $esEdicion = $categoria !== null;
 $csrf_token = $csrf_token ?? '';
-
-// Mensajes de sesión para los errores
-$errores = $_SESSION['errores'] ?? [];
-$old = $_SESSION['form_old'] ?? [];
-unset($_SESSION['errores'], $_SESSION['form_old']);
+$errores = $errores ?? [];
+$old = $old ?? [];
 
 $titulo = $esEdicion ? "Editar categoría | Administración" : "Añadir categoría | Administración";
 $bodyClass = "admin-body";

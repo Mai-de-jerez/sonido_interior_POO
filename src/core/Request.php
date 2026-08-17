@@ -42,6 +42,10 @@ class Request {
         return $this->server['HTTP_REFERER'] ?? $default;
     }
 
+    public function host(): ?string {
+        return $this->server['HTTP_HOST'] ?? null;
+    }
+
     public function method(): string {
         return $this->server['REQUEST_METHOD'] ?? 'GET';
     }

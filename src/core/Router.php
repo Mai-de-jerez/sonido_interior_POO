@@ -76,13 +76,35 @@ class Router
     }
 
     /**
-     * Busca y ejecuta la ruta correspondiente.
+     * Punto de entrada real. Único sitio con try/catch: si algo revienta
+     * en cualquier punto de la resolución de la ruta (middleware, controller,
+     * servicio, lo que sea), se captura aquí y se delega al ExceptionMapper.
      */
     public function dispatch(
         string $method,
         string $uri,
         Container $container
     ): void {
+        $request = Request::fromGlobals();
+
+        try {
+            $resultado = $this->resolverRuta($method, $uri, $container, $request);
+        } catch (\Throwable $e) {
+            $resultado = ExceptionMapper::map($e, $request);
+        }
+
+        $resultado->send();
+    }
+
+    /**
+     * Busca la ruta correspondiente y la ejecuta. Puede lanzar libremente
+     * — no necesita capturar nada, porque dispatch() ya se encarga.
+     */
+    private function resolverRuta(
+        string $method,
+        string $uri,
+        Container $container
+    ): Response {
         // Eliminar BASE_URL e index.php
         $uri = str_replace(
             [BASE_URL, '/index.php'],
@@ -118,28 +140,22 @@ class Router
                 }
             }
 
-            $this->ejecutarRoute(
-                $route,
-                $container,
-                $params
-            );
-
-            return;
+            return $this->ejecutarRoute($route, $container, $params);
         }
 
         // No existe ninguna ruta
-        $this->mostrar404();
+        return Response::notFound();
     }
-
 
     /**
      * Ejecuta middleware, resuelve controlador y ejecuta acción.
+     * Siempre devuelve un Response — nunca envía nada por sí mismo.
      */
     private function ejecutarRoute(
         array $route,
         Container $container,
         array $params
-    ): void {
+    ): Response {
         // 1. Middlewares
         foreach ($route['middlewares'] as $middlewareClass) {
             $middleware = new $middlewareClass();
@@ -162,26 +178,18 @@ class Router
             && $parametros[0]->getType()->getName() === Request::class;
 
         // 4. Ejecutar acción, pasando Request solo si el método lo espera
-        if ($esperaRequest) {
-            $resultado = $controller->$metodo(Request::fromGlobals(), ...$params);
-        } else {
-            $resultado = $controller->$metodo(...$params);
+        $resultado = $esperaRequest
+            ? $controller->$metodo(Request::fromGlobals(), ...$params)
+            : $controller->$metodo(...$params);
+
+        // 5. Garantizamos que siempre se devuelve un Response.
+        if (!($resultado instanceof Response)) {
+            throw new \RuntimeException(
+                "El método {$metodo} de " . get_class($controller) .
+                " no devolvió un Response."
+            );
         }
 
-        // 5. Si el Controller devuelve un Response (estilo nuevo), lo enviamos.
-        //    Si devuelve null (estilo viejo), ya generó su salida por dentro.
-        if ($resultado instanceof Response) {
-            $resultado->send();
-        }
-    }
-
-    /**
-     * Mostrar página 404.
-     */
-    private function mostrar404(): void
-    {
-        Response::notFound()->send();
+        return $resultado;
     }
 }
-
-

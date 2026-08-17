@@ -1,11 +1,6 @@
 <?php
-$producto = $data['producto'] ?? null;
-$csrf_token = $data['csrf_token'] ?? '';
-
-if (!$producto) {
-    header("Location: " . BASE_URL . "/admin/productos?status=notfound");
-    exit();
-}
+$producto = $producto ?? null;
+$csrf_token = $csrf_token ?? '';
 
 $titulo = "Reactivar producto | Administración";
 $bodyClass = "admin-body";
@@ -29,12 +24,12 @@ include __DIR__ . '/../../includes/menu-admin.php';
                 <div class="modal-confirmacion-icono">↺</div>
                 <h3>¿Reactivar este producto?</h3>
                 <p>
-                    Vas a reactivar <strong><?php echo htmlspecialchars($producto->getNombre()); ?></strong>.
+                    Vas a reactivar <strong><?php echo $producto !== null ? htmlspecialchars($producto->getNombre()) : 'Producto no encontrado'; ?></strong>.
                     Volverá a estar visible en la tienda.
                 </p>
 
                 <form 
-                    action="<?php echo BASE_URL; ?>/admin/productos/reactivar/<?php echo $producto->getIdProducto(); ?>"
+                    action="<?php echo BASE_URL; ?>/admin/productos/reactivar/<?php echo $producto !== null ? $producto->getIdProducto() : ''; ?>"
                     method="post">
                     <input type="hidden" name="csrf_token" value="<?php echo $csrf_token; ?>">
 

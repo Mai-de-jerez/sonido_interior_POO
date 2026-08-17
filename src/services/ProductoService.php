@@ -1,12 +1,13 @@
 <?php
 namespace SonidoInteriorPoo\services;
 
-
 use SonidoInteriorPoo\models\Producto;
 use SonidoInteriorPoo\interfaces\ProductoDAOInterface;
 use SonidoInteriorPoo\interfaces\CategoriaDAOInterface;
 use SonidoInteriorPoo\interfaces\ProductoServiceInterface;
 use SonidoInteriorPoo\utils\ArchivosHelper;
+use SonidoInteriorPoo\exceptions\NotFoundException;
+use SonidoInteriorPoo\exceptions\BusinessRuleException;
 
 class ProductoService implements ProductoServiceInterface {
     private ProductoDAOInterface $productoDAO;
@@ -17,7 +18,6 @@ class ProductoService implements ProductoServiceInterface {
         $this->categoriaDAO = $categoriaDAO;
     }
 
-    // ---------- VALIDACIÓN DE NEGOCIO (requiere BD) ----------
     public function validarCategoria(array $datos): array {
         $errores = [];
         $idCategoriaPost = $datos['id_categoria'] ?? '';
@@ -31,8 +31,8 @@ class ProductoService implements ProductoServiceInterface {
 
         return $errores;
     }
-
-    // ---------- OBTENER PRODUCTOS ----------
+    
+    // Funciones de lectura
     public function obtenerPorIdAdmin(int $idProducto): ?Producto {
         return $this->productoDAO->obtenerPorIdAdmin($idProducto);
     }
@@ -57,7 +57,6 @@ class ProductoService implements ProductoServiceInterface {
         return $this->productoDAO->contarProductosCatalogo($idCategoria);
     }
 
-    // ---------- DASHBOARD / ESTADÍSTICAS ----------
     public function obtenerTotalProductosAdmin(): int {
         return $this->productoDAO->contarTodosAdmin();
     }
@@ -66,13 +65,13 @@ class ProductoService implements ProductoServiceInterface {
         return $this->productoDAO->contarActivosAdmin();
     }
 
-    // ---------- CREAR ----------
+    // Funciones de escritura
     public function crear(array $datos, array $ficheros): bool {
         $imagen = ArchivosHelper::subirFoto($ficheros['imagen'], trim($datos['nombre']), 10000000);
         $nota = ArchivosHelper::subirMP3($ficheros['nota'], trim($datos['nombre']));
 
         if ($imagen === false || $nota === false) {
-            throw new \RuntimeException("Error con el archivo de imagen o la melodía (formato no válido o peso superior al permitido).");
+            throw new BusinessRuleException("Error con el archivo de imagen o la melodía (formato no válido o peso superior al permitido).");
         }
 
         $diametro = trim($datos['diametro'] ?? '');
@@ -95,12 +94,11 @@ class ProductoService implements ProductoServiceInterface {
         return $this->productoDAO->insertar($producto);
     }
 
-    // ---------- ACTUALIZAR ----------
     public function actualizar(int $idProducto, array $datos, array $ficheros): bool {
         $productoActual = $this->productoDAO->obtenerPorIdAdmin($idProducto);
 
         if ($productoActual === null) {
-            throw new \RuntimeException("Producto no encontrado.");
+            throw new NotFoundException("Producto no encontrado.");
         }
 
         if ($ficheros['imagen']['error'] === UPLOAD_ERR_NO_FILE) {
@@ -108,7 +106,7 @@ class ProductoService implements ProductoServiceInterface {
         } else {
             $imagen = ArchivosHelper::subirFoto($ficheros['imagen'], trim($datos['nombre']), 10000000);
             if ($imagen === false) {
-                throw new \RuntimeException("Error con el archivo de imagen (formato no válido o peso superior al permitido).");
+                throw new BusinessRuleException("Error con el archivo de imagen (formato no válido o peso superior al permitido).");
             }
         }
 
@@ -117,7 +115,7 @@ class ProductoService implements ProductoServiceInterface {
         } else {
             $nota = ArchivosHelper::subirMP3($ficheros['nota'], trim($datos['nombre']));
             if ($nota === false) {
-                throw new \RuntimeException("Error con el archivo de melodía (formato no válido o peso superior al permitido).");
+                throw new BusinessRuleException("Error con el archivo de melodía (formato no válido o peso superior al permitido).");
             }
         }
 
@@ -141,12 +139,11 @@ class ProductoService implements ProductoServiceInterface {
         return $this->productoDAO->actualizar($producto);
     }
 
-    // ---------- ELIMINAR / REACTIVAR ----------
     public function eliminarLogico(int $idProducto): bool {
         $producto = $this->productoDAO->obtenerPorIdAdmin($idProducto);
 
         if ($producto === null) {
-            throw new \RuntimeException("El producto no existe.");
+            throw new NotFoundException("El producto no existe.");
         }
 
         return $this->productoDAO->eliminarLogico($idProducto);
@@ -156,7 +153,7 @@ class ProductoService implements ProductoServiceInterface {
         $producto = $this->productoDAO->obtenerPorIdAdmin($idProducto);
 
         if ($producto === null) {
-            throw new \RuntimeException("El producto no existe.");
+            throw new NotFoundException("El producto no existe.");
         }
 
         return $this->productoDAO->reactivar($idProducto);

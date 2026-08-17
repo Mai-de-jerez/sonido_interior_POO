@@ -27,6 +27,7 @@ use SonidoInteriorPoo\controllers\UsuarioController;
 use SonidoInteriorPoo\controllers\StaticPagesController;
 use SonidoInteriorPoo\controllers\MensajeController;
 use SonidoInteriorPoo\controllers\CarritoController;
+use SonidoInteriorPoo\controllers\CheckoutController;
 
 use SonidoInteriorPoo\validators\CheckoutValidator;
 use SonidoInteriorPoo\validators\CategoriaValidator;
@@ -57,6 +58,7 @@ class Container
             StaticPagesController::class => $this->getStaticPagesController(),
             MensajeController::class => $this->getMensajeController(),
             CarritoController::class => $this->getCarritoController(),
+            CheckoutController::class => $this->getCheckoutController(),
             default => throw new \InvalidArgumentException("Controlador no registrado en el contenedor: $class"),
         };
     }
@@ -152,6 +154,19 @@ class Container
     {
         $carritoDAO = new CarritoDAO($this->getConexion());
         $productoDAO = new ProductoDAO($this->getConexion());
+
+        $carritoService = new CarritoService(
+            $carritoDAO,
+            $productoDAO
+        );
+
+        return new CarritoController($carritoService);
+    }
+
+    public function getCheckoutController(): CheckoutController
+    {
+        $carritoDAO = new CarritoDAO($this->getConexion());
+        $productoDAO = new ProductoDAO($this->getConexion());
         $pedidoDAO = new PedidoDAO($this->getConexion());
 
         $carritoService = new CarritoService(
@@ -159,12 +174,10 @@ class Container
             $productoDAO
         );
 
-        $pedidoService = new PedidoService(
-            $pedidoDAO
-        );
+        $pedidoService = new PedidoService($pedidoDAO);
 
         $checkoutService = new CheckoutService(
-            $this->getConexion(), 
+            $this->getConexion(),
             $carritoDAO,
             $productoDAO,
             $pedidoService
@@ -172,7 +185,7 @@ class Container
 
         $checkoutValidator = new CheckoutValidator();
 
-        return new CarritoController(
+        return new CheckoutController(
             $carritoService,
             $checkoutService,
             $checkoutValidator
