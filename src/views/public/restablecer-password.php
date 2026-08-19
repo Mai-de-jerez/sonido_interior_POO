@@ -5,12 +5,10 @@ $csrf_token = $csrf_token ?? '';
 $titulo = "Sonido Interior | Nueva Contraseña";
 $pagina = "restablecer";
 
-
 include __DIR__ . '/../includes/header.php';
 include __DIR__ . "/../includes/menu-login.php";
 
-$errores = $_SESSION['errores'] ?? [];
-unset($_SESSION['errores']);
+$errores = $errores ?? [];
 ?>
 
 <main class="contenedor">

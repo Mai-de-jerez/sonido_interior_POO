@@ -52,6 +52,30 @@ class UsuarioDAO implements UsuarioDAOInterface{
 
         return $fila ? Usuario::fromArray($fila) : null;
     }
+   
+ 
+    // ============================================================
+    // VERIFICAR SI USUARIO EXISTE (por username o email)
+    // ============================================================
+    public function existeUsuario(string $usuario): bool {
+        $pdo = $this->conexion->getPdo();
+        $sql = "SELECT COUNT(*) FROM usuarios WHERE usuario = ?";
+
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute([$usuario]);
+
+        return (int) $stmt->fetchColumn() > 0;
+    }
+
+    public function existeEmail(string $email): bool {
+        $pdo = $this->conexion->getPdo();
+        $sql = "SELECT COUNT(*) FROM usuarios WHERE email = ?";
+
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute([$email]);
+
+        return (int) $stmt->fetchColumn() > 0;
+    }
 
     // ============================================================
     // REGISTRAR NUEVO USUARIO
@@ -63,21 +87,11 @@ class UsuarioDAO implements UsuarioDAOInterface{
         $stmt = $pdo->prepare($sql);
         return $stmt->execute([$usuario, $email, $passwordHash]);
     }
- 
-    // ============================================================
-    // VERIFICAR SI USUARIO EXISTE (por username o email)
-    // ============================================================
-    public function existeUsuario(string $usuario, string $email): bool {
-        $pdo = $this->conexion->getPdo();
-        $sql = "SELECT COUNT(*) FROM usuarios WHERE usuario = ? OR email = ?";
-        
-        $stmt = $pdo->prepare($sql);
-        $stmt->execute([$usuario, $email]);
-        $count = (int) $stmt->fetchColumn();
-        
-        return $count > 0;
-    }
 
+    
+    // ============================================================
+    // ACTUALIZAR CONTRASEÑA
+    // ============================================================
     public function actualizarPassword(string $email, string $nuevaPasswordHash): bool {
         $pdo = $this->conexion->getPdo();
         $stmt = $pdo->prepare("UPDATE usuarios SET password = ? WHERE email = ?");

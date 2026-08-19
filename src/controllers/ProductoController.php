@@ -145,6 +145,10 @@ class ProductoController extends Controller
         return Response::view('admin/productos/admin-listado-productos', ['productos' => $productos]);
     }
 
+    // ============================================================
+    // MÉTODOS POST 
+    // ============================================================
+
     public function crear(Request $request): Response
     {
         $datos = $request->allPost();
@@ -165,15 +169,10 @@ class ProductoController extends Controller
             return Response::redirect('admin/productos/crear');
         }
 
-        $creado = $this->productoService->crear($datos, $archivos);
-
-        if ($creado) {
-            $this->setFlash('mensaje_exito', 'Producto guardado con éxito.');
-            return Response::redirect('admin/productos');
-        }
-
-        $this->setFlash('mensaje_error', 'Error al guardar el producto.');
-        return Response::redirect('admin/productos/crear');
+        $this->productoService->crear($datos, $archivos);
+        
+        $this->setFlash('mensaje_exito', 'Producto guardado con éxito.');
+        return Response::redirect('admin/productos');
     }
 
     public function actualizar(Request $request, int $id): Response
@@ -197,40 +196,25 @@ class ProductoController extends Controller
             return Response::redirect($urlVuelta);
         }
 
-        $actualizado = $this->productoService->actualizar($id, $datos, $archivos);
-
-        if ($actualizado) {
-            $this->setFlash('mensaje_exito', 'Producto actualizado con éxito.');
-            return Response::redirect('admin/productos');
-        }
-
-        $this->setFlash('mensaje_error', 'Error al actualizar el producto.');
-        return Response::redirect($urlVuelta);
+        $this->productoService->actualizar($id, $datos, $archivos);
+        
+        $this->setFlash('mensaje_exito', 'Producto actualizado con éxito.');
+        return Response::redirect('admin/productos');
     }
 
     public function eliminar(int $id): Response
     {
-        $eliminado = $this->productoService->eliminarLogico($id);
-
-        if ($eliminado) {
-            $this->setFlash('mensaje_exito', 'Producto eliminado correctamente.');
-            return Response::redirect('admin/productos?status=deleted');
-        }
-
-        $this->setFlash('mensaje_error', 'No se pudo eliminar el producto.');
-        return Response::redirect('admin/productos?status=error');
+        $this->productoService->eliminarLogico($id);
+        
+        $this->setFlash('mensaje_exito', 'Producto eliminado correctamente.');
+        return Response::redirect('admin/productos?status=deleted');
     }
 
     public function reactivar(int $id): Response
     {
-        $reactivado = $this->productoService->reactivar($id);
-
-        if ($reactivado) {
-            $this->setFlash('mensaje_exito', 'Producto reactivado correctamente.');
-            return Response::redirect('admin/productos?status=reactivated');
-        }
-
-        $this->setFlash('mensaje_error', 'No se pudo reactivar el producto. Por favor, inténtalo de nuevo.');
-        return Response::redirect('admin/productos?status=error');
+        $this->productoService->reactivar($id);
+        
+        $this->setFlash('mensaje_exito', 'Producto reactivado correctamente.');
+        return Response::redirect('admin/productos?status=reactivated');
     }
 }

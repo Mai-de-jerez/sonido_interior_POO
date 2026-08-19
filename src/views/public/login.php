@@ -1,14 +1,14 @@
 <?php
 $titulo = "Login Administración | Sonido Interior";
 $bodyClass = "fondo-login";
+
+$errores = $errores ?? [];
+$mensajeError = $mensajeError ?? null;
+$old = $old ?? [];
+$csrf_token = $csrf_token ?? '';
+
 include __DIR__ . "/../includes/header.php";
 include __DIR__ . "/../includes/menu-login.php";
-
-$errores = $_SESSION['errores'] ?? [];
-$old = $_SESSION['form_old'] ?? [];
-$mensajeError = $_SESSION['mensaje_error'] ?? null;
-$csrf_token = $csrf_token ?? '';
-unset($_SESSION['errores'], $_SESSION['form_old'], $_SESSION['mensaje_error']);
 ?>
 
 <main class="login-contenedor">
@@ -19,10 +19,6 @@ unset($_SESSION['errores'], $_SESSION['form_old'], $_SESSION['mensaje_error']);
 
         <h3>Acceso al panel de administración</h3>
         <p>Introduce tus credenciales para continuar</p>
-
-        <?php if ($mensajeError): ?>
-            <p id="error-general" style="color: #b03030; text-align: center;"><?= htmlspecialchars($mensajeError) ?></p>
-        <?php endif; ?>
 
         <!-- FORMULARIO -->
         <form class="formulario-login" action="<?php echo BASE_URL; ?>/login" method="post" autocomplete="off">

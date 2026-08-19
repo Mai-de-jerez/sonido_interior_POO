@@ -5,6 +5,7 @@ use SonidoInteriorPoo\models\Usuario;
 use SonidoInteriorPoo\interfaces\UsuarioDAOInterface;
 use SonidoInteriorPoo\interfaces\UsuarioServiceInterface;
 use SonidoInteriorPoo\interfaces\CarritoServiceInterface;
+use SonidoInteriorPoo\exceptions\BusinessRuleException;
 
 
 class UsuarioService implements UsuarioServiceInterface {
@@ -45,20 +46,20 @@ class UsuarioService implements UsuarioServiceInterface {
         ];
     }
 
-    public function registrar(string $usuario, string $email, string $password): bool {
-        if ($this->usuarioDAO->existeUsuario($usuario, $email)) {
-            return false;
+    public function registrar(string $usuario, string $email, string $password): void {
+        if ($this->usuarioDAO->existeUsuario($usuario)) {
+            throw new BusinessRuleException("Ese nombre de usuario ya está en uso.");
+        }
+
+        if ($this->usuarioDAO->existeEmail($email)) {
+            throw new BusinessRuleException("Ese email ya está registrado.");
         }
 
         $passwordHash = password_hash($password, PASSWORD_DEFAULT);
-        return $this->usuarioDAO->registrar($usuario, $email, $passwordHash);
-    }
 
-
-    // ============================================================
-    // GESTIÓN DE PERFIL Y USUARIO
-    // ============================================================
-    public function obtenerPorId(int $idUsuario): ?Usuario {
-        return $this->usuarioDAO->obtenerPorId($idUsuario);
+        if (!$this->usuarioDAO->registrar($usuario, $email, $passwordHash)) {
+            throw new BusinessRuleException("No se pudo completar el registro.");
+        }
     }
 }
+

@@ -17,11 +17,11 @@ interface ProductoServiceInterface {
     public function obtenerTotalProductosAdmin(): int;
     public function obtenerTotalActivosAdmin(): int;
 
-    // ---------- CREAR / ACTUALIZAR ----------
-    public function crear(array $datos, array $ficheros): bool;
-    public function actualizar(int $idProducto, array $datos, array $ficheros): bool;
+    // ---------- CREAR / ACTUALIZAR (AHORA VOID) ----------
+    public function crear(array $datos, array $ficheros): void;
+    public function actualizar(int $idProducto, array $datos, array $ficheros): void;
 
-    // ---------- ELIMINAR / REACTIVAR ----------
-    public function eliminarLogico(int $idProducto): bool;
-    public function reactivar(int $idProducto): bool;
+    // ---------- ELIMINAR / REACTIVAR (AHORA VOID) ----------
+    public function eliminarLogico(int $idProducto): void;
+    public function reactivar(int $idProducto): void;
 }

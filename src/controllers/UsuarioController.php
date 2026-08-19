@@ -37,11 +37,8 @@ class UsuarioController extends Controller
         $errores = $this->usuarioValidator->validarLogin($datos);
 
         if (!empty($errores)) {
-            $this->setSession('errores', $errores);
-
-            $this->setSession('form_old', [
-                'usuario' => $request->post('usuario', '')
-            ]);
+            $this->setFlash('errores', $errores);
+            $this->setFlash('form_old', ['usuario' => $request->post('usuario', '')]);
 
             return Response::redirect('login');
         }
@@ -52,36 +49,17 @@ class UsuarioController extends Controller
         );
 
         if (!$usuarioData) {
-            $this->setFlash(
-                'mensaje_error',
-                'Usuario o contraseña incorrectos.'
-            );
-
+            $this->setFlash('mensaje_error', 'Usuario o contraseña incorrectos.');
             return Response::redirect('login');
         }
 
         Session::clear();
         Session::regenerate();
 
-        $this->setSession(
-            'id_usuario',
-            $usuarioData['id_usuario']
-        );
-
-        $this->setSession(
-            'usuario',
-            $usuarioData['usuario']
-        );
-
-        $this->setSession(
-            'rol',
-            $usuarioData['rol']
-        );
-
-        $this->setSession(
-            'cantidades_carrito',
-            $usuarioData['cantidades_carrito']
-        );
+        $this->setSession('id_usuario', $usuarioData['id_usuario']);
+        $this->setSession('usuario', $usuarioData['usuario']);
+        $this->setSession('rol', $usuarioData['rol']);
+        $this->setSession('cantidades_carrito', $usuarioData['cantidades_carrito']);
 
         if ($usuarioData['rol'] === 'ADMIN') {
             return Response::redirect('admin/dashboard');
@@ -101,9 +79,9 @@ class UsuarioController extends Controller
         $errores = $this->usuarioValidator->validarRegistro($datos);
 
         if (!empty($errores)) {
-            $this->setSession('errores', $errores);
+            $this->setFlash('errores', $errores);
 
-            $this->setSession('form_old', [
+            $this->setFlash('form_old', [
                 'usuario' => $request->post('usuario', ''),
                 'email' => $request->post('email', '')
             ]);
@@ -111,25 +89,16 @@ class UsuarioController extends Controller
             return Response::redirect('registro');
         }
 
-        $registrado = $this->usuarioService->registrar(
+        $this->setFlash('form_old', [
+            'usuario' => $request->post('usuario', ''),
+            'email' => $request->post('email', '')
+        ]);
+
+        $this->usuarioService->registrar(
             trim($request->post('usuario', '')),
             trim($request->post('email', '')),
             $request->post('password', '')
         );
-
-        if (!$registrado) {
-            $this->setFlash(
-                'mensaje_error',
-                'El usuario o email ya existe.'
-            );
-
-            $this->setSession('form_old', [
-                'usuario' => $request->post('usuario', ''),
-                'email' => $request->post('email', '')
-            ]);
-
-            return Response::redirect('registro');
-        }
 
         $this->setFlash(
             'mensaje_exito',
@@ -146,14 +115,15 @@ class UsuarioController extends Controller
     public function mostrarRecuperar(): Response
     {
         return Response::view('public/recuperar-password', [
-            'csrf_token' => $this->csrfToken()
+            'csrf_token' => $this->csrfToken(),
+            'errores' => $this->getFlash('errores', []),
+            'old' => $this->getFlash('form_old', [])
         ]);
     }
 
     // ============================================================
     // PROCESAR RECUPERACIÓN
     // ============================================================
-
     public function procesarRecuperar(Request $request): Response
     {
         $datos = $request->allPost();
@@ -161,12 +131,8 @@ class UsuarioController extends Controller
         $errores = $this->usuarioValidator->validarRecuperacion($datos);
 
         if (!empty($errores)) {
-            $this->setSession('errores', $errores);
-
-            $this->setSession('form_old', [
-                'email' => $request->post('email', '')
-            ]);
-
+            $this->setFlash('errores', $errores);
+            $this->setFlash('form_old', ['email' => $request->post('email', '')]);
             return Response::redirect('recuperar-password');
         }
 
@@ -196,7 +162,9 @@ class UsuarioController extends Controller
 
         return Response::view('public/restablecer-password', [
             'token' => $token,
-            'csrf_token' => $this->csrfToken()
+            'csrf_token' => $this->csrfToken(),
+            'errores' => $this->getFlash('errores', []),
+            'old' => $this->getFlash('form_old', [])
         ]);
     }
 
@@ -217,34 +185,24 @@ class UsuarioController extends Controller
         $errores = $this->usuarioValidator->validarNuevaPassword($datos);
 
         if (!empty($errores)) {
-            $this->setSession('errores', $errores);
+            $this->setFlash('errores', $errores);
 
             return Response::redirect(
                 'restablecer-password?token=' . urlencode($token)
             );
         }
 
-        $actualizado = $this->passwordResetService
-            ->actualizarPasswordPorToken(
-                $token,
-                $request->post('password', '')
-            );
-
-        if ($actualizado) {
-            $this->setFlash(
-                'mensaje_exito',
-                '¡Contraseña cambiada con éxito! Ya puedes acceder.'
-            );
-
-            return Response::redirect('login');
-        }
-
-        $this->setFlash(
-            'mensaje_error',
-            'El enlace ha caducado o es inválido. Solicita uno nuevo.'
+        $this->passwordResetService->actualizarPasswordPorToken(
+            $token,
+            $request->post('password', '')
         );
 
-        return Response::redirect('recuperar-password');
+        $this->setFlash(
+            'mensaje_exito',
+            '¡Contraseña cambiada con éxito! Ya puedes acceder.'
+        );
+
+        return Response::redirect('login');
     }
 
     // ============================================================

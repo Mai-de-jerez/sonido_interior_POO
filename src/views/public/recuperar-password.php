@@ -5,10 +5,9 @@ $pagina = "recuperar";
 include __DIR__ . '/../includes/header.php';
 include __DIR__ . "/../includes/menu-login.php";
 
-$errores = $_SESSION['errores'] ?? [];
-$old = $_SESSION['form_old'] ?? [];
+$errores = $errores ?? [];
+$old = $old ?? [];
 $csrf_token = $csrf_token ?? '';
-unset($_SESSION['errores'], $_SESSION['form_old']);
 ?>
 
 <main class="contenedor">

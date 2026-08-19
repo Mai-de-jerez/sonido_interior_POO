@@ -6,6 +6,7 @@ use SonidoInteriorPoo\interfaces\PasswordResetDAOInterface;
 use SonidoInteriorPoo\interfaces\PasswordResetServiceInterface;
 use SonidoInteriorPoo\interfaces\TransactionManagerInterface;
 use SonidoInteriorPoo\utils\EmailHelper;
+use SonidoInteriorPoo\exceptions\BusinessRuleException;
 
 class PasswordResetService implements PasswordResetServiceInterface {
  
@@ -44,22 +45,22 @@ class PasswordResetService implements PasswordResetServiceInterface {
         return $this->passwordResetDAO->obtenerEmailPorToken($token);
     }
 
-    private function actualizarPasswordConToken(string $email, string $nuevaPassword): bool {
+    private function actualizarPasswordConToken(string $email, string $nuevaPassword): void {
         $passwordHash = password_hash($nuevaPassword, PASSWORD_DEFAULT);
 
         $this->transactionManager->transaction(function () use ($email, $passwordHash) {
             $this->usuarioDAO->actualizarPassword($email, $passwordHash);
             $this->passwordResetDAO->borrarTokenDe($email);
         });
-
-        return true;
     }
 
-    public function actualizarPasswordPorToken(string $token, string $nuevaPassword): bool {
+    public function actualizarPasswordPorToken(string $token, string $nuevaPassword): void {
         $email = $this->obtenerEmailPorToken($token);
+
         if (!$email) {
-            return false;
+            throw new BusinessRuleException("El enlace ha caducado o es inválido. Solicita uno nuevo ya.");
         }
-        return $this->actualizarPasswordConToken($email, $nuevaPassword);
+
+        $this->actualizarPasswordConToken($email, $nuevaPassword);
     }
 }

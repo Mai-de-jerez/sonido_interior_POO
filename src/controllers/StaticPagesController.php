@@ -10,14 +10,18 @@ class StaticPagesController extends Controller
     public function login(): Response
     {
         return Response::view('public/login', [
-            'csrf_token' => $this->csrfToken()
+            'csrf_token' => $this->csrfToken(),
+            'errores' => $this->getFlash('errores', []),
+            'old' => $this->getFlash('form_old', [])
         ]);
     }
 
     public function registro(): Response
     {
         return Response::view('public/registro', [
-            'csrf_token' => $this->csrfToken()
+            'csrf_token' => $this->csrfToken(),
+            'errores' => $this->getFlash('errores', []),
+            'old' => $this->getFlash('form_old', [])
         ]);
     }
 

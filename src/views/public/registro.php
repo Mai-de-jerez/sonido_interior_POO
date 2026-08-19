@@ -1,17 +1,15 @@
 <?php
 $titulo = "Crear cuenta | Sonido Interior";
 $bodyClass = "fondo-login";
+
+$errores = $errores ?? [];
+$mensajeError = $mensajeError ?? null;
+$old = $old ?? [];
+$csrf_token = $csrf_token ?? '';
+
 include __DIR__ . "/../includes/header.php";
 include __DIR__ . "/../includes/menu-login.php";
 
-// Recogemos los errores y mensajes que genera tu UsuarioController
-$errores = $_SESSION['errores'] ?? [];
-$mensajeError = $_SESSION['mensaje_error'] ?? null;
-$old = $_SESSION['form_old'] ?? [];
-$csrf_token = $csrf_token ?? '';
-
-// Limpiamos la sesión tras leerlos
-unset($_SESSION['errores'], $_SESSION['mensaje_error'], $_SESSION['form_old']);
 ?>
 
 <main class="registro-contenedor">
@@ -22,10 +20,6 @@ unset($_SESSION['errores'], $_SESSION['mensaje_error'], $_SESSION['form_old']);
 
         <h3>Únete a Sonido Interior</h3>
         <p>Rellena tus datos para crear tu cuenta</p>
-
-        <?php if ($mensajeError): ?>
-            <p style="color: #b03030; text-align: center; margin-bottom: 15px;"><?= htmlspecialchars($mensajeError) ?></p>
-        <?php endif; ?>
 
         <form class="formulario-registro" action="<?php echo BASE_URL; ?>/registro" method="post"> 
             
