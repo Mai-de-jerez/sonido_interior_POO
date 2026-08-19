@@ -5,6 +5,8 @@ use SonidoInteriorPoo\models\Mensaje;
 use SonidoInteriorPoo\interfaces\MensajeDAOInterface;
 use SonidoInteriorPoo\interfaces\MensajeServiceInterface;
 use SonidoInteriorPoo\utils\EmailHelper;
+use SonidoInteriorPoo\exceptions\NotFoundException;
+use SonidoInteriorPoo\exceptions\BusinessRuleException;
 
 class MensajeService implements MensajeServiceInterface {
     private MensajeDAOInterface $mensajeDAO;
@@ -13,8 +15,23 @@ class MensajeService implements MensajeServiceInterface {
         $this->mensajeDAO = $mensajeDAO;
     }
 
-    // ---------- CREAR ----------
-    public function crear(array $datos): bool {
+    // ---------- LECTURA ----------
+    public function obtenerTodosAdmin(): array {
+        return $this->mensajeDAO->obtenerTodosAdmin();
+    }
+
+    public function obtenerPorId(int $idMensaje): ?Mensaje {
+        return $this->mensajeDAO->obtenerPorId($idMensaje);
+    }
+
+    public function contarNoLeidos(): int {
+        return $this->mensajeDAO->contarNoLeidos();
+    }
+
+    // ---------- ESCRITURA ----------
+
+    // crear un mensaje de contacto nuevo y enviar un aviso por email al admin
+    public function crear(array $datos): void {
         $nombre = trim($datos['nombre']);
         $email = trim($datos['email']);
         $telefono = trim($datos['telefono'] ?? '');
@@ -29,45 +46,38 @@ class MensajeService implements MensajeServiceInterface {
             $mensaje
         );
 
-        if ($guardado) {
-            EmailHelper::enviarAvisoContacto($nombre, $email, $telefono ?: null, $motivo ?: null, $mensaje);
+        if (!$guardado) {
+            throw new BusinessRuleException("Error al guardar el mensaje en la base de datos.");
         }
-
-        return $guardado;
+        // Enviar aviso por email al admin
+        EmailHelper::enviarAvisoContacto($nombre, $email, $telefono ?: null, $motivo ?: null, $mensaje);
     }
 
-    // ---------- OBTENER ----------
-    public function obtenerTodosAdmin(): array {
-        return $this->mensajeDAO->obtenerTodosAdmin();
-    }
-
-    public function obtenerPorId(int $idMensaje): ?Mensaje {
-        return $this->mensajeDAO->obtenerPorId($idMensaje);
-    }
-
-    public function contarNoLeidos(): int {
-        return $this->mensajeDAO->contarNoLeidos();
-    }
-
-    // ---------- MARCAR LEÍDO ----------
-    public function marcarComoLeido(int $idMensaje): bool {
+    // marcar como leído un mensaje (para el admin)
+    public function marcarComoLeido(int $idMensaje): void {
         $mensaje = $this->mensajeDAO->obtenerPorId($idMensaje);
 
         if ($mensaje === null) {
-            throw new \RuntimeException("El mensaje no existe.");
+            throw new NotFoundException("El mensaje no existe.");
         }
 
-        return $this->mensajeDAO->marcarComoLeido($idMensaje);
+        if (!$this->mensajeDAO->marcarComoLeido($idMensaje)) {
+            throw new BusinessRuleException("No se pudo marcar el mensaje como leído.");
+        }
     }
 
-    // ---------- ELIMINAR ----------
-    public function eliminar(int $idMensaje): bool {
+    // eliminar un mensaje (para el admin)
+    public function eliminar(int $idMensaje): void {
         $mensaje = $this->mensajeDAO->obtenerPorId($idMensaje);
 
         if ($mensaje === null) {
-            throw new \RuntimeException("El mensaje no existe.");
+            throw new NotFoundException("El mensaje no existe.");
         }
 
-        return $this->mensajeDAO->eliminar($idMensaje);
+        if (!$this->mensajeDAO->eliminar($idMensaje)) {
+            throw new BusinessRuleException("No se pudo eliminar el mensaje.");
+        }
     }
+
+    
 }

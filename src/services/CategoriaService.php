@@ -5,6 +5,7 @@ use SonidoInteriorPoo\interfaces\CategoriaDAOInterface;
 use SonidoInteriorPoo\models\Categoria;
 use SonidoInteriorPoo\interfaces\CategoriaServiceInterface;
 use SonidoInteriorPoo\exceptions\NotFoundException;
+use SonidoInteriorPoo\exceptions\BusinessRuleException;
 
 class CategoriaService implements CategoriaServiceInterface {
     private CategoriaDAOInterface $categoriaDAO;
@@ -25,17 +26,20 @@ class CategoriaService implements CategoriaServiceInterface {
         return $this->categoriaDAO->obtenerActivas();
     }
 
-    public function crear(array $datos): bool {
+    public function crear(array $datos): void {
         $categoria = new Categoria(
             0,
             trim($datos['nombre']),
             trim($datos['descripcion'])
         );
 
-        return $this->categoriaDAO->crear($categoria);
+        if (!$this->categoriaDAO->crear($categoria)) {
+            throw new BusinessRuleException("Error al guardar la categoría en la base de datos.");
+        }
     }
 
-    public function actualizar(int $idCategoria, array $datos): bool {
+
+    public function actualizar(int $idCategoria, array $datos): void {
         $categoriaActual = $this->categoriaDAO->obtenerPorId($idCategoria);
 
         if ($categoriaActual === null) {
@@ -48,26 +52,32 @@ class CategoriaService implements CategoriaServiceInterface {
             trim($datos['descripcion'])
         );
 
-        return $this->categoriaDAO->actualizar($categoria);
+        if (!$this->categoriaDAO->actualizar($categoria)) {
+            throw new BusinessRuleException("Error al actualizar la categoría en la base de datos.");
+        }
     }
 
-    public function eliminarLogica(int $idCategoria): bool {
+    public function eliminarLogica(int $idCategoria): void {
         $categoria = $this->categoriaDAO->obtenerPorId($idCategoria);
 
         if ($categoria === null) {
             throw new NotFoundException("La categoría no existe.");
         }
 
-        return $this->categoriaDAO->eliminarLogica($idCategoria);
+        if (!$this->categoriaDAO->eliminarLogica($idCategoria)) {
+            throw new BusinessRuleException("No se pudo eliminar la categoría.");
+        }
     }
 
-    public function reactivar(int $idCategoria): bool {
+    public function reactivar(int $idCategoria): void {
         $categoria = $this->categoriaDAO->obtenerPorId($idCategoria);
 
         if ($categoria === null) {
             throw new NotFoundException("La categoría no existe.");
         }
 
-        return $this->categoriaDAO->reactivar($idCategoria);
+        if (!$this->categoriaDAO->reactivar($idCategoria)) {
+            throw new BusinessRuleException("No se pudo reactivar la categoría.");
+        }
     }
 }

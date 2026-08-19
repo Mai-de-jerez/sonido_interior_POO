@@ -71,7 +71,9 @@ $router->group([CsrfMiddleware::class], function ($router) {
         $router->get('/admin/mensajes', [MensajeController::class, 'listar']);
         $router->post('/admin/mensajes/marcar-leido/{id}', [MensajeController::class, 'marcarLeido']);
         $router->post('/admin/mensajes/eliminar/{id}', [MensajeController::class, 'eliminar']);
-
+        $router->get('/admin/mensajes/eliminar/{id}', [MensajeController::class, 'confirmarEliminar']);  
+        $router->get('/admin/mensajes/marcar-leido/{id}', [MensajeController::class, 'confirmarMarcarLeido']);
+ 
         $router->get('/admin/categorias', [CategoriaController::class, 'listar']);
         $router->get('/admin/categorias/crear', [CategoriaController::class, 'nuevo']);
         $router->get('/admin/categorias/editar/{id}', [CategoriaController::class, 'editar']);

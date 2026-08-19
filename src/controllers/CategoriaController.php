@@ -69,15 +69,10 @@ class CategoriaController extends Controller
             return Response::redirect('admin/categorias/crear');
         }
 
-        $creado = $this->categoriaService->crear($datos);
+        $this->categoriaService->crear($datos);
 
-        if ($creado) {
-            $this->setFlash('mensaje_exito', 'Categoría guardada con éxito.');
-            return Response::redirect('admin/categorias');
-        }
-
-        $this->setFlash('mensaje_error', 'Error al guardar la categoría.');
-        return Response::redirect('admin/categorias/crear');
+        $this->setFlash('mensaje_exito', 'Categoría guardada con éxito.');
+        return Response::redirect('admin/categorias');
     }
 
     public function actualizar(Request $request, int $id): Response
@@ -93,27 +88,17 @@ class CategoriaController extends Controller
             return Response::redirect($urlVuelta);
         }
 
-        $actualizado = $this->categoriaService->actualizar($id, $datos);
+        $this->categoriaService->actualizar($id, $datos);
 
-        if ($actualizado) {
-            $this->setFlash('mensaje_exito', 'Categoría actualizada con éxito.');
-            return Response::redirect('admin/categorias');
-        }
-
-        $this->setFlash('mensaje_error', 'Error al actualizar la categoría.');
-        return Response::redirect($urlVuelta);
+        $this->setFlash('mensaje_exito', 'Categoría actualizada con éxito.');
+        return Response::redirect('admin/categorias');
     }
 
     public function eliminar(int $id): Response
     {
-        $eliminado = $this->categoriaService->eliminarLogica($id);
+        $this->categoriaService->eliminarLogica($id);
 
-        if ($eliminado) {
-            $this->setFlash('mensaje_exito', 'Categoría eliminada correctamente.');
-        } else {
-            $this->setFlash('mensaje_error', 'No se pudo eliminar la categoría.');
-        }
-
+        $this->setFlash('mensaje_exito', 'Categoría eliminada correctamente.');
         return Response::redirect('admin/categorias');
     }
 
@@ -147,14 +132,9 @@ class CategoriaController extends Controller
 
     public function reactivar(int $id): Response
     {
-        $reactivado = $this->categoriaService->reactivar($id);
+        $this->categoriaService->reactivar($id);
 
-        if ($reactivado) {
-            $this->setFlash('mensaje_exito', 'Categoría reactivada correctamente.');
-        } else {
-            $this->setFlash('mensaje_error', 'No se pudo reactivar la categoría.');
-        }
-
+        $this->setFlash('mensaje_exito', 'Categoría reactivada correctamente.');
         return Response::redirect('admin/categorias');
     }
 }

@@ -11,15 +11,8 @@ class MensajeDAO implements MensajeDAOInterface {
         $this->conexion = $conexion;
     }
 
-    // Guardar un mensaje de contacto nuevo
-    public function guardar(string $nombre, string $email, ?string $telefono, ?string $motivo, string $mensaje): bool {
-        $pdo = $this->conexion->getPdo();
-        $sql = "INSERT INTO mensajes (nombre, email, telefono, motivo, mensaje) VALUES (?, ?, ?, ?, ?)";
-
-        $stmt = $pdo->prepare($sql);
-        return $stmt->execute([$nombre, $email, $telefono, $motivo, $mensaje]);
-    }
-
+    // ------ LECTURA DE DATOS ------
+    
     // Obtener todos los mensajes para el admin (más recientes primero)
     public function obtenerTodosAdmin(): array {
         $pdo = $this->conexion->getPdo();
@@ -45,13 +38,6 @@ class MensajeDAO implements MensajeDAOInterface {
         return $fila ? Mensaje::fromArray($fila) : null;
     }
 
-    // Marcar un mensaje como leído
-    public function marcarComoLeido(int $idMensaje): bool {
-        $pdo = $this->conexion->getPdo();
-        $stmt = $pdo->prepare("UPDATE mensajes SET leido = 1 WHERE id_mensaje = ?");
-        return $stmt->execute([$idMensaje]);
-    }
-
     // Contar mensajes no leídos (útil para un badge en el admin)
     public function contarNoLeidos(): int {
         $pdo = $this->conexion->getPdo();
@@ -59,6 +45,25 @@ class MensajeDAO implements MensajeDAOInterface {
         $stmt = $pdo->query($sql);
         return (int) $stmt->fetchColumn();
     }
+
+    // ------ ESCRITURA DE DATOS ------
+
+    // Guardar un mensaje de contacto nuevo
+    public function guardar(string $nombre, string $email, ?string $telefono, ?string $motivo, string $mensaje): bool {
+        $pdo = $this->conexion->getPdo();
+        $sql = "INSERT INTO mensajes (nombre, email, telefono, motivo, mensaje) VALUES (?, ?, ?, ?, ?)";
+
+        $stmt = $pdo->prepare($sql);
+        return $stmt->execute([$nombre, $email, $telefono, $motivo, $mensaje]);
+    }
+
+    // Marcar un mensaje como leído
+    public function marcarComoLeido(int $idMensaje): bool {
+        $pdo = $this->conexion->getPdo();
+        $stmt = $pdo->prepare("UPDATE mensajes SET leido = 1 WHERE id_mensaje = ?");
+        return $stmt->execute([$idMensaje]);
+    }
+
 
     // Borrar un mensaje (borrado físico, no lógico — un mensaje de contacto no tiene sentido "reactivarlo")
     public function eliminar(int $idMensaje): bool {

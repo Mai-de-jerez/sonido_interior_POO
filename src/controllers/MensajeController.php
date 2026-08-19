@@ -32,25 +32,17 @@ class MensajeController extends Controller
         $errores = $this->mensajeValidator->validar($datos);
 
         if (!empty($errores)) {
-            $this->setSession('errores', $errores);
-            $this->setSession('form_old', $request->allPost());
-
+            $this->setFlash('errores', $errores);
+            $this->setFlash('form_old', $datos);
             return Response::redirect('contacto');
         }
 
-        $creado = $this->mensajeService->crear($datos);
+        $this->mensajeService->crear($datos);
 
-        if ($creado) {
-            $this->setFlash(
-                'mensaje_exito',
-                'Mensaje enviado correctamente. Te responderemos lo antes posible.'
-            );
-        } else {
-            $this->setFlash(
-                'mensaje_error',
-                'Ha habido un problema al enviar el mensaje. Inténtalo de nuevo.'
-            );
-        }
+        $this->setFlash(
+            'mensaje_exito',
+            'Mensaje enviado correctamente. Te responderemos lo antes posible.'
+        );
 
         return Response::redirect('contacto');
     }
@@ -74,25 +66,45 @@ class MensajeController extends Controller
         );
     }
 
+    public function confirmarMarcarLeido(int $id): Response
+    {
+        $mensaje = $this->mensajeService->obtenerPorId($id);
+
+        if ($mensaje === null) {
+            return Response::redirect('admin/mensajes?status=notfound');
+        }
+
+        return Response::view('admin/mensajes/admin-confirmar-leido', [
+            'mensaje' => $mensaje,
+            'csrf_token' => $this->csrfToken()
+        ]);
+    }
+
+    public function confirmarEliminar(int $id): Response
+    {
+        $mensaje = $this->mensajeService->obtenerPorId($id);
+
+        if ($mensaje === null) {
+            return Response::redirect('admin/mensajes?status=notfound');
+        }
+
+        return Response::view('admin/mensajes/admin-confirmar-eliminar', [
+            'mensaje' => $mensaje,
+            'csrf_token' => $this->csrfToken()
+        ]);
+    }
+
     // ============================================================
     // MARCAR MENSAJE COMO LEÍDO (ADMIN)
     // ============================================================
-
     public function marcarLeido(int $id): Response
     {
-        try {
-            $this->mensajeService->marcarComoLeido($id);
+        $this->mensajeService->marcarComoLeido($id);
 
-            $this->setFlash(
-                'mensaje_exito',
-                'Mensaje marcado como leído.'
-            );
-        } catch (\RuntimeException $e) {
-            $this->setFlash(
-                'mensaje_error',
-                $e->getMessage()
-            );
-        }
+        $this->setFlash(
+            'mensaje_exito',
+            'Mensaje marcado como leído.'
+        );
 
         return Response::redirect('admin/mensajes');
     }
@@ -100,30 +112,16 @@ class MensajeController extends Controller
     // ============================================================
     // ELIMINAR MENSAJE (ADMIN)
     // ============================================================
-
     public function eliminar(int $id): Response
     {
-        try {
-            $eliminado = $this->mensajeService->eliminar($id);
+        $this->mensajeService->eliminar($id);
 
-            if ($eliminado) {
-                $this->setFlash(
-                    'mensaje_exito',
-                    'Mensaje eliminado correctamente.'
-                );
-            } else {
-                $this->setFlash(
-                    'mensaje_error',
-                    'No se pudo eliminar el mensaje.'
-                );
-            }
-        } catch (\RuntimeException $e) {
-            $this->setFlash(
-                'mensaje_error',
-                $e->getMessage()
-            );
-        }
+        $this->setFlash(
+            'mensaje_exito',
+            'Mensaje eliminado correctamente.'
+        );
 
         return Response::redirect('admin/mensajes');
     }
+
 }

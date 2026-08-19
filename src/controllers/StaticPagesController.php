@@ -38,7 +38,9 @@ class StaticPagesController extends Controller
     public function contacto(): Response
     {
         return Response::view('public/contacto', [
-            'csrf_token' => $this->csrfToken()
+            'csrf_token' => $this->csrfToken(),
+            'errores' => $this->getFlash('errores', []),
+            'old' => $this->getFlash('form_old', [])
         ]);
     }
 }

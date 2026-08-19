@@ -4,10 +4,13 @@ namespace SonidoInteriorPoo\interfaces;
 use SonidoInteriorPoo\models\Mensaje;
 
 interface MensajeServiceInterface {
-    public function crear(array $datos): bool;
+    // ---------- ESCRITURA ----------
+    public function crear(array $datos): void;
+    public function eliminar(int $idMensaje): void;
+    public function marcarComoLeido(int $idMensaje): void;
+    // ---------- LECTURA ----------
     public function obtenerTodosAdmin(): array;
-    public function obtenerPorId(int $idMensaje): ?Mensaje;
-    public function marcarComoLeido(int $idMensaje): bool;
+    public function obtenerPorId(int $idMensaje): ?Mensaje;    
     public function contarNoLeidos(): int;
-    public function eliminar(int $idMensaje): bool;
+    
 }

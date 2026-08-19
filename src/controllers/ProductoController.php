@@ -142,7 +142,10 @@ class ProductoController extends Controller
     public function listar(): Response
     {
         $productos = $this->productoService->obtenerProductosAdmin();
-        return Response::view('admin/productos/admin-listado-productos', ['productos' => $productos]);
+        
+        return Response::view(
+            'admin/productos/admin-listado-productos', 
+            ['productos' => $productos]);
     }
 
     // ============================================================
