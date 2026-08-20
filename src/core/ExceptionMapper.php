@@ -6,15 +6,6 @@ use SonidoInteriorPoo\exceptions\NotFoundException;
 
 class ExceptionMapper {
 
-    // public static function map(\Throwable $e, Request $request): Response {
-    //     self::logException($e);
-
-    //     if ($e instanceof AppException) {
-    //         return self::mapAppException($e, $request);
-    //     }
-
-    //     return self::mapExcepcionInesperada($e);
-    // }
     public static function map(\Throwable $e, Request $request): Response {
         self::logException($e);
 
@@ -31,11 +22,7 @@ class ExceptionMapper {
     }
 
     private static function mapAppException(AppException $e, Request $request): Response {
-        if ($e instanceof NotFoundException) {
-            return Response::notFound();
-        }
 
-        // Para otros errores de negocio, redirigimos al usuario a la página anterior con un mensaje de error.
         Session::setFlash('mensaje_error', $e->getMessage());
         return Response::redirect(self::origenSeguro($request));
     }

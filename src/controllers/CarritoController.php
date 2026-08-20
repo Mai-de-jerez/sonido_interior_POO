@@ -1,4 +1,5 @@
 <?php
+
 namespace SonidoInteriorPoo\controllers;
 
 use SonidoInteriorPoo\core\Controller;
@@ -32,7 +33,7 @@ class CarritoController extends Controller {
     // AÑADIR PRODUCTO AL CARRITO
     // ============================================================
     public function agregar(Request $request): Response {
-
+        
         $origen = $request->referer(BASE_URL . '/catalogo');
         $idUsuario = $this->getUserId();
 
@@ -47,13 +48,12 @@ class CarritoController extends Controller {
         }
 
         $resultado = $this->carritoService->agregarProducto($idUsuario, $idProducto, $cantidad);
-
-        if ($resultado['ok']) {
-            $this->setSession('cantidades_carrito', ($this->getSession('cantidades_carrito', 0) + $resultado['unidadesAnadidas']));
-            $this->setFlash('mensaje_exito', $resultado['mensaje']);
-        } else {
-            $this->setFlash('mensaje_error', $resultado['mensaje']);
-        }
+        
+        $this->setSession(
+            'cantidades_carrito', 
+            $this->getSession('cantidades_carrito', 0) + $resultado['unidadesAnadidas']
+        );
+        $this->setFlash('mensaje_exito', $resultado['mensaje']);
 
         return Response::redirect($origen);
     }
@@ -66,20 +66,14 @@ class CarritoController extends Controller {
 
         $idRaw = $request->post('id_carrito_producto');
         $idCarritoProducto = ctype_digit((string) $idRaw) ? (int) $idRaw : null;
-
         $accion = $request->post('accion');
 
-        if ($idCarritoProducto === null || !in_array($accion, ['sumar', 'restar'], true)) {
-            return Response::redirect('carrito');
-        }
-
-        $resultado = $this->carritoService->actualizarCantidad($idUsuario, $idCarritoProducto, $accion);
-
-        if ($resultado['ok']) {
-            $this->setSession('cantidades_carrito', max(0, ($this->getSession('cantidades_carrito', 0) + $resultado['delta'])));
-        } elseif ($resultado['mensaje'] !== '') {
-            $this->setFlash('mensaje_error', $resultado['mensaje']);
-        }
+        $delta = $this->carritoService->actualizarCantidad($idUsuario, $idCarritoProducto, $accion);
+        
+        $this->setSession(
+            'cantidades_carrito', 
+            max(0, $this->getSession('cantidades_carrito', 0) + $delta)
+        );
 
         return Response::redirect('carrito');
     }
@@ -97,16 +91,12 @@ class CarritoController extends Controller {
             return Response::redirect('carrito');
         }
 
-        $cantidadAEliminar = $this->carritoService->obtenerCantidadLinea($idUsuario, $idCarritoProducto);
-
-        if ($cantidadAEliminar === null) {
-            $this->setFlash('mensaje_error', 'Esa línea no pertenece a tu carrito.');
-            return Response::redirect('carrito');
-        }
-
-        $this->carritoService->eliminarLinea($idUsuario, $idCarritoProducto);
-
-        $this->setSession('cantidades_carrito', max(0, ($this->getSession('cantidades_carrito', 0) - $cantidadAEliminar)));
+        $cantidadAEliminar = $this->carritoService->eliminarLinea($idUsuario, $idCarritoProducto);
+        
+        $this->setSession(
+            'cantidades_carrito', 
+            max(0, $this->getSession('cantidades_carrito', 0) - $cantidadAEliminar)
+        );
 
         return Response::redirect('carrito');
     }

@@ -103,7 +103,8 @@ class Router
     private function resolverRuta(
         string $method,
         string $uri,
-        Container $container
+        Container $container,
+        Request $request
     ): Response {
         // Eliminar BASE_URL e index.php
         $uri = str_replace(
@@ -140,7 +141,7 @@ class Router
                 }
             }
 
-            return $this->ejecutarRoute($route, $container, $params);
+            return $this->ejecutarRoute($route, $container, $params, $request);
         }
 
         // No existe ninguna ruta
@@ -154,7 +155,8 @@ class Router
     private function ejecutarRoute(
         array $route,
         Container $container,
-        array $params
+        array $params,
+        Request $request
     ): Response {
         // 1. Middlewares
         foreach ($route['middlewares'] as $middlewareClass) {
@@ -179,7 +181,7 @@ class Router
 
         // 4. Ejecutar acción, pasando Request solo si el método lo espera
         $resultado = $esperaRequest
-            ? $controller->$metodo(Request::fromGlobals(), ...$params)
+            ? $controller->$metodo($request, ...$params)
             : $controller->$metodo(...$params);
 
         // 5. Garantizamos que siempre se devuelve un Response.

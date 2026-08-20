@@ -65,10 +65,16 @@ class ProductoService implements ProductoServiceInterface {
     }
 
     public function crear(array $datos, array $ficheros): void {
-        $imagen = ArchivosHelper::subirFoto($ficheros['imagen'], trim($datos['nombre']), 10000000);
-        $nota = ArchivosHelper::subirMP3($ficheros['nota'], trim($datos['nombre']));
+        $nombre = trim($datos['nombre']);
+
+        $imagen = ArchivosHelper::subirFoto($ficheros['imagen'], $nombre, 10000000);
+        $nota = ArchivosHelper::subirMP3($ficheros['nota'], $nombre);
 
         if ($imagen === false || $nota === false) {
+            // Si una subida falla pero la otra funcionó, limpiamos el archivo subido
+            if ($imagen !== false) $this->borrarImagen($imagen);
+            if ($nota !== false && $nota !== null) $this->borrarAudio($nota);
+
             throw new BusinessRuleException("Error con el archivo de imagen o la melodía (formato no válido o peso superior al permitido).");
         }
 
@@ -77,7 +83,7 @@ class ProductoService implements ProductoServiceInterface {
         $producto = new Producto(
             0,
             (int) $datos['id_categoria'],
-            trim($datos['nombre']),
+            $nombre,
             trim($datos['descripcion']),
             (float) $datos['precio'],
             (int) $datos['stock'],
@@ -89,7 +95,14 @@ class ProductoService implements ProductoServiceInterface {
             trim($datos['procedencia'])
         );
 
-        $this->productoDAO->insertar($producto);
+        try {
+            $this->productoDAO->insertar($producto);
+        } catch (\Throwable $e) {
+            // Si la BBDD falla, no dejamos huérfanos
+            $this->borrarImagen($imagen);
+            $this->borrarAudio($nota);
+            throw $e;
+        }
     }
 
     public function actualizar(int $idProducto, array $datos, array $ficheros): void {
@@ -99,42 +112,60 @@ class ProductoService implements ProductoServiceInterface {
             throw new NotFoundException("Producto no encontrado.");
         }
 
-        if ($ficheros['imagen']['error'] === UPLOAD_ERR_NO_FILE) {
-            $imagen = $productoActual->getImagen();
-        } else {
-            $imagen = ArchivosHelper::subirFoto($ficheros['imagen'], trim($datos['nombre']), 10000000);
-            if ($imagen === false) {
+        $nombre = trim($datos['nombre']);
+        $nuevaImagen = null;
+        $nuevaNota = null;
+
+        if (isset($ficheros['imagen']) && $ficheros['imagen']['error'] !== UPLOAD_ERR_NO_FILE) {
+            $nuevaImagen = ArchivosHelper::subirFoto($ficheros['imagen'], $nombre, 10000000);
+            if ($nuevaImagen === false) {
                 throw new BusinessRuleException("Error con el archivo de imagen (formato no válido o peso superior al permitido).");
             }
         }
 
-        if ($ficheros['nota']['error'] === UPLOAD_ERR_NO_FILE) {
-            $nota = $productoActual->getNotaMusical();
-        } else {
-            $nota = ArchivosHelper::subirMP3($ficheros['nota'], trim($datos['nombre']));
-            if ($nota === false) {
+        if (isset($ficheros['nota']) && $ficheros['nota']['error'] !== UPLOAD_ERR_NO_FILE) {
+            $nuevaNota = ArchivosHelper::subirMP3($ficheros['nota'], $nombre);
+            if ($nuevaNota === false) {
+                if ($nuevaImagen !== null) $this->borrarImagen($nuevaImagen);
                 throw new BusinessRuleException("Error con el archivo de melodía (formato no válido o peso superior al permitido).");
             }
         }
 
+        $imagenFinal = $nuevaImagen ?? $productoActual->getImagen();
+        $notaFinal = $nuevaNota ?? $productoActual->getNotaMusical();
         $diametro = trim($datos['diametro'] ?? '');
 
         $producto = new Producto(
             $idProducto,
             (int) $datos['id_categoria'],
-            trim($datos['nombre']),
+            $nombre,
             trim($datos['descripcion']),
             (float) $datos['precio'],
             (int) $datos['stock'],
-            $imagen,
+            $imagenFinal,
             $diametro !== '' ? (float) $diametro : null,
             (float) $datos['peso'],
             trim($datos['material']),
-            $nota,
+            $notaFinal,
             trim($datos['procedencia'])
         );
 
-        $this->productoDAO->actualizar($producto);
+        try {
+            $this->productoDAO->actualizar($producto);
+
+            // Si la BBDD actualiza bien y se subieron archivos nuevos, borramos los antiguos
+            if ($nuevaImagen !== null) {
+                $this->borrarImagen($productoActual->getImagen());
+            }
+            if ($nuevaNota !== null) {
+                $this->borrarAudio($productoActual->getNotaMusical());
+            }
+        } catch (\Throwable $e) {
+            // Si falla la BBDD, deshacemos las subidas nuevas
+            if ($nuevaImagen !== null) $this->borrarImagen($nuevaImagen);
+            if ($nuevaNota !== null) $this->borrarAudio($nuevaNota);
+            throw $e;
+        }
     }
 
     public function eliminarLogico(int $idProducto): void {
@@ -155,5 +186,24 @@ class ProductoService implements ProductoServiceInterface {
         }
 
         $this->productoDAO->reactivar($idProducto);
+    }
+
+    // Metodos privados
+    private function borrarImagen(?string $nombreArchivo): void {
+        if ($nombreArchivo !== null && $nombreArchivo !== '') {
+            $ruta = __DIR__ . '/../../public/img/productos/' . $nombreArchivo;
+            if (file_exists($ruta)) {
+                @unlink($ruta);
+            }
+        }
+    }
+
+    private function borrarAudio(?string $nombreArchivo): void {
+        if ($nombreArchivo !== null && $nombreArchivo !== '') {
+            $ruta = __DIR__ . '/../../public/sonidos/' . $nombreArchivo;
+            if (file_exists($ruta)) {
+                @unlink($ruta);
+            }
+        }
     }
 }
