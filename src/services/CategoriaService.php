@@ -5,7 +5,6 @@ use SonidoInteriorPoo\interfaces\CategoriaDAOInterface;
 use SonidoInteriorPoo\models\Categoria;
 use SonidoInteriorPoo\interfaces\CategoriaServiceInterface;
 use SonidoInteriorPoo\exceptions\NotFoundException;
-use SonidoInteriorPoo\exceptions\BusinessRuleException;
 
 class CategoriaService implements CategoriaServiceInterface {
     private CategoriaDAOInterface $categoriaDAO;
@@ -33,11 +32,8 @@ class CategoriaService implements CategoriaServiceInterface {
             trim($datos['descripcion'])
         );
 
-        if (!$this->categoriaDAO->crear($categoria)) {
-            throw new BusinessRuleException("Error al guardar la categoría en la base de datos.");
-        }
+        $this->categoriaDAO->crear($categoria);
     }
-
 
     public function actualizar(int $idCategoria, array $datos): void {
         $categoriaActual = $this->categoriaDAO->obtenerPorId($idCategoria);
@@ -52,9 +48,7 @@ class CategoriaService implements CategoriaServiceInterface {
             trim($datos['descripcion'])
         );
 
-        if (!$this->categoriaDAO->actualizar($categoria)) {
-            throw new BusinessRuleException("Error al actualizar la categoría en la base de datos.");
-        }
+        $this->categoriaDAO->actualizar($categoria);
     }
 
     public function eliminarLogica(int $idCategoria): void {
@@ -64,9 +58,7 @@ class CategoriaService implements CategoriaServiceInterface {
             throw new NotFoundException("La categoría no existe.");
         }
 
-        if (!$this->categoriaDAO->eliminarLogica($idCategoria)) {
-            throw new BusinessRuleException("No se pudo eliminar la categoría.");
-        }
+        $this->categoriaDAO->eliminarLogica($idCategoria);
     }
 
     public function reactivar(int $idCategoria): void {
@@ -76,8 +68,6 @@ class CategoriaService implements CategoriaServiceInterface {
             throw new NotFoundException("La categoría no existe.");
         }
 
-        if (!$this->categoriaDAO->reactivar($idCategoria)) {
-            throw new BusinessRuleException("No se pudo reactivar la categoría.");
-        }
+        $this->categoriaDAO->reactivar($idCategoria);
     }
 }

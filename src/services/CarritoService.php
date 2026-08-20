@@ -105,12 +105,14 @@ class CarritoService implements CarritoServiceInterface {
         return ['ok' => false, 'mensaje' => 'Acción no válida.', 'delta' => 0];
     }
 
-    // Devuelve el número de unidades eliminadas (para restar de sesión), o false si no pertenece al usuario
+    // Devuelve el número de unidades eliminadas (para restar de sesión), o false si no pertenece al usuario    
     public function eliminarLinea(int $idUsuario, int $idCarritoProducto): bool {
         if (!$this->carritoDAO->lineaPerteneceAUsuario($idCarritoProducto, $idUsuario)) {
             return false;
         }
-        return $this->carritoDAO->eliminarLinea($idCarritoProducto);
+
+        $this->carritoDAO->eliminarLinea($idCarritoProducto);
+        return true;
     }
 
     // Devuelve la cantidad eliminada, o null si la línea no pertenecía al usuario

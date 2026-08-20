@@ -6,11 +6,25 @@ use SonidoInteriorPoo\exceptions\NotFoundException;
 
 class ExceptionMapper {
 
+    // public static function map(\Throwable $e, Request $request): Response {
+    //     self::logException($e);
+
+    //     if ($e instanceof AppException) {
+    //         return self::mapAppException($e, $request);
+    //     }
+
+    //     return self::mapExcepcionInesperada($e);
+    // }
     public static function map(\Throwable $e, Request $request): Response {
         self::logException($e);
 
         if ($e instanceof AppException) {
             return self::mapAppException($e, $request);
+        }
+
+        if ($e instanceof \PDOException) {
+            Session::setFlash('mensaje_error', 'Ha ocurrido un error al guardar los datos. Inténtalo de nuevo.');
+            return Response::redirect(self::origenSeguro($request));
         }
 
         return self::mapExcepcionInesperada($e);

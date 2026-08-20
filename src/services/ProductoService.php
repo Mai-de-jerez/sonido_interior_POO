@@ -31,11 +31,7 @@ class ProductoService implements ProductoServiceInterface {
 
         return $errores;
     }
-    
-    // ============================================================
-    // FUNCIONES DE LECTURA
-    // ============================================================
-    
+
     public function obtenerPorIdAdmin(int $idProducto): ?Producto {
         return $this->productoDAO->obtenerPorIdAdmin($idProducto);
     }
@@ -68,10 +64,6 @@ class ProductoService implements ProductoServiceInterface {
         return $this->productoDAO->contarActivosAdmin();
     }
 
-    // ============================================================
-    // FUNCIONES DE ESCRITURA (VOID + EXCEPCIONES)
-    // ============================================================
-    
     public function crear(array $datos, array $ficheros): void {
         $imagen = ArchivosHelper::subirFoto($ficheros['imagen'], trim($datos['nombre']), 10000000);
         $nota = ArchivosHelper::subirMP3($ficheros['nota'], trim($datos['nombre']));
@@ -97,9 +89,7 @@ class ProductoService implements ProductoServiceInterface {
             trim($datos['procedencia'])
         );
 
-        if (!$this->productoDAO->insertar($producto)) {
-            throw new BusinessRuleException("Error al guardar el producto en la base de datos.");
-        }
+        $this->productoDAO->insertar($producto);
     }
 
     public function actualizar(int $idProducto, array $datos, array $ficheros): void {
@@ -144,9 +134,7 @@ class ProductoService implements ProductoServiceInterface {
             trim($datos['procedencia'])
         );
 
-        if (!$this->productoDAO->actualizar($producto)) {
-            throw new BusinessRuleException("Error al actualizar el producto en la base de datos.");
-        }
+        $this->productoDAO->actualizar($producto);
     }
 
     public function eliminarLogico(int $idProducto): void {
@@ -156,9 +144,7 @@ class ProductoService implements ProductoServiceInterface {
             throw new NotFoundException("El producto no existe.");
         }
 
-        if (!$this->productoDAO->eliminarLogico($idProducto)) {
-            throw new BusinessRuleException("No se pudo eliminar el producto.");
-        }
+        $this->productoDAO->eliminarLogico($idProducto);
     }
 
     public function reactivar(int $idProducto): void {
@@ -168,8 +154,6 @@ class ProductoService implements ProductoServiceInterface {
             throw new NotFoundException("El producto no existe.");
         }
 
-        if (!$this->productoDAO->reactivar($idProducto)) {
-            throw new BusinessRuleException("No se pudo reactivar el producto.");
-        }
+        $this->productoDAO->reactivar($idProducto);
     }
 }

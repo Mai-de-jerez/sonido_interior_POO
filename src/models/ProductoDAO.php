@@ -3,6 +3,8 @@ namespace SonidoInteriorPoo\models;
 
 use SonidoInteriorPoo\interfaces\ProductoDAOInterface;
 use SonidoInteriorPoo\dto\ProductoAdminDTO;
+use SonidoInteriorPoo\dto\ProductoTarjetaDTO;
+use SonidoInteriorPoo\dto\ProductoStockDTO;
 use SonidoInteriorPoo\core\Conexion;
 
 class ProductoDAO implements ProductoDAOInterface {
@@ -15,8 +17,9 @@ class ProductoDAO implements ProductoDAOInterface {
     // Obtener todos los productos para el admin (con categoría)
     public function obtenerProductosAdmin(): array {
         $pdo = $this->conexion->getPdo();
-        $sql = "SELECT p.id_producto, p.nombre, p.precio, p.stock, p.imagen,
-                    p.nota_musical, p.id_categoria, p.activo, p.fecha_alta, c.nombre AS nombre_categoria
+        
+        $sql = "SELECT p.id_producto, p.imagen, p.nombre, p.precio, p.stock, 
+                    p.nota_musical, p.activo, c.nombre AS nombre_categoria
                 FROM productos p
                 INNER JOIN categorias c ON p.id_categoria = c.id_categoria
                 ORDER BY p.id_producto DESC";
@@ -25,8 +28,14 @@ class ProductoDAO implements ProductoDAOInterface {
 
         return array_map(
             fn($fila) => new ProductoAdminDTO(
-                Producto::fromArray($fila),
-                $fila['nombre_categoria'] ?? ''
+                (int) $fila['id_producto'],
+                $fila['imagen'] ?? '',
+                $fila['nombre'],
+                $fila['nombre_categoria'] ?? '',
+                (float) $fila['precio'],
+                (int) $fila['stock'],
+                $fila['nota_musical'],
+                (int) $fila['activo']
             ),
             $filas
         );
@@ -42,10 +51,19 @@ class ProductoDAO implements ProductoDAOInterface {
                 LIMIT 4";
 
         $filas = $pdo->query($sql)->fetchAll();
-        return array_map(fn($fila) => Producto::fromArray($fila), $filas);
+
+        return array_map(
+            fn($fila) => new ProductoTarjetaDTO(
+                (int) $fila['id_producto'],
+                $fila['nombre'],
+                (float) $fila['precio'],
+                $fila['imagen'] ?? ''
+            ),
+            $filas
+        );
     }
 
-    // Obtener productos para el catálogo público con filtro, orden y paginación
+    // Obtener productos para el catálogo público
     public function obtenerProductosCatalogo(?int $idCategoria = null, string $orden = 'recientes', int $pagina = 1, int $porPagina = 12): array {
         $pdo = $this->conexion->getPdo();
         $offset = ($pagina - 1) * $porPagina;
@@ -78,7 +96,15 @@ class ProductoDAO implements ProductoDAOInterface {
         $stmt->execute($params);
         $filas = $stmt->fetchAll();
 
-        return array_map(fn($fila) => Producto::fromArray($fila), $filas);
+        return array_map(
+            fn($fila) => new ProductoTarjetaDTO(
+                (int) $fila['id_producto'],
+                $fila['nombre'],
+                (float) $fila['precio'],
+                $fila['imagen'] ?? ''
+            ),
+            $filas
+        );
     }
 
     // Contar productos activos para la paginación
@@ -151,14 +177,22 @@ class ProductoDAO implements ProductoDAOInterface {
         return $fila ? Producto::fromArray($fila) : null;
     }
 
-    // Consulta y bloquea la fila del producto (FOR UPDATE), solo válido dentro de una transacción
-    public function obtenerStockParaUpdate(int $idProducto): ?array {
+    // Consulta y bloquea la fila del producto (FOR UPDATE)
+    public function obtenerStockParaUpdate(int $idProducto): ?ProductoStockDTO {
         $pdo = $this->conexion->getPdo();
         $sql = "SELECT stock, nombre FROM productos WHERE id_producto = ? FOR UPDATE";
         $stmt = $pdo->prepare($sql);
         $stmt->execute([$idProducto]);
         $fila = $stmt->fetch();
-        return $fila ?: null;
+
+        if (!$fila) {
+            return null;
+        }
+
+        return new ProductoStockDTO(
+            (int) $fila['stock'],
+            $fila['nombre']
+        );
     }
 
     // Descuenta stock tras una compra; si llega a 0, desactiva el producto automáticamente
@@ -173,14 +207,14 @@ class ProductoDAO implements ProductoDAOInterface {
     }
 
     // Insertar nuevo producto
-    public function insertar(Producto $producto): bool {
+    public function insertar(Producto $producto): void {
         $pdo = $this->conexion->getPdo();
         $sql = "INSERT INTO productos
                     (nombre, id_categoria, precio, stock, diametro, peso, material, procedencia, descripcion, imagen, nota_musical)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
         $stmt = $pdo->prepare($sql);
-        return $stmt->execute([
+        $stmt->execute([
             $producto->getNombre(),
             $producto->getIdCategoria(),
             $producto->getPrecio(),
@@ -196,7 +230,7 @@ class ProductoDAO implements ProductoDAOInterface {
     }
 
     // Actualizar producto
-    public function actualizar(Producto $producto): bool {
+    public function actualizar(Producto $producto): void {
         $pdo = $this->conexion->getPdo();
         $sql = "UPDATE productos SET
                     nombre = ?, id_categoria = ?, precio = ?, stock = ?, diametro = ?, peso = ?,
@@ -204,7 +238,7 @@ class ProductoDAO implements ProductoDAOInterface {
                 WHERE id_producto = ?";
 
         $stmt = $pdo->prepare($sql);
-        return $stmt->execute([
+        $stmt->execute([
             $producto->getNombre(),
             $producto->getIdCategoria(),
             $producto->getPrecio(),
@@ -221,16 +255,18 @@ class ProductoDAO implements ProductoDAOInterface {
     }
 
     // Borrado lógico (activo = 0)
-    public function eliminarLogico(int $idProducto): bool {
+    public function eliminarLogico(int $idProducto): void {
         $pdo = $this->conexion->getPdo();
         $stmt = $pdo->prepare("UPDATE productos SET activo = 0 WHERE id_producto = ?");
-        return $stmt->execute([$idProducto]);
+        $stmt->execute([$idProducto]);
     }
 
     // Reactivar producto (activo = 1)
-    public function reactivar(int $idProducto): bool {
+    public function reactivar(int $idProducto): void {
         $pdo = $this->conexion->getPdo();
         $stmt = $pdo->prepare("UPDATE productos SET activo = 1 WHERE id_producto = ?");
-        return $stmt->execute([$idProducto]);
+        $stmt->execute([$idProducto]);
     }
 }
+
+

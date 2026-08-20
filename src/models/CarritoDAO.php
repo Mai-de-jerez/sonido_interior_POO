@@ -29,14 +29,14 @@ class CarritoDAO implements CarritoDAOInterface {
         return (int) $pdo->lastInsertId();
     }
 
-    public function agregarProducto(int $idCarrito, int $idProducto, int $cantidad, float $precioUnitario): bool {
+    public function agregarProducto(int $idCarrito, int $idProducto, int $cantidad, float $precioUnitario): void {
         $pdo = $this->conexion->getPdo();
         $sql = "INSERT INTO carrito_producto (id_carrito, id_producto, cantidad, precio_unitario)
                 VALUES (?, ?, ?, ?)
                 ON DUPLICATE KEY UPDATE cantidad = cantidad + VALUES(cantidad)";
 
         $stmt = $pdo->prepare($sql);
-        return $stmt->execute([$idCarrito, $idProducto, $cantidad, $precioUnitario]);
+        $stmt->execute([$idCarrito, $idProducto, $cantidad, $precioUnitario]);
     }
 
     // Devuelve CarritoLineaDTO[] con el Producto completo ya unido
@@ -66,22 +66,22 @@ class CarritoDAO implements CarritoDAOInterface {
         );
     }
 
-    public function actualizarCantidad(int $idCarritoProducto, int $cantidad): bool {
+    public function actualizarCantidad(int $idCarritoProducto, int $cantidad): void {
         $pdo = $this->conexion->getPdo();
         $stmt = $pdo->prepare("UPDATE carrito_producto SET cantidad = ? WHERE id_carrito_producto = ?");
-        return $stmt->execute([$cantidad, $idCarritoProducto]);
+        $stmt->execute([$cantidad, $idCarritoProducto]);
     }
 
-    public function eliminarLinea(int $idCarritoProducto): bool {
+    public function eliminarLinea(int $idCarritoProducto): void {
         $pdo = $this->conexion->getPdo();
         $stmt = $pdo->prepare("DELETE FROM carrito_producto WHERE id_carrito_producto = ?");
-        return $stmt->execute([$idCarritoProducto]);
+        $stmt->execute([$idCarritoProducto]);
     }
 
-    public function vaciarCarrito(int $idCarrito): bool {
+    public function vaciarCarrito(int $idCarrito): void {
         $pdo = $this->conexion->getPdo();
         $stmt = $pdo->prepare("DELETE FROM carrito_producto WHERE id_carrito = ?");
-        return $stmt->execute([$idCarrito]);
+        $stmt->execute([$idCarrito]);
     }
 
     public function lineaPerteneceAUsuario(int $idCarritoProducto, int $idUsuario): bool {

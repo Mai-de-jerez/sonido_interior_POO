@@ -1,8 +1,4 @@
 <?php
-// ============================================
-// LISTADO DE PRODUCTOS - ADMIN (POO)
-// ============================================
-
 // Datos que llegan del controlador
 $productos = $productos ?? [];
 
@@ -45,25 +41,24 @@ include __DIR__ . '/../../includes/menu-admin.php';
                             <td colspan="9" style="text-align: center; padding: 20px;">No hay productos guardados en la base de datos.</td>
                         </tr>
                     <?php else: ?>
-                        <?php foreach ($productos as $dto): ?>
-                            <?php $prod = $dto->getProducto(); ?>
+                        <?php foreach ($productos as $dto): ?>                           
                             <tr>
-                                <td><?php echo $prod->getIdProducto(); ?></td>
+                                <td><?php echo $dto->getIdProducto(); ?></td>
                                 <td>
-                                    <?php if (!empty($prod->getImagen())): ?>
-                                        <img src="<?php echo BASE_URL; ?>/public/img/productos/<?php echo htmlspecialchars($prod->getImagen()); ?>" alt="<?php echo htmlspecialchars($prod->getNombre()); ?>">
-                                    <?php else: ?>
+                                    <?php if (!empty($dto->getImagen())): ?>
+                                        <img src="<?php echo BASE_URL; ?>/public/img/productos/<?php echo htmlspecialchars($dto->getImagen()); ?>" alt="<?php echo htmlspecialchars($dto->getNombre()); ?>">
+                                    <?php else: ?> 
                                         <img src="<?php echo BASE_URL; ?>/public/img/cuenco-12.svg" alt="Por defecto">
                                     <?php endif; ?>
                                 </td>
-                                <td><?php echo htmlspecialchars($prod->getNombre()); ?></td>
+                                <td><?php echo htmlspecialchars($dto->getNombre()); ?></td>
                                 <td><?php echo htmlspecialchars($dto->getNombreCategoria()); ?></td>
-                                <td><?php echo number_format($prod->getPrecio(), 2, ',', '.'); ?> €</td>
-                                <td><?php echo $prod->getStock(); ?></td>
+                                <td><?php echo number_format($dto->getPrecio(), 2, ',', '.'); ?> €</td>
+                                <td><?php echo $dto->getStock(); ?></td>
                                 <td>
-                                    <?php if (!empty($prod->getNotaMusical())): ?>
+                                    <?php if (!empty($dto->getNotaMusical())): ?>
                                         <audio controls style="width: 120px; height: 30px;">
-                                            <source src="<?php echo BASE_URL; ?>/public/sonidos/<?php echo htmlspecialchars($prod->getNotaMusical()); ?>" type="audio/mpeg">
+                                            <source src="<?php echo BASE_URL; ?>/public/sonidos/<?php echo htmlspecialchars($dto->getNotaMusical()); ?>" type="audio/mpeg">
                                             Tu navegador no soporta audio.
                                         </audio>
                                     <?php else: ?>
@@ -71,18 +66,18 @@ include __DIR__ . '/../../includes/menu-admin.php';
                                     <?php endif; ?>
                                 </td>
                                 <td>
-                                    <?php if ($prod->isActivo()): ?>
+                                    <?php if ($dto->isActivo()): ?>
                                         <span class="estado activo">Activo</span>
                                     <?php else: ?>
                                         <span class="estado inactivo">Inactivo</span>
                                     <?php endif; ?>
                                 </td>
                                 <td class="acciones-tabla">
-                                    <a href="<?php echo BASE_URL; ?>/admin/productos/editar/<?php echo $prod->getIdProducto(); ?>">✎</a>                                
-                                    <?php if ($prod->isActivo()): ?>
-                                        <a href="<?php echo BASE_URL; ?>/admin/productos/eliminar/<?php echo $prod->getIdProducto(); ?>">🗑</a>
+                                    <a href="<?php echo BASE_URL; ?>/admin/productos/editar/<?php echo $dto->getIdProducto(); ?>">✎</a>                                
+                                    <?php if ($dto->isActivo()): ?>
+                                        <a href="<?php echo BASE_URL; ?>/admin/productos/eliminar/<?php echo $dto->getIdProducto(); ?>">🗑</a>
                                     <?php else: ?>
-                                        <a href="<?php echo BASE_URL; ?>/admin/productos/reactivar/<?php echo $prod->getIdProducto(); ?>">↺</a>
+                                        <a href="<?php echo BASE_URL; ?>/admin/productos/reactivar/<?php echo $dto->getIdProducto(); ?>">↺</a>
                                     <?php endif; ?>
                                 </td>
                             </tr>

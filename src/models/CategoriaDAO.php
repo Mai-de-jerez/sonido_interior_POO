@@ -38,38 +38,38 @@ class CategoriaDAO implements CategoriaDAOInterface {
         return array_map(fn($fila) => Categoria::fromArray($fila), $filas);
     }
 
-    public function crear(Categoria $categoria): bool {
+    public function crear(Categoria $categoria): void {
         $pdo = $this->conexion->getPdo();
         $sql = "INSERT INTO categorias (nombre, descripcion) VALUES (?, ?)";
 
         $stmt = $pdo->prepare($sql);
-        return $stmt->execute([
+        $stmt->execute([
             $categoria->getNombre(),
             $categoria->getDescripcion(),
         ]);
     }
 
-    public function actualizar(Categoria $categoria): bool {
+    public function actualizar(Categoria $categoria): void {
         $pdo = $this->conexion->getPdo();
         $sql = "UPDATE categorias SET nombre = ?, descripcion = ? WHERE id_categoria = ?";
 
         $stmt = $pdo->prepare($sql);
-        return $stmt->execute([
+        $stmt->execute([
             $categoria->getNombre(),
             $categoria->getDescripcion(),
             $categoria->getIdCategoria(),
         ]);
     }
 
-    public function eliminarLogica(int $idCategoria): bool {
+    public function eliminarLogica(int $idCategoria): void {
         $pdo = $this->conexion->getPdo();
         $stmt = $pdo->prepare("UPDATE categorias SET activo = 0 WHERE id_categoria = ?");
-        return $stmt->execute([$idCategoria]);
+        $stmt->execute([$idCategoria]);
     }
 
-    public function reactivar(int $idCategoria): bool {
+    public function reactivar(int $idCategoria): void {
         $pdo = $this->conexion->getPdo();
         $stmt = $pdo->prepare("UPDATE categorias SET activo = 1 WHERE id_categoria = ?");
-        return $stmt->execute([$idCategoria]);
+        $stmt->execute([$idCategoria]);
     }
 }

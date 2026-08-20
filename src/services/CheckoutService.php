@@ -41,9 +41,9 @@ class CheckoutService implements CheckoutServiceInterface {
                 foreach ($lineas as $linea) {
                     $stockFila = $this->productoDAO->obtenerStockParaUpdate($linea->getProducto()->getIdProducto());
 
-                    if (!$stockFila || $linea->getCantidad() > $stockFila['stock']) {
-                        $nombre = $stockFila['nombre'] ?? $linea->getProducto()->getNombre();
-                        $disponible = $stockFila['stock'] ?? 0;
+                    if (!$stockFila || $linea->getCantidad() > $stockFila->getStock()) {
+                        $nombre = $stockFila ? $stockFila->getNombre() : $linea->getProducto()->getNombre();
+                        $disponible = $stockFila ? $stockFila->getStock() : 0;
                         throw new \RuntimeException("El stock del producto '{$nombre}' ha cambiado. Disponibles: {$disponible}.");
                     }
 
@@ -79,4 +79,5 @@ class CheckoutService implements CheckoutServiceInterface {
             return ['ok' => false, 'mensaje' => $e->getMessage(), 'idPedido' => null];
         }
     }
+
 }
