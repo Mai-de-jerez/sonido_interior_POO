@@ -11,6 +11,6 @@ interface UsuarioDAOInterface {
     public function existeUsuario(string $usuario): bool;
     public function existeEmail(string $email): bool;
     // escritura
-    public function registrar(string $usuario, string $email, string $passwordHash): bool;
-    public function actualizarPassword(string $email, string $nuevaPasswordHash): bool;   
+    public function registrar(string $usuario, string $email, string $passwordHash): void;
+    public function actualizarPassword(string $email, string $nuevaPasswordHash): void;   
 }

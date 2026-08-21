@@ -11,11 +11,11 @@ class PedidoService implements PedidoServiceInterface {
         $this->pedidoDAO = $pedidoDAO;
     }
 
-    public function crear(int $idUsuario, float $total, string $direccionEnvio): int|false {
+    public function crear(int $idUsuario, float $total, string $direccionEnvio): int {
         return $this->pedidoDAO->crear($idUsuario, $total, $direccionEnvio);
     }
 
-    public function crearDetalle(int $idPedido, int $idProducto, int $cantidad, float $precioUnitario): bool {
-        return $this->pedidoDAO->crearDetalle($idPedido, $idProducto, $cantidad, $precioUnitario);
+    public function crearDetalle(int $idPedido, int $idProducto, int $cantidad, float $precioUnitario): void {
+        $this->pedidoDAO->crearDetalle($idPedido, $idProducto, $cantidad, $precioUnitario);
     }
 }

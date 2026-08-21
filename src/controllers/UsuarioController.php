@@ -56,12 +56,13 @@ class UsuarioController extends Controller
         Session::clear();
         Session::regenerate();
 
-        $this->setSession('id_usuario', $usuarioData['id_usuario']);
-        $this->setSession('usuario', $usuarioData['usuario']);
-        $this->setSession('rol', $usuarioData['rol']);
-        $this->setSession('cantidades_carrito', $usuarioData['cantidades_carrito']);
+        $this->setSession('id_usuario', $usuarioData->getIdUsuario());
+        $this->setSession('usuario', $usuarioData->getUsuario());
+        $this->setSession('rol', $usuarioData->getRol());
+        $this->setSession('cantidades_carrito', $usuarioData->getCantidadesCarrito());
 
-        if ($usuarioData['rol'] === 'ADMIN') {
+
+        if ($usuarioData->getRol() === 'ADMIN') {
             return Response::redirect('admin/dashboard');
         }
 

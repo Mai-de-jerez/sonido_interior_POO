@@ -80,21 +80,21 @@ class UsuarioDAO implements UsuarioDAOInterface{
     // ============================================================
     // REGISTRAR NUEVO USUARIO
     // ============================================================
-    public function registrar(string $usuario, string $email, string $passwordHash): bool {
+    public function registrar(string $usuario, string $email, string $passwordHash): void {
         $pdo = $this->conexion->getPdo();
         $sql = "INSERT INTO usuarios (usuario, email, password, rol) VALUES (?, ?, ?, 'CLIENTE')";
-        
+
         $stmt = $pdo->prepare($sql);
-        return $stmt->execute([$usuario, $email, $passwordHash]);
+        $stmt->execute([$usuario, $email, $passwordHash]);
     }
 
     
     // ============================================================
     // ACTUALIZAR CONTRASEÑA
     // ============================================================
-    public function actualizarPassword(string $email, string $nuevaPasswordHash): bool {
+    public function actualizarPassword(string $email, string $nuevaPasswordHash): void {
         $pdo = $this->conexion->getPdo();
         $stmt = $pdo->prepare("UPDATE usuarios SET password = ? WHERE email = ?");
-        return $stmt->execute([$nuevaPasswordHash, $email]);
+        $stmt->execute([$nuevaPasswordHash, $email]);
     }
 }

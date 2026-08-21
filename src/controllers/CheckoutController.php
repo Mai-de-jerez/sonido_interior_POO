@@ -23,37 +23,17 @@ class CheckoutController extends Controller {
         $this->checkoutValidator = $checkoutValidator;
     }
 
-    // ============================================================
-    // MOSTRAR CHECKOUT
-    // ============================================================
     public function mostrarCheckout(): Response {
         $idUsuario = $this->getUserId();
-        $lineas = $this->carritoService->obtenerLineas($idUsuario);
-
-        if (empty($lineas)) {
-            $this->setFlash('mensaje_error', 'Tu carrito está vacío. Añade algún producto antes de finalizar la compra.');
-            return Response::redirect('carrito');
-        }
-
-        $totalCarrito = 0;
-        foreach ($lineas as $linea) {
-            if ($linea->getCantidad() > $linea->getProducto()->getStock()) {
-                $this->setFlash('mensaje_error', "El producto '" . $linea->getProducto()->getNombre() . "' solo tiene " . $linea->getProducto()->getStock() . " unidades disponibles. Ajusta la cantidad.");
-                return Response::redirect('carrito');
-            }
-            $totalCarrito += $linea->getSubtotal();
-        }
+        $resumen = $this->carritoService->validarYCalcularTotal($idUsuario);
 
         return Response::view('public/checkout', [
-            'lineas' => $lineas,
-            'totalCarrito' => $totalCarrito,
+            'lineas' => $resumen->getLineas(),
+            'totalCarrito' => $resumen->getTotal(),
             'csrf_token' => $this->csrfToken()
         ]);
     }
 
-    // ============================================================
-    // PROCESAR CHECKOUT
-    // ============================================================
     public function procesarCheckout(Request $request): Response {
         $idUsuario = $this->getUserId();
         $datos = $request->allPost();
@@ -61,28 +41,21 @@ class CheckoutController extends Controller {
         $errores = $this->checkoutValidator->validar($datos);
 
         if (!empty($errores)) {
-            $this->setSession('errores', $errores);
-            $this->setSession('form_old', $datos);
+            $this->setFlash('errores', $errores);
+            $this->setFlash('form_old', $datos);
             return Response::redirect('checkout');
         }
 
         $direccionEnvio = trim($request->post('direccion_envio', ''));
-        $resultado = $this->checkoutService->procesarCheckout($idUsuario, $direccionEnvio);
+        $idPedido = $this->checkoutService->procesarCheckout($idUsuario, $direccionEnvio);
 
-        if ($resultado['ok']) {
-            $this->setSession('cantidades_carrito', 0);
-            $this->setSession('ultimo_pedido_id', $resultado['idPedido']);
-            $this->setFlash('mensaje_exito', $resultado['mensaje']);
-            return Response::redirect('pedido-exito');
-        }
+        $this->setSession('cantidades_carrito', 0);
+        $this->setSession('ultimo_pedido_id', $idPedido);
+        $this->setFlash('mensaje_exito', "¡Pedido #{$idPedido} realizado con éxito!");
 
-        $this->setFlash('mensaje_error', $resultado['mensaje']);
-        return Response::redirect('carrito');
+        return Response::redirect('pedido-exito');
     }
 
-    // ============================================================
-    // PÁGINA DE ÉXITO
-    // ============================================================
     public function pedidoExito(): Response {
         if (!$this->hasSession('ultimo_pedido_id')) {
             return Response::redirect('catalogo');

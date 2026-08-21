@@ -33,7 +33,7 @@ class CarritoController extends Controller {
     // AÑADIR PRODUCTO AL CARRITO
     // ============================================================
     public function agregar(Request $request): Response {
-        
+
         $origen = $request->referer(BASE_URL . '/catalogo');
         $idUsuario = $this->getUserId();
 
@@ -47,13 +47,13 @@ class CarritoController extends Controller {
             return Response::redirect($origen);
         }
 
-        $resultado = $this->carritoService->agregarProducto($idUsuario, $idProducto, $cantidad);
-        
+        $this->carritoService->agregarProducto($idUsuario, $idProducto, $cantidad);
+
         $this->setSession(
-            'cantidades_carrito', 
-            $this->getSession('cantidades_carrito', 0) + $resultado['unidadesAnadidas']
+            'cantidades_carrito',
+            $this->getSession('cantidades_carrito', 0) + $cantidad
         );
-        $this->setFlash('mensaje_exito', $resultado['mensaje']);
+        $this->setFlash('mensaje_exito', '¡Producto añadido al carrito correctamente!');
 
         return Response::redirect($origen);
     }
@@ -68,10 +68,14 @@ class CarritoController extends Controller {
         $idCarritoProducto = ctype_digit((string) $idRaw) ? (int) $idRaw : null;
         $accion = $request->post('accion');
 
+        if ($idCarritoProducto === null) {
+            return Response::redirect('carrito');
+        }
+
         $delta = $this->carritoService->actualizarCantidad($idUsuario, $idCarritoProducto, $accion);
-        
+
         $this->setSession(
-            'cantidades_carrito', 
+            'cantidades_carrito',
             max(0, $this->getSession('cantidades_carrito', 0) + $delta)
         );
 

@@ -84,16 +84,31 @@ class CarritoDAO implements CarritoDAOInterface {
         $stmt->execute([$idCarrito]);
     }
 
-    public function lineaPerteneceAUsuario(int $idCarritoProducto, int $idUsuario): bool {
+    public function obtenerLineaDeUsuario(int $idCarritoProducto, int $idUsuario): ?CarritoLineaDTO {
         $pdo = $this->conexion->getPdo();
-        $sql = "SELECT cp.id_carrito_producto
+        $sql = "SELECT cp.id_carrito_producto, cp.cantidad, cp.precio_unitario,
+                       p.id_producto, p.id_categoria, p.nombre, p.descripcion, p.precio, p.stock,
+                       p.imagen, p.diametro, p.peso, p.material, p.nota_musical, p.procedencia,
+                       p.activo, p.fecha_alta
                 FROM carrito_producto cp
                 INNER JOIN carrito c ON cp.id_carrito = c.id_carrito
+                INNER JOIN productos p ON cp.id_producto = p.id_producto
                 WHERE cp.id_carrito_producto = ? AND c.id_usuario = ?";
 
         $stmt = $pdo->prepare($sql);
         $stmt->execute([$idCarritoProducto, $idUsuario]);
-        return $stmt->fetch() !== false;
+        $fila = $stmt->fetch();
+
+        if (!$fila) {
+            return null;
+        }
+
+        return new CarritoLineaDTO(
+            (int) $fila['id_carrito_producto'],
+            (int) $fila['cantidad'],
+            (float) $fila['precio_unitario'],
+            Producto::fromArray($fila)
+        );
     }
 
     public function contarUnidades(int $idUsuario): int {

@@ -1,7 +1,7 @@
 <?php
 namespace SonidoInteriorPoo\services;
 
-use SonidoInteriorPoo\models\Usuario;
+use SonidoInteriorPoo\dto\LoginDTO;
 use SonidoInteriorPoo\interfaces\UsuarioDAOInterface;
 use SonidoInteriorPoo\interfaces\UsuarioServiceInterface;
 use SonidoInteriorPoo\interfaces\CarritoServiceInterface;
@@ -25,9 +25,9 @@ class UsuarioService implements UsuarioServiceInterface {
     // ============================================================
     // AUTENTICACIÓN Y REGISTRO
     // ============================================================
-    public function login(string $usuario, string $password): ?array {
+    public function login(string $usuario, string $password): ?LoginDTO {
         $usuarioEncontrado = $this->usuarioDAO->obtenerPorUsername($usuario);
-        
+
         if (!$usuarioEncontrado) {
             $usuarioEncontrado = $this->usuarioDAO->obtenerPorEmail($usuario);
         }
@@ -38,12 +38,12 @@ class UsuarioService implements UsuarioServiceInterface {
 
         $cantidadesCarrito = $this->carritoService->contarUnidades((int) $usuarioEncontrado->getIdUsuario());
 
-        return [
-            'id_usuario'         => $usuarioEncontrado->getIdUsuario(),
-            'usuario'            => $usuarioEncontrado->getUsuario(),
-            'rol'                => $usuarioEncontrado->getRol(),
-            'cantidades_carrito' => $cantidadesCarrito
-        ];
+        return new LoginDTO(
+            $usuarioEncontrado->getIdUsuario(),
+            $usuarioEncontrado->getUsuario(),
+            $usuarioEncontrado->getRol(),
+            $cantidadesCarrito
+        );
     }
 
     public function registrar(string $usuario, string $email, string $password): void {
@@ -57,9 +57,7 @@ class UsuarioService implements UsuarioServiceInterface {
 
         $passwordHash = password_hash($password, PASSWORD_DEFAULT);
 
-        if (!$this->usuarioDAO->registrar($usuario, $email, $passwordHash)) {
-            throw new BusinessRuleException("No se pudo completar el registro.");
-        }
+        $this->usuarioDAO->registrar($usuario, $email, $passwordHash);
     }
 }
 

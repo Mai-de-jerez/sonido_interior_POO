@@ -11,25 +11,23 @@ class PedidoDAO implements PedidoDAOInterface {
         $this->conexion = $conexion;
     }
 
-    public function crear(int $idUsuario, float $total, string $direccionEnvio): int|false {
+    public function crear(int $idUsuario, float $total, string $direccionEnvio): int {
         $pdo = $this->conexion->getPdo();
         $sql = "INSERT INTO pedidos (id_usuario, total, direccion_envio, estado) VALUES (?, ?, ?, 'PAGADO')";
 
         $stmt = $pdo->prepare($sql);
-        if (!$stmt->execute([$idUsuario, $total, $direccionEnvio])) {
-            return false;
-        }
+        $stmt->execute([$idUsuario, $total, $direccionEnvio]);
 
         return (int) $pdo->lastInsertId();
     }
 
-    public function crearDetalle(int $idPedido, int $idProducto, int $cantidad, float $precioUnitario): bool {
+    public function crearDetalle(int $idPedido, int $idProducto, int $cantidad, float $precioUnitario): void {
         $pdo = $this->conexion->getPdo();
         $subtotal = $cantidad * $precioUnitario;
         $sql = "INSERT INTO detalle_pedido (id_pedido, id_producto, cantidad, precio_unitario, subtotal)
                 VALUES (?, ?, ?, ?, ?)";
 
         $stmt = $pdo->prepare($sql);
-        return $stmt->execute([$idPedido, $idProducto, $cantidad, $precioUnitario, $subtotal]);
+        $stmt->execute([$idPedido, $idProducto, $cantidad, $precioUnitario, $subtotal]);
     }
 }

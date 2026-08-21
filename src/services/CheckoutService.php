@@ -6,6 +6,7 @@ use SonidoInteriorPoo\interfaces\CarritoDAOInterface;
 use SonidoInteriorPoo\interfaces\ProductoDAOInterface;
 use SonidoInteriorPoo\interfaces\PedidoServiceInterface;
 use SonidoInteriorPoo\interfaces\CheckoutServiceInterface;
+use SonidoInteriorPoo\exceptions\BusinessRuleException;
 
 class CheckoutService implements CheckoutServiceInterface {
     private TransactionManagerInterface $transactionManager;
@@ -25,59 +26,47 @@ class CheckoutService implements CheckoutServiceInterface {
         $this->pedidoService = $pedidoService;
     }
 
-    // Devuelve ['ok' => bool, 'mensaje' => string, 'idPedido' => ?int]
-    public function procesarCheckout(int $idUsuario, string $direccionEnvio): array {
+    public function procesarCheckout(int $idUsuario, string $direccionEnvio): int {
         $idCarrito = $this->carritoDAO->obtenerOCrearCarrito($idUsuario);
         $lineas = $this->carritoDAO->obtenerLineas($idCarrito);
 
         if (empty($lineas)) {
-            return ['ok' => false, 'mensaje' => 'Tu carrito está vacío.', 'idPedido' => null];
+            throw new BusinessRuleException('Tu carrito está vacío.');
         }
 
-        try {
-            return $this->transactionManager->transaction(function () use ($idUsuario, $direccionEnvio, $idCarrito, $lineas) {
-                $totalPedido = 0;
+        return $this->transactionManager->transaction(function () use ($idUsuario, $direccionEnvio, $idCarrito, $lineas) {
+            $totalPedido = 0;
 
-                foreach ($lineas as $linea) {
-                    $stockFila = $this->productoDAO->obtenerStockParaUpdate($linea->getProducto()->getIdProducto());
+            foreach ($lineas as $linea) {
+                $stockInfo = $this->productoDAO->obtenerStockParaUpdate($linea->getProducto()->getIdProducto());
 
-                    if (!$stockFila || $linea->getCantidad() > $stockFila->getStock()) {
-                        $nombre = $stockFila ? $stockFila->getNombre() : $linea->getProducto()->getNombre();
-                        $disponible = $stockFila ? $stockFila->getStock() : 0;
-                        throw new \RuntimeException("El stock del producto '{$nombre}' ha cambiado. Disponibles: {$disponible}.");
-                    }
-
-                    $totalPedido += $linea->getSubtotal();
+                if ($stockInfo === null || $linea->getCantidad() > $stockInfo->getStock()) {
+                    $nombre = $stockInfo?->getNombre() ?? $linea->getProducto()->getNombre();
+                    $disponible = $stockInfo?->getStock() ?? 0;
+                    throw new BusinessRuleException("El stock del producto '{$nombre}' ha cambiado. Disponibles: {$disponible}.");
                 }
 
-                $idPedido = $this->pedidoService->crear($idUsuario, $totalPedido, $direccionEnvio);
+                $totalPedido += $linea->getSubtotal();
+            }
 
-                if (!$idPedido) {
-                    throw new \RuntimeException('No se pudo registrar la cabecera del pedido.');
+            $idPedido = $this->pedidoService->crear($idUsuario, $totalPedido, $direccionEnvio);
+
+            foreach ($lineas as $linea) {
+                $this->pedidoService->crearDetalle(
+                    $idPedido,
+                    $linea->getProducto()->getIdProducto(),
+                    $linea->getCantidad(),
+                    $linea->getPrecioUnitario()
+                );
+
+                if (!$this->productoDAO->descontarStock($linea->getProducto()->getIdProducto(), $linea->getCantidad())) {
+                    throw new BusinessRuleException("No había stock suficiente de '{$linea->getProducto()->getNombre()}' al confirmar el pedido.");
                 }
+            }
 
-                foreach ($lineas as $linea) {
-                    $detalleOk = $this->pedidoService->crearDetalle(
-                        $idPedido,
-                        $linea->getProducto()->getIdProducto(),
-                        $linea->getCantidad(),
-                        $linea->getPrecioUnitario()
-                    );
+            $this->carritoDAO->vaciarCarrito($idCarrito);
 
-                    $stockOk = $this->productoDAO->descontarStock($linea->getProducto()->getIdProducto(), $linea->getCantidad());
-
-                    if (!$detalleOk || !$stockOk) {
-                        throw new \RuntimeException('Error al procesar el desglose del pedido.');
-                    }
-                }
-
-                $this->carritoDAO->vaciarCarrito($idCarrito);
-
-                return ['ok' => true, 'mensaje' => "¡Pedido #{$idPedido} realizado con éxito!", 'idPedido' => $idPedido];
-            });
-        } catch (\Throwable $e) {
-            return ['ok' => false, 'mensaje' => $e->getMessage(), 'idPedido' => null];
-        }
+            return $idPedido;
+        });
     }
-
 }

@@ -1,18 +1,17 @@
 <?php
 namespace SonidoInteriorPoo\services;
 
-
 use SonidoInteriorPoo\interfaces\CarritoDAOInterface;
 use SonidoInteriorPoo\interfaces\ProductoDAOInterface;
 use SonidoInteriorPoo\interfaces\CarritoServiceInterface;
 use SonidoInteriorPoo\exceptions\NotFoundException;
 use SonidoInteriorPoo\exceptions\BusinessRuleException;
+use SonidoInteriorPoo\dto\ResumenCheckoutDTO;
 
 class CarritoService implements CarritoServiceInterface {
 
     private CarritoDAOInterface $carritoDAO;
     private ProductoDAOInterface $productoDAO;
-
 
     public function __construct(
         CarritoDAOInterface $carritoDAO,
@@ -27,12 +26,45 @@ class CarritoService implements CarritoServiceInterface {
         return $this->carritoDAO->obtenerLineas($idCarrito);
     }
 
+    public function obtenerCantidadLinea(int $idUsuario, int $idCarritoProducto): int {
+
+        $linea = $this->carritoDAO->obtenerLineaDeUsuario($idCarritoProducto, $idUsuario);
+
+        if ($linea === null) {
+            throw new NotFoundException('Esa línea no pertenece a tu carrito.');
+        }
+
+        return $linea->getCantidad();
+    }
+
+    public function validarYCalcularTotal(int $idUsuario): ResumenCheckoutDTO {
+        $lineas = $this->obtenerLineas($idUsuario);
+
+        if (empty($lineas)) {
+            throw new BusinessRuleException('Tu carrito está vacío. Añade algún producto antes de finalizar la compra.');
+        }
+
+        $total = 0;
+        foreach ($lineas as $linea) {
+            if ($linea->getCantidad() > $linea->getProducto()->getStock()) {
+                throw new BusinessRuleException(
+                    "El producto '{$linea->getProducto()->getNombre()}' solo tiene {$linea->getProducto()->getStock()} unidades disponibles. Ajusta la cantidad."
+                );
+            }
+            $total += $linea->getSubtotal();
+        }
+
+        return new ResumenCheckoutDTO($lineas, $total);
+    }
+
     public function contarUnidades(int $idUsuario): int {
         return $this->carritoDAO->contarUnidades($idUsuario);
     }
 
 
-    public function agregarProducto(int $idUsuario, int $idProducto, int $cantidad): array {
+    //-----------ESCRITURA------------
+
+    public function agregarProducto(int $idUsuario, int $idProducto, int $cantidad): void {
 
         if ($cantidad <= 0) {
             throw new BusinessRuleException("La cantidad debe ser mayor que 0");
@@ -61,34 +93,18 @@ class CarritoService implements CarritoServiceInterface {
         }
 
         $this->carritoDAO->agregarProducto($idCarrito, $idProducto, $cantidad, $producto->getPrecio());
-
-        return ['ok' => true, 'mensaje' => '¡Producto añadido al carrito correctamente!', 'unidadesAnadidas' => $cantidad];
     }
-
 
     public function actualizarCantidad(int $idUsuario, int $idCarritoProducto, string $accion): int {
 
         if (!in_array($accion, ['sumar', 'restar'], true)) {
             throw new BusinessRuleException('Acción no válida');
         }
-        
-        if (!$this->carritoDAO->lineaPerteneceAUsuario($idCarritoProducto, $idUsuario)) {
-            throw new NotFoundException('Esa línea no pertenece a tu carrito.');
-        }
 
-        $idCarrito = $this->carritoDAO->obtenerOCrearCarrito($idUsuario);
-        $lineas = $this->carritoDAO->obtenerLineas($idCarrito);
-
-        $lineaActual = null;
-        foreach ($lineas as $linea) {
-            if ($linea->getIdCarritoProducto() === $idCarritoProducto) {
-                $lineaActual = $linea;
-                break;
-            }
-        }
+        $lineaActual = $this->carritoDAO->obtenerLineaDeUsuario($idCarritoProducto, $idUsuario);
 
         if ($lineaActual === null) {
-            throw new NotFoundException('La línea no existe.');
+            throw new NotFoundException('Esa línea no pertenece a tu carrito.');
         }
 
         $cantidadActual = $lineaActual->getCantidad();
@@ -97,11 +113,11 @@ class CarritoService implements CarritoServiceInterface {
             $stockInfo = $this->productoDAO->obtenerStockParaUpdate(
                 $lineaActual->getProducto()->getIdProducto()
             );
-            
+
             if ($stockInfo === null) {
                 throw new NotFoundException('Producto no disponible');
             }
-            
+
             $nuevaCantidad = $cantidadActual + 1;
             if ($nuevaCantidad > $stockInfo->getStock()) {
                 throw new BusinessRuleException(
@@ -115,7 +131,7 @@ class CarritoService implements CarritoServiceInterface {
 
         if ($accion === 'restar' && $cantidadActual > 1) {
             $this->carritoDAO->actualizarCantidad($idCarritoProducto, $cantidadActual - 1);
-            return -1; 
+            return -1;
         }
 
         throw new BusinessRuleException('No puedes reducir más la cantidad');
@@ -123,29 +139,15 @@ class CarritoService implements CarritoServiceInterface {
 
     public function eliminarLinea(int $idUsuario, int $idCarritoProducto): int {
 
-        if (!$this->carritoDAO->lineaPerteneceAUsuario($idCarritoProducto, $idUsuario)) {
+        $linea = $this->carritoDAO->obtenerLineaDeUsuario($idCarritoProducto, $idUsuario);
+
+        if ($linea === null) {
             throw new NotFoundException('Esa línea no pertenece a tu carrito.');
         }
 
-        $cantidad = $this->obtenerCantidadLinea($idUsuario, $idCarritoProducto);
-        
+        $cantidad = $linea->getCantidad();
         $this->carritoDAO->eliminarLinea($idCarritoProducto);
-        return $cantidad; 
-    }
 
-    public function obtenerCantidadLinea(int $idUsuario, int $idCarritoProducto): int {
-
-        if (!$this->carritoDAO->lineaPerteneceAUsuario($idCarritoProducto, $idUsuario)) {
-            throw new NotFoundException('Esa línea no pertenece a tu carrito.');
-        }
-
-        $idCarrito = $this->carritoDAO->obtenerOCrearCarrito($idUsuario);
-        foreach ($this->carritoDAO->obtenerLineas($idCarrito) as $linea) {
-            if ($linea->getIdCarritoProducto() === $idCarritoProducto) {
-                return $linea->getCantidad();
-            }
-        }
-        
-        throw new NotFoundException('Línea no encontrada');
+        return $cantidad;
     }
 }

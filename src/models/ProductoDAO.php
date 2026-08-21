@@ -203,7 +203,9 @@ class ProductoDAO implements ProductoDAOInterface {
                     activo = CASE WHEN stock - ? <= 0 THEN 0 ELSE activo END
                 WHERE id_producto = ? AND stock >= ?";
         $stmt = $pdo->prepare($sql);
-        return $stmt->execute([$cantidad, $cantidad, $idProducto, $cantidad]);
+        $stmt->execute([$cantidad, $cantidad, $idProducto, $cantidad]);
+
+        return $stmt->rowCount() > 0;
     }
 
     // Insertar nuevo producto
